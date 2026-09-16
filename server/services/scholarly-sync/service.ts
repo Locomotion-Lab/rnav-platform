@@ -277,7 +277,20 @@ export function createScholarlySyncService(options: {
       if (!profile) throw new ScholarlySyncError("成员不存在", "NOT_FOUND", 404);
       const orcid = input.orcidId ? normalizeOrcid(input.orcidId) : profile.orcidId;
       if (input.orcidId && !orcid) throw new ScholarlySyncError("ORCID 格式或校验位无效", "INVALID_ORCID");
-      return orcid ? [await openAlex.resolveAuthorByOrcid(orcid)] : openAlex.searchAuthorCandidates(input.name || profile.memberName, input.institution);
+      if (orcid) {
+        const direct = await openAlex.resolveAuthorByOrcid(orcid);
+        if (direct) return { candidates: [direct], notice: null, resolution: "orcid" as const };
+        const candidates = await openAlex.searchAuthorCandidates(input.name || profile.memberName, input.institution);
+        return {
+          candidates,
+          notice: candidates.length
+            ? "OpenAlex 暂未通过该 ORCID 找到作者，已改用姓名和机构搜索，请确认正确的作者记录。"
+            : "暂未在 OpenAlex 找到匹配作者记录。",
+          resolution: "name_fallback" as const,
+        };
+      }
+      const candidates = await openAlex.searchAuthorCandidates(input.name || profile.memberName, input.institution);
+      return { candidates, notice: candidates.length ? null : "暂未在 OpenAlex 找到匹配作者记录。", resolution: "name" as const };
     },
     async verifyAuthor(userId: string, openalexAuthorId: string, actorId: string, source: "admin" | "self" = "admin") {
       const profile = await repository.getProfile(userId);

@@ -2,7 +2,7 @@ import { z } from "zod";
 import { normalizeOrcid, normalizeProviderId } from "../normalizer.js";
 import { openAlexAuthorSchema, openAlexWorkSchema } from "../schemas.js";
 import type { OpenAlexAuthorCandidate } from "../types.js";
-import { fetchProviderJson, type ProviderFetch, type ProviderObservation } from "./http.js";
+import { fetchProviderJson, ProviderHttpError, type ProviderFetch, type ProviderObservation } from "./http.js";
 
 type DynamicValue = string | undefined | (() => string | undefined | Promise<string | undefined>);
 type Options = { baseUrl?: string; apiKey?: DynamicValue; fetchImpl?: ProviderFetch; onObservation?: (observation: ProviderObservation) => void };
@@ -14,12 +14,17 @@ const workSelect = "id,doi,title,publication_year,publication_date,type,authorsh
 export function createOpenAlexClient(options: Options = {}) {
   const baseUrl = new URL(options.baseUrl ?? "https://api.openalex.org");
   const apiKey = async () => typeof options.apiKey === "function" ? options.apiKey() : options.apiKey;
-  const request = async (path: string, params: Record<string, string | undefined> = {}) => {
+  const request = async (path: string, params: Record<string, string | undefined> = {}, suppressNotFoundObservation = false) => {
     const url = new URL(path, baseUrl);
     for (const [key, value] of Object.entries(params)) if (value) url.searchParams.set(key, value);
     const key = await apiKey();
     if (key) url.searchParams.set("api_key", key);
-    return fetchProviderJson("OpenAlex", url, { fetchImpl: options.fetchImpl, onObservation: options.onObservation });
+    return fetchProviderJson("OpenAlex", url, {
+      fetchImpl: options.fetchImpl,
+      onObservation: suppressNotFoundObservation
+        ? (observation) => { if (observation.httpStatus !== 404) options.onObservation?.(observation); }
+        : options.onObservation,
+    });
   };
 
   const getWorksByAuthor = async (authorId: string, fromYear?: number | null, toYear?: number | null, limit?: number) => {
@@ -56,8 +61,14 @@ export function createOpenAlexClient(options: Options = {}) {
     async resolveAuthorByOrcid(orcid: string) {
       const normalized = normalizeOrcid(orcid);
       if (!normalized) throw new Error("Invalid ORCID");
-      const author = openAlexAuthorSchema.parse(await request(`/authors/orcid:${normalized}`, { select: authorSelect }));
-      return toCandidate(author);
+      let raw: unknown;
+      try {
+        raw = await request(`/authors/orcid:${normalized}`, { select: authorSelect }, true);
+      } catch (error) {
+        if (error instanceof ProviderHttpError && error.status === 404) return null;
+        throw error;
+      }
+      return toCandidate(openAlexAuthorSchema.parse(raw));
     },
     async searchAuthorCandidates(name: string, institution?: string) {
       const search = [name.trim(), institution?.trim()].filter(Boolean).join(" ");

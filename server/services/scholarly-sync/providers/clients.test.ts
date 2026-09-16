@@ -11,9 +11,19 @@ test("OpenAlex resolves ORCID and retrieves recent works with bounded selected f
     return Response.json({ results: [{ id: "https://openalex.org/W1", title: "Work", publication_year: 2025, type: "article", authorships: [] }], meta: { next_cursor: null } });
   } });
   const author = await client.resolveAuthorByOrcid("0000-0002-1825-0097");
-  assert.equal(author.id, "A1"); assert.equal(author.recentWorks[0].id, "W1");
+  assert.equal(author?.id, "A1"); assert.equal(author?.recentWorks[0].id, "W1");
   assert.ok(urls.every((url) => url.searchParams.get("api_key") === "test-key"));
   assert.equal(urls.find((url) => url.pathname === "/works")?.searchParams.get("per_page"), "100");
+});
+
+test("OpenAlex treats an unlinked ORCID 404 as no author match without a provider fault", async () => {
+  const observations: Array<{ httpStatus: number | null }> = [];
+  const client = createOpenAlexClient({
+    onObservation: (observation) => observations.push(observation),
+    fetchImpl: async () => new Response("{}", { status: 404 }),
+  });
+  assert.equal(await client.resolveAuthorByOrcid("0000-0002-1825-0097"), null);
+  assert.deepEqual(observations, []);
 });
 test("Crossref uses polite identification without exposing it outside the provider request", async () => {
   let observed: { url?: URL; userAgent?: string | null } = {};

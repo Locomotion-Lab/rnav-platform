@@ -40,7 +40,7 @@ export function createScholarlySyncRouter({ authMiddleware, service, trustProxy 
     try { const profile = await service.updateProfile(request.authUser!.id, selfScholarlyProfilePatchSchema.parse(request.body), request.authUser!.id, "self"); if (!profile) { response.status(404).json({ error: "成员不存在" }); return; } response.json({ profile }); } catch (error) { if (!fail(response, error)) next(error); }
   }));
   router.post("/api/scholarly-sync/me/resolve", ...selfAction(async (request, response, next) => {
-    try { response.json({ candidates: await service.resolveAuthor(request.authUser!.id, resolveAuthorSchema.parse(request.body)) }); } catch (error) { if (!fail(response, error)) next(error); }
+    try { response.json(await service.resolveAuthor(request.authUser!.id, resolveAuthorSchema.parse(request.body))); } catch (error) { if (!fail(response, error)) next(error); }
   }));
   router.post("/api/scholarly-sync/me/verify-author", ...selfAction(async (request, response, next) => {
     try { const body = verifyAuthorSchema.parse(request.body); response.json(await service.verifyAuthor(request.authUser!.id, parsedParam(openAlexAuthorIdSchema, body.openalexAuthorId), request.authUser!.id, "self")); } catch (error) { if (!fail(response, error)) next(error); }
@@ -56,7 +56,7 @@ export function createScholarlySyncRouter({ authMiddleware, service, trustProxy 
     try { response.json({ profile: await service.updateProfile(parsedParam(userIdSchema, request.params.userId), scholarlyProfilePatchSchema.parse(request.body), request.authUser!.id) }); } catch (error) { if (!fail(response, error)) next(error); }
   }));
   router.post("/api/scholarly-sync/members/:userId/resolve", ...action("site.members.write", async (request, response, next) => {
-    try { response.json({ candidates: await service.resolveAuthor(parsedParam(userIdSchema, request.params.userId), resolveAuthorSchema.parse(request.body)) }); } catch (error) { if (!fail(response, error)) next(error); }
+    try { response.json(await service.resolveAuthor(parsedParam(userIdSchema, request.params.userId), resolveAuthorSchema.parse(request.body))); } catch (error) { if (!fail(response, error)) next(error); }
   }));
   router.post("/api/scholarly-sync/members/:userId/verify-author", ...action("site.members.write", async (request, response, next) => {
     try { const body = verifyAuthorSchema.parse(request.body); response.json(await service.verifyAuthor(parsedParam(userIdSchema, request.params.userId), parsedParam(openAlexAuthorIdSchema, body.openalexAuthorId), request.authUser!.id)); } catch (error) { if (!fail(response, error)) next(error); }
