@@ -5,6 +5,7 @@ const optionalString = z.preprocess((value) => value === "" ? undefined : value,
 
 const schema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+  RNAV_SERVER_MODE: z.enum(["unified", "api"]).default("unified"),
   HOST: z.string().min(1).default("127.0.0.1"),
   PORT: z.coerce.number().int().min(1).max(65535).default(4090),
   PUBLIC_BASE_URL: z.string().url().optional(),
@@ -28,6 +29,7 @@ const schema = z.object({
 export function loadEnv(source: Record<string, string | undefined> = process.env) {
   const parsed = schema.parse(source);
   return {
+    serverMode: parsed.RNAV_SERVER_MODE,
     nodeEnv: parsed.NODE_ENV, host: parsed.HOST, port: parsed.PORT, publicBaseUrl: parsed.PUBLIC_BASE_URL ?? `http://${parsed.HOST}:${parsed.PORT}`, databaseUrl: parsed.DATABASE_URL,
     sessionSecret: parsed.SESSION_SECRET, passwordPepper: parsed.PASSWORD_PEPPER, deviceTokenPepper: parsed.DEVICE_TOKEN_PEPPER,
     cookieSecure: parsed.COOKIE_SECURE === undefined ? undefined : parsed.COOKIE_SECURE === "true",

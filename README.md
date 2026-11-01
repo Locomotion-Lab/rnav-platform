@@ -67,3 +67,9 @@ npm run db:verify-migration -- \
 ## Scholarly Sync
 
 OpenAlex 负责论文发现，Crossref 负责 DOI 元数据校准，公开站仍只读取 `research_items`。配置、手动同步、定时任务与回滚说明见 [`docs/scholarly-sync-operations.md`](docs/scholarly-sync-operations.md)。
+
+## Hybrid Architecture (local phase 1)
+
+2026-11-01 实际环境审计、目标架构、风险与分阶段迁移方案见 [架构审计](docs/architecture/audit-2026-11-01.md)。
+
+`RNAV_SERVER_MODE=api` 可独立启动现有 Express API 和监控处理；默认 `unified` 保留官网一体化启动。Mac 隔离空库 Compose 和备份恢复步骤见 [本地演练](docs/architecture/mac-compose.md)。这些配置尚未用于生产切换。

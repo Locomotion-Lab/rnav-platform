@@ -1,0 +1,76 @@
+name: rnav-mac-dev
+
+x-api: &api
+  build:
+    context: .
+    dockerfile: deploy/docker/Dockerfile.api
+  image: rnav-api:phase1
+  env_file: .env.mac
+  environment:
+    NODE_ENV: production
+    RNAV_SERVER_MODE: api
+    HOST: 0.0.0.0
+    PORT: 4090
+    DATABASE_URL: postgres://rnav:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env.mac}@db:5432/rnav_platform
+  init: true
+  networks: [internal]
+  logging:
+    driver: json-file
+    options: { max-size: "10m", max-file: "3" }
+
+services:
+  db:
+    # Retain the production major version for the first rehearsal.
+    image: postgres:14-bookworm
+    environment:
+      POSTGRES_DB: rnav_platform
+      POSTGRES_USER: rnav
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env.mac}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U rnav -d rnav_platform"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+    networks: [internal]
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+
+  migrate:
+    <<: *api
+    command: [node, server/dist/db/runMigrations.js]
+    depends_on:
+      db: { condition: service_healthy }
+    restart: "no"
+
+  api:
+    <<: *api
+    ports:
+      - "127.0.0.1:${RNAV_MAC_API_PORT:-14090}:4090"
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:4090/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
+    restart: unless-stopped
+
+  scholarly-sync:
+    <<: *api
+    profiles: [jobs]
+    command: [npm, run, scholarly:sync]
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+    restart: "no"
+
+networks:
+  # Private bridge; outbound HTTPS remains available for COS and scholarly APIs.
+  internal: {}
+
+volumes:
+  postgres_data:

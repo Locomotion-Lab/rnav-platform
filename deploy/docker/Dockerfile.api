@@ -1,0 +1,21 @@
+FROM node:24.18.0-bookworm-slim AS build
+WORKDIR /app
+COPY package.json package-lock.json tsconfig.json ./
+COPY server/package.json server/package.json
+COPY apps/web/package.json apps/web/package.json
+RUN npm ci --no-audit --no-fund
+COPY server server
+RUN npm run build --workspace server
+RUN cp -R server/db/migrations server/dist/db/migrations
+
+FROM node:24.18.0-bookworm-slim AS runtime
+ENV NODE_ENV=production RNAV_SERVER_MODE=api HOST=0.0.0.0 PORT=4090
+WORKDIR /app
+# Keep the locked workspace dependency tree for tsx migration and scholarly jobs.
+COPY --from=build --chown=node:node /app/node_modules ./node_modules
+COPY --from=build --chown=node:node /app/package*.json ./
+COPY --from=build --chown=node:node /app/server ./server
+COPY scripts/scholarly ./scripts/scholarly
+USER node
+EXPOSE 4090
+CMD ["node", "server/dist/index.js"]

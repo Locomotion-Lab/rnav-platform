@@ -1,8 +1,6 @@
 import "dotenv/config";
 import { createServer } from "node:http";
 import { parse as parseCookie } from "cookie";
-import nextModule from "next/dist/server/next.js";
-import type { NextServerOptions } from "next/dist/server/next.js";
 import pg from "pg";
 import { createApp } from "./app.js";
 import { loadEnv } from "./config/env.js";
@@ -37,7 +35,7 @@ import { createMediaRouter } from "./routes/media.js";
 import { createSettingsService } from "./services/settings/settingsService.js";
 import { createScholarlySyncSettingsService } from "./services/settings/scholarlySyncSettingsService.js";
 import { createSettingsRouter } from "./routes/settings.js";
-import { resolveWebDir } from "./webDir.js";
+import { prepareWebHandler } from "./webRuntime.js";
 import { createNotificationService } from "./services/notifications/notificationService.js";
 import { createNotificationsRouter } from "./routes/notifications.js";
 import { createScholarlySyncRepository } from "./services/scholarly-sync/repository.js";
@@ -50,11 +48,7 @@ import { createOpenAlexStatusMonitor } from "./services/scholarly-sync/providers
 const env = loadEnv();
 const pool = new pg.Pool({ connectionString: env.databaseUrl });
 const authRepository = createPostgresAuthRepository(pool); const authMiddleware = createAuthMiddleware(authRepository);
-type NextInstance = { prepare(): Promise<void>; getRequestHandler(): (request: import("express").Request, response: import("express").Response) => unknown };
-type CreateNext = (options: NextServerOptions) => NextInstance;
-const createNext = ((nextModule as unknown as { default?: CreateNext }).default ?? nextModule) as unknown as CreateNext;
-const web = createNext({ dev: env.nodeEnv !== "production", dir: resolveWebDir(import.meta.url), hostname: env.host, port: env.port });
-await web.prepare();
+const nextHandler = await prepareWebHandler(env);
 
 const publicService = createPublicSiteService(createPostgresPublicSiteRepository(pool));
 const siteAdminService = createSiteAdminService(createPostgresSiteAdminRepository(pool));
@@ -105,7 +99,7 @@ const app = createApp({
     createMonitorRouter({ authMiddleware, service: monitorService, trustProxy: true }),
     createProcurementRouter({ authMiddleware, service: createProcurementService(pool), trustProxy: true }),
   ],
-  nextHandler: web.getRequestHandler(),
+  nextHandler,
 });
 const server = createServer(app); server.on("upgrade", async (request, socket, head) => { if (!(await hub.handleUpgrade(request, socket, head))) socket.destroy(); });
 const stopOfflineMonitor = startOfflineMonitor({ service: monitorService, offlineTimeoutSeconds: env.monitorOfflineTimeoutSeconds });
