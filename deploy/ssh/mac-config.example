@@ -1,0 +1,33 @@
+Host rnav-business-tunnel
+    HostName 82.156.156.43
+    User rnav-tunnel
+    IdentityFile /Users/aaron/.ssh/rnav-business-tunnel
+    IdentitiesOnly yes
+    BatchMode yes
+    StrictHostKeyChecking yes
+    UserKnownHostsFile /Users/aaron/.ssh/known_hosts
+    ExitOnForwardFailure yes
+    ServerAliveInterval 15
+    ServerAliveCountMax 3
+    ConnectTimeout 10
+    RemoteForward 127.0.0.1:14090 127.0.0.1:14090
+    RequestTTY no
+
+Host rnav-publication
+    HostName 82.156.156.43
+    User rnav-publish
+    IdentityFile /Users/aaron/.ssh/rnav-publication
+    IdentitiesOnly yes
+    BatchMode yes
+    StrictHostKeyChecking yes
+    UserKnownHostsFile /Users/aaron/.ssh/known_hosts
+
+# Candidate only: user has not yet selected/approved this backup location.
+Host rnav-backup
+    HostName 82.156.156.43
+    User rnav-backup
+    IdentityFile /Users/aaron/.ssh/rnav-backup
+    IdentitiesOnly yes
+    BatchMode yes
+    StrictHostKeyChecking yes
+    UserKnownHostsFile /Users/aaron/.ssh/known_hosts

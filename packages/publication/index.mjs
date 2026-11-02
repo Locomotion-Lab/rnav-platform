@@ -1,4 +1,5 @@
-import { createHash, randomUUID } from 'node:crypto';
+import fields from './fields.json' with { type: 'json' };
+import { createHash, randomUUID, sign, verify } from 'node:crypto';
 import { lstat, readFile, realpath, mkdir, symlink, rename, cp } from 'node:fs/promises';
 import { join, sep } from 'node:path';
 export const pageKeys = ['bootstrap','home','directions','homepage','research','news','team','facilities','contact'];
@@ -13,14 +14,16 @@ export function validatePublication(value) {
   for (const [slug, profile] of Object.entries(value.members)) {
     if (!slug || slug.length > 200 || ['__proto__','constructor','prototype'].includes(slug) || !profile || typeof profile !== 'object') throw Error('Invalid member profile');
   }
+  const allowedFields = new Set(fields);
   const rejectPrivate = value => {
     if (Array.isArray(value)) value.forEach(rejectPrivate);
     else if (value && typeof value === 'object') for (const [key,item] of Object.entries(value)) {
+      if (!allowedFields.has(key)) throw Error('Unknown public field: '+key);
       if (/^(password_?hash|password|token_?hash|session_?tokens|system_?secrets|private_?notes|vendor_?serial|borrower_?contact)$/i.test(key)) throw Error('Private field in public payload');
       rejectPrivate(item);
     }
   };
-  rejectPrivate(value.pages); rejectPrivate(value.members);
+  Object.values(value.pages).forEach(rejectPrivate); Object.values(value.members).forEach(rejectPrivate);
   const paths = new Set();
   for (const item of value.media) {
     if (!item || !mediaPattern.test(item.path) || !/^[a-f0-9]{64}$/.test(item.sha256) || !item.path.includes(item.sha256) || !Number.isSafeInteger(item.size) || item.size < 1 || item.size > 20971520 || !['image/png','image/jpeg','image/webp','application/pdf'].includes(item.contentType) || paths.has(item.path)) throw Error('Invalid media manifest');
@@ -41,11 +44,15 @@ export async function safeFile(root, relative) {
   return current;
 }
 export async function validateBundle(directory) {
-  const bytes = await readFile(await safeFile(directory, 'snapshot.json'));
+  const snapshotPath = await safeFile(directory, 'snapshot.json');
+  if ((await lstat(snapshotPath)).size > 20971520) throw Error('Snapshot too large');
+  const bytes = await readFile(snapshotPath);
   if (bytes.length > 20971520) throw Error('Snapshot too large');
   const publication = validatePublication(JSON.parse(bytes));
   for (const item of publication.media) {
-    const data = await readFile(await safeFile(directory, item.path));
+    const mediaPath = await safeFile(directory,item.path);
+    if ((await lstat(mediaPath)).size !== item.size) throw Error('Media size mismatch');
+    const data = await readFile(mediaPath);
     if (data.length !== item.size || sha256(data) !== item.sha256) throw Error('Media checksum mismatch');
   }
   // All generated local URLs must resolve to declared, verified media.
@@ -60,22 +67,32 @@ export async function validateBundle(directory) {
   inspect(publication.pages); inspect(publication.members);
   return publication;
 }
-export async function approveBundle(directory, expectedHash) {
+export async function approveBundle(directory, expectedHash, options = {}) {
   await validateBundle(directory);
   const hash = sha256(await readFile(await safeFile(directory, 'snapshot.json')));
   if (hash !== expectedHash) throw Error('Approval hash does not match reviewed snapshot');
   const { writeFile } = await import('node:fs/promises');
-  await writeFile(join(directory, 'approval.json'), JSON.stringify({ sha256: hash, approvedAt: new Date().toISOString() }), { flag: 'wx', mode: 0o600 });
+  const review = { sha256: hash, approvedAt: new Date().toISOString(), actor: options.actor ?? 'local-operator' };
+  const signature = options.privateKey ? sign(null,Buffer.from(JSON.stringify(review)),options.privateKey).toString('base64') : undefined;
+  await writeFile(join(directory, 'approval.json'), JSON.stringify({ ...review, signature }), { flag: 'wx', mode: 0o600 });
 }
-export async function readCurrent(root) {
+export async function readCurrent(root, options = {}) {
   const base = await realpath(join(root, 'versions'));
   const current = await realpath(join(root, 'current'));
   if (!current.startsWith(base + sep)) throw Error('Invalid current pointer');
-  return validatePublication(JSON.parse(await readFile(await safeFile(current, 'snapshot.json'), 'utf8')));
+  const bytes=await readFile(await safeFile(current,'snapshot.json'));
+  const approval=JSON.parse(await readFile(await safeFile(current,'approval.json'),'utf8'));
+  if(approval.sha256!==sha256(bytes))throw Error('Current snapshot integrity failed');
+  if(options.requireSignature||options.publicKey){const{signature,...review}=approval;if(!signature||!options.publicKey||!verify(null,Buffer.from(JSON.stringify(review)),options.publicKey,Buffer.from(signature,'base64')))throw Error('Untrusted current publication');}
+  return validatePublication(JSON.parse(bytes));
 }
-export async function activateBundle(directory, root, expectedCurrent) {
+export async function activateBundle(directory, root, expectedCurrent, options = {}) {
   const publication = await validateBundle(directory);
   const approval = JSON.parse(await readFile(await safeFile(directory, 'approval.json'), 'utf8'));
+  if (options.requireSignature || options.publicKey) {
+    const {signature,...review}=approval;
+    if (!signature || !options.publicKey || !verify(null,Buffer.from(JSON.stringify(review)),options.publicKey,Buffer.from(signature,'base64'))) throw Error('Untrusted publication approval');
+  }
   if (approval.sha256 !== sha256(await readFile(await safeFile(directory, 'snapshot.json')))) throw Error('Unapproved or modified publication');
   await mkdir(join(root,'versions'), { recursive: true });
   // A lock prevents racing activations; no stale-lock deletion is performed automatically.
@@ -88,7 +105,7 @@ export async function activateBundle(directory, root, expectedCurrent) {
     if (current !== expectedCurrent) throw Error('Current publication changed; review again');
     const target = join(root,'versions',publication.publicationId);
     let exists = false;
-    try { await lstat(target); exists = true; } catch(error) { if(error.code !== 'ENOENT') throw error; }
+    try { if((await lstat(target)).isSymbolicLink())throw Error('Version root symlink forbidden'); exists = true; } catch(error) { if(error.code !== 'ENOENT') throw error; }
     if (exists) {
       await validateBundle(target);
       if (sha256(await readFile(await safeFile(target,'snapshot.json'))) !== approval.sha256) throw Error('Publication ID already used');
@@ -102,6 +119,8 @@ export async function activateBundle(directory, root, expectedCurrent) {
     }
     const pointer = join(root,`.current-${randomUUID()}`);
     await symlink(`versions/${publication.publicationId}`,pointer);
+    const { appendFile } = await import('node:fs/promises');
+    await appendFile(join(root,'audit.ndjson'),JSON.stringify({action:'activation',from:current,to:publication.publicationId,sha256:approval.sha256,reviewer:approval.actor ?? 'legacy-local',at:new Date().toISOString()})+'\n',{mode:0o600});
     await rename(pointer,join(root,'current'));
   } finally { await rm(lock,{ recursive:true }); }
 }

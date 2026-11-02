@@ -8,6 +8,7 @@ RUN npm ci --workspace server --include-workspace-root --no-audit --no-fund
 COPY server server
 RUN npm run build --workspace server
 RUN cp -R server/db/migrations server/dist/db/migrations
+RUN npm prune --omit=dev --workspace server --include-workspace-root --no-audit --no-fund
 
 FROM node:24.18.0-bookworm-slim AS runtime
 ENV NODE_ENV=production HOST=0.0.0.0 PORT=4090
@@ -19,6 +20,7 @@ COPY --from=build --chown=node:node /app/server ./server
 COPY --from=build --chown=node:node /app/packages ./packages
 COPY scripts/scholarly ./scripts/scholarly
 COPY scripts/publication ./scripts/publication
+COPY scripts/phase3 ./scripts/phase3
 RUN mkdir -p /data/private-media /data/publications && chown -R node:node /data
 USER node
 EXPOSE 4090

@@ -1,0 +1,10 @@
+{
+  "date": "2026-11-02",
+  "scope": "COS list metadata only; no object bodies downloaded",
+  "objects": 56,
+  "bytes": 59664647,
+  "rnavPrefixObjects": 56,
+  "referencedDatabaseObjects": 56,
+  "listedMatches": 56,
+  "unmatchedDatabaseReferences": 0
+}

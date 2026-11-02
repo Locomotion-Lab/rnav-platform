@@ -1,3 +1,4 @@
+import {gatewayHeaders} from "@/lib/server/gateway";
 import "server-only";
 import { connection } from "next/server";
 import { readPublished } from "@/lib/server/publication";
@@ -13,7 +14,7 @@ export async function getPublicData<T>(path: string, fallback: T): Promise<Publi
       const data = await readPublished(path);
       return data == null ? {data:fallback,degraded:true} : {data:data as T,degraded:false};
     }
-    const response = await fetch(getInternalApiUrl(endpoint), { next: { revalidate: 60 } });
+    const response = await fetch(getInternalApiUrl(endpoint), { headers:gatewayHeaders(), redirect:"error", next: { revalidate: 60 } });
     if (!response.ok) {
       console.error(`[public-site] ${endpoint} returned ${response.status}`);
       return { data: fallback, degraded: true };
@@ -29,7 +30,7 @@ export async function getOptionalPublicData(path: string): Promise<unknown | nul
   await connection();
   try {
     if (process.env.RNAV_PUBLIC_SOURCE === "snapshot") return path.startsWith("/api/public/") ? await readPublished(path.slice(12)) : null;
-    const response = await fetch(getInternalApiUrl(path), { next: { revalidate: 30 } });
+    const response = await fetch(getInternalApiUrl(path), { headers:gatewayHeaders(), redirect:"error", next: { revalidate: 30 } });
     if (!response.ok) return null;
     return await response.json() as unknown;
   } catch (error) {

@@ -91,6 +91,7 @@ test("every known permission maps to its console module", () => {
     "lab_assets.read": "lab-assets",
     "lab_assets.write": "lab-assets",
     "site.content.write": "site",
+    "site.publish": "site",
     "site.members.write": "site",
     "site.media.write": "media",
     "users.read": "users",

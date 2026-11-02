@@ -1,30 +1,8 @@
-import { proxyResponse } from "@/lib/server/proxy-response";
-import { NextResponse } from "next/server";
-import { getInternalApiUrl } from "@/lib/server/api";
-import { createUpstreamHeaders, validateIncomingOrigin } from "./proxy";
-
-async function proxy(request: Request, context: { params: Promise<{ path?: string[] }> }) {
-  const originRejection = validateIncomingOrigin(request);
-  if (originRejection) return originRejection;
-
-  const { path = [] } = await context.params;
-  const incomingUrl = new URL(request.url);
-  const suffix = path.length ? `/${path.map(encodeURIComponent).join("/")}` : "";
-  const upstreamUrl = getInternalApiUrl(`/api/lab-assets${suffix}${incomingUrl.search}`);
-
-  try {
-    const upstream = await fetch(upstreamUrl, {
-      method: request.method,
-      headers: createUpstreamHeaders(request),
-      body: ["GET", "HEAD"].includes(request.method.toUpperCase()) ? undefined : await request.arrayBuffer(),
-      cache: "no-store", signal: AbortSignal.timeout(15000),
-    });
-    return proxyResponse(upstream,request.method);
-  } catch {
-    return NextResponse.json({ error: "Lab assets service unavailable" }, { status: 502 });
-  }
+import {proxyInternalApi} from "@/lib/server/proxy";
+async function proxy(request:Request,context:{params:Promise<{path?:string[]}>}){
+ const {path=[]}=await context.params;
+ return proxyInternalApi(request,`/api/lab-assets${path.length?`/${path.map(encodeURIComponent).join("/")}`:""}`,"Internal service unavailable");
 }
-
 export const GET = proxy;
 export const POST = proxy;
 export const PUT = proxy;

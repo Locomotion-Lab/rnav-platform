@@ -1,3 +1,4 @@
+import {gatewayHeaders} from "@/lib/server/gateway";
 import "server-only";
 
 import { cookies } from "next/headers";
@@ -48,8 +49,8 @@ export const getConsoleBootstrap = cache(async (): Promise<ConsoleBootstrapResul
 
   try {
     const response = await fetch(getInternalApiUrl("/api/console/bootstrap"), {
-      headers: { cookie: cookieStore.toString() },
-      cache: "no-store", signal: AbortSignal.timeout(15000),
+      headers: gatewayHeaders({ cookie: cookieStore.toString() }),
+      cache: "no-store", redirect:"error", signal: AbortSignal.timeout(15000),
     });
 
     if (response.status === 401) {

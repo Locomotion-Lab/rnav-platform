@@ -432,3 +432,8 @@ test("public payloads sanitize hostile media, document, link, and embed URLs", a
     ],
   );
 });
+
+test('legacy CMS monitor configuration cannot survive the new public export boundary',async()=>{
+ const repository=new MemoryPublicSiteRepository();repository.pages.set('home',{compositionOrder:['people','status','contact'],sectionOrder:['members','monitor'],sectionVisibility:{monitor:true,members:true}});
+ const home=await createPublicSiteService(repository).getHome();assert.equal('monitor' in home.sectionVisibility,false);assert.equal(home.compositionOrder.includes('status'),false);assert.equal(home.sectionOrder.includes('monitor'),false);
+});

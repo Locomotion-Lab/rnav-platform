@@ -1,3 +1,4 @@
+import { gatewayHeaders,proxyBody } from "./gateway";
 import { getRequestOrigin } from "./request-origin";
 import { proxyResponse } from "./proxy-response";
 import { NextResponse } from "next/server";
@@ -10,13 +11,14 @@ export async function proxyInternalApi(
   upstreamPath: string,
   unavailableMessage: string,
 ) {
-  const incoming = getRequestOrigin(request);
+  let incoming: URL;
+  try { incoming=getRequestOrigin(request); } catch {return NextResponse.json({code:"ORIGIN_DENIED",error:"Forbidden host"},{status:403});}
   const origin = request.headers.get("origin");
   if (!readMethods.has(request.method.toUpperCase()) && origin !== incoming.origin) {
-    return NextResponse.json({ error: "Forbidden origin" }, { status: 403 });
+    return NextResponse.json({ code:"ORIGIN_DENIED", error: "Forbidden origin" }, { status: 403 });
   }
 
-  const headers = new Headers();
+  const headers = gatewayHeaders();
   for (const name of ["accept", "content-type", "cookie"]) {
     const value = request.headers.get(name);
     if (value) headers.set(name, value);
@@ -30,12 +32,12 @@ export async function proxyInternalApi(
     const upstream = await fetch(getInternalApiUrl(`${upstreamPath}${new URL(request.url).search}`), {
       method: request.method,
       headers,
-      body: readMethods.has(request.method.toUpperCase()) ? undefined : await request.arrayBuffer(),
-      cache: "no-store",
-      signal: AbortSignal.timeout(15000),
+      body: readMethods.has(request.method.toUpperCase()) ? undefined : await proxyBody(request),
+      cache: "no-store", redirect:"error",
+      signal: AbortSignal.timeout(Math.max(100,Math.min(15000,Number(process.env.RNAV_API_TIMEOUT_MS)||15000))),
     });
     return proxyResponse(upstream,request.method);
-  } catch {
-    return NextResponse.json({ error: unavailableMessage }, { status: 503 });
+  } catch(error) {
+    return NextResponse.json({ code:error instanceof Error && error.message === "PROXY_BODY_LIMIT" ? "PAYLOAD_TOO_LARGE" : "UPSTREAM_UNAVAILABLE", error: error instanceof Error && error.message === "PROXY_BODY_LIMIT" ? "File too large" : unavailableMessage }, { status: error instanceof Error && error.message === "PROXY_BODY_LIMIT" ? 413 : 503 });
   }
 }

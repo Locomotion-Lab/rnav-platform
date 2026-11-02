@@ -657,7 +657,12 @@ export function createPublicSiteService(repository: PublicSiteRepository) {
       await repository.getPageContent(key),
       pageAllowlists[key],
     );
-    return sanitizeConfig(mergeLocalized(fallback, stored)) as PublicRecord;
+    const result=sanitizeConfig(mergeLocalized(fallback, stored)) as PublicRecord;
+    if(key === "home"){
+      if(result.sectionVisibility)delete result.sectionVisibility.monitor;
+      for(const field of ["compositionOrder","sectionOrder"])if(Array.isArray(result[field]))result[field]=result[field].filter((value:unknown)=>value!=="monitor"&&value!=="status");
+    }
+    return result;
   };
   const resolveDirections = async (providedHome?: PublicRecord): Promise<PublicRecord> => {
     const [raw, home] = await Promise.all([

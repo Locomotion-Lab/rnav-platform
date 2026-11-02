@@ -20,3 +20,9 @@ test("server environment treats an empty optional COS URL as unset", () => {
   const env = loadEnv({ ...valid, COS_PUBLIC_BASE_URL: "" });
   assert.equal(env.cosPublicBaseUrl, undefined);
 });
+
+test("production gateway guard refuses empty/missing weak credentials",()=>{
+ assert.throws(()=>loadEnv({...valid,REQUIRE_GATEWAY_TOKEN:"true"}),/GATEWAY_TOKEN/);
+ assert.throws(()=>loadEnv({...valid,REQUIRE_GATEWAY_TOKEN:"true",GATEWAY_TOKEN:"weak"}),/GATEWAY_TOKEN/);
+ assert.equal(loadEnv({...valid,REQUIRE_GATEWAY_TOKEN:"true",GATEWAY_TOKEN:"g".repeat(64)}).gatewayToken,"g".repeat(64));
+});

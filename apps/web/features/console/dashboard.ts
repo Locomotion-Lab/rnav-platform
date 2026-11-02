@@ -1,3 +1,4 @@
+import {gatewayHeaders} from "@/lib/server/gateway";
 import "server-only";
 
 import { cookies } from "next/headers";
@@ -13,8 +14,8 @@ export const getConsoleDashboard = cache(async (): Promise<ConsoleDashboardResul
   const cookieStore = await cookies();
   try {
     const response = await fetch(getInternalApiUrl("/api/console/dashboard"), {
-      headers: { cookie: cookieStore.toString() },
-      cache: "no-store", signal: AbortSignal.timeout(15000),
+      headers: gatewayHeaders({ cookie: cookieStore.toString() }),
+      cache: "no-store", redirect:"error", signal: AbortSignal.timeout(15000),
     });
     if (!response.ok) {
       return { status: "error", message: `工作台服务返回了意外状态（${response.status}）。` };

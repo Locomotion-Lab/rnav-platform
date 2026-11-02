@@ -1,0 +1,35 @@
+{
+  "note": "Locally built; not deployed to production. Verify matching architecture and image ID after transfer.",
+  "images": [
+    {
+      "tag": "rnav-backend:phase3",
+      "id": "sha256:568fcc9d461c31814c83ead1c7326b42c8993d542819636e08800e9a14fc9756",
+      "os": "linux",
+      "architecture": "arm64"
+    },
+    {
+      "tag": "rnav-web:phase3",
+      "id": "sha256:6bcbc25db4e97590bec73bae72d1633a81f1fbf732e701322798fc879e2c5f28",
+      "os": "linux",
+      "architecture": "arm64"
+    },
+    {
+      "tag": "rnav-backend:phase3-amd64",
+      "id": "sha256:11cad58d20f8d3220cc0d6f54d2653d63b02ffbf003aff08d9907323f28ad3ca",
+      "os": "linux",
+      "architecture": "amd64"
+    },
+    {
+      "tag": "rnav-web:phase3-amd64",
+      "id": "sha256:f07fc6f585a3b825555568a475320d3dcacbf632aa0d40696d985f128482af19",
+      "os": "linux",
+      "architecture": "amd64"
+    },
+    {
+      "tag": "rnav-dbtools:phase3",
+      "id": "sha256:6d432f347bd8c8147b468900d5615600eeddf836abf75ff6ddb25d55eb7ba6b3",
+      "os": "linux",
+      "architecture": "arm64"
+    }
+  ]
+}

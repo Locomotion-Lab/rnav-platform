@@ -3,6 +3,8 @@ import { createServer } from "node:http";
 import pg from "pg";
 import { createAuthMiddleware, createPostgresAuthRepository } from "./middleware/auth.js";
 import { createContractRouter } from "./routes/contract.js";
+import { createPublisherService } from "./services/public-site/publisher-service.js";
+import { createPublicationsRouter } from "./routes/publications.js";
 import { createApp } from "./app.js";
 import { loadEnv } from "./config/env.js";
 import { createAuthRouter } from "./routes/auth.js";
@@ -67,9 +69,11 @@ const scholarlySyncService = createScholarlySyncService({
   openAlexStatus,
 });
 const app = createApp({
+  gatewayToken: env.gatewayToken, writeEnabled:env.writeEnabled,
   health: { database: async () => { await pool.query("SELECT 1"); return true; } },
   routers: [
     createContractRouter(),
+    createPublicationsRouter({authMiddleware,service:createPublisherService(pool,createStorage(env),{root:env.publicationRoot,signingKey:env.publicationSigningKey})}),
     createAuthRouter({ repository: authRepository, authMiddleware, cookieSecure: env.cookieSecure, accountService: createAccountService(pool), trustProxy: true }),
     createProfileRouter({ authMiddleware, service: profileService, trustProxy: true }),
     createUsersRouter({ authMiddleware, service: createUserAdminService(pool), profileService, trustProxy: true }),

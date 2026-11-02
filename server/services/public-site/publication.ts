@@ -7,10 +7,7 @@ import { createPostgresPublicSiteRepository } from "./postgres-repository.js";
 import { createPublicSiteService } from "./service.js";
 import type { StorageProvider } from "../storage/provider.js";
 
-const allowedOrigins = new Set([
-  "https://r-navigation-1326672316.cos.ap-beijing.myqcloud.com",
-  "https://liesmars.whu.edu.cn",
-]);
+import { ownedMediaOrigins as allowedOrigins, shouldCopyMedia } from "./media-policy.js";
 function mediaType(bytes: Buffer) {
   if (bytes.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10]))) return ["image/png","png"];
   if (bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255) return ["image/jpeg","jpg"];
@@ -32,7 +29,7 @@ async function download(src: string) {
 export async function preparePublication(pool: Pool, storage: StorageProvider, destination: string) {
   const client = await pool.connect();
   const publication: Publication = { schemaVersion:1, publicationId:randomUUID(), generatedAt:new Date().toISOString(), pages:{}, members:{}, media:[] };
-  const objects = new Map<string,{object_key:string;storage_provider:"local"|"cos"}>();
+  const objects = new Map<string,{object_key:string;storage_provider:"local"|"cos";checksum_sha256:string;size_bytes:string}>();
   try {
     await client.query("BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY");
     const service = createPublicSiteService(createPostgresPublicSiteRepository(client));
@@ -51,8 +48,8 @@ export async function preparePublication(pool: Pool, storage: StorageProvider, d
       const profile = await service.getTeamMemberProfile(slug);
       if (profile) Object.defineProperty(publication.members,slug,{value:profile,enumerable:true});
     }
-    const result = await client.query<{url:string;object_key:string;storage_provider:"local"|"cos"}>("SELECT url,object_key,storage_provider FROM media_assets WHERE status='active'");
-    result.rows.forEach(row => objects.set(row.url,row));
+    const result = await client.query<{url:string;object_key:string;storage_provider:"local"|"cos";checksum_sha256:string;size_bytes:string}>("SELECT url,object_key,storage_provider,checksum_sha256,size_bytes FROM media_assets WHERE status='active'");
+    result.rows.forEach(row => {const previous=objects.get(row.url);if(previous&&previous.checksum_sha256!==row.checksum_sha256)throw new Error("Conflicting media metadata");objects.set(row.url,row);});
     await client.query("COMMIT");
   } catch (error) { await client.query("ROLLBACK"); throw error; } finally { client.release(); }
   // Exclusive destination, never overwrite an already reviewed package.
@@ -60,7 +57,7 @@ export async function preparePublication(pool: Pool, storage: StorageProvider, d
   await mkdir(join(destination,"media"));
   const copied = new Map<string,string>();
   const transform = async (value: unknown, field = ""): Promise<unknown> => {
-    if (typeof value === "string" && (field === "src" || (field === "href" && (objects.has(value) || value.startsWith("/api/media/files/") || /\.pdf(?:$|[?#])/i.test(value))))) {
+    if (typeof value === "string" && shouldCopyMedia(value,field,objects.has(value))) {
       if (!value) return value;
       // Repo-native immutable brand/placeholder assets ship with the independent web image.
       if (/^\/(?:brand\/|og-default\.svg$)/.test(value)) return value;
@@ -71,8 +68,11 @@ export async function preparePublication(pool: Pool, storage: StorageProvider, d
         const provider = storage.forProvider?.("local") ?? storage;
         if (!provider.getObject) throw new Error("Local object reader unavailable");
         bytes = await provider.getObject(object.object_key);
+      } else if (object && storage.forProvider?.("cos").getObject) {
+        bytes = await storage.forProvider("cos").getObject!(object.object_key);
       } else bytes = await download(value);
       if (!bytes.length || bytes.length > 20971520) throw new Error("Public media size invalid");
+      if(object&&(sha256(bytes)!==object.checksum_sha256||bytes.length!==Number(object.size_bytes)))throw new Error("Source media integrity mismatch");
       const [contentType,extension] = mediaType(bytes);
       const hash = sha256(bytes), path = `media/${hash}.${extension}`;
       if (!publication.media.some(item=>item.path===path)) {

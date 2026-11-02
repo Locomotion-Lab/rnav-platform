@@ -276,6 +276,7 @@ test("GET /api/console/bootstrap returns every module for a super user", async (
     "site.content.write",
     "site.media.write",
     "site.members.write",
+    "site.publish",
     "system.settings.write",
     "users.read",
     "users.write"

@@ -35,6 +35,8 @@ npm run api:check
 
 ## 架构与操作文档
 
+Phase3最新入口：[迁移准备、验证和正式Runbook](docs/phase3/README.md)。生产依赖已更新，当前生产仍未切换；原Phase2记录是历史证据。
+
 - [最新目标、阶段计划与历史归档边界](docs/architecture/target-2026-11-02.md)
 - [独立 Compose、发布、备份恢复与待审批切换方案](docs/architecture/modular-operations.md)
 - [API v1 契约及当前覆盖边界](docs/api/README.md)

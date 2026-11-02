@@ -1,3 +1,4 @@
+import {detectMediaType} from "./contentType.js";
 import { createHash, randomUUID } from "node:crypto";
 import type { Pool } from "pg";
 import { mediaMimeTypes } from "./mediaSchemas.js";
@@ -5,12 +6,13 @@ import type { StorageProvider } from "../storage/provider.js";
 
 export class MediaError extends Error { constructor(message: string, readonly code: string, readonly status = 400) { super(message); this.name = "MediaError"; } }
 type MediaInput = { filename: string; mimeType: string; body: Buffer; maxBytes: number; publicBaseUrl: string; pathPrefix: string };
-type MediaRow = { id: string; filename: string; object_key: string; url: string; mime_type: string; size_bytes: string; checksum_sha256: string; status: string; recycled_at: string | null; created_at: string; storage_provider?: "local" | "cos"; owner_user_id?: string; references?: number };
+type MediaRow = { id: string; filename: string; object_key: string; url: string; mime_type: string; size_bytes: string; checksum_sha256: string; status: string; recycled_at: string | null; created_at: string; storage_provider?: "local" | "cos"; owner_user_id?: string; own_avatar?:boolean; asset_linked?:boolean; references?: number };
 const safeFilename = (filename: string) => filename.replace(/[^a-zA-Z0-9._-]+/g, "-").slice(-180) || "upload";
 
 export function createMediaService(pool: Pick<Pool, "query" | "connect">, cos: StorageProvider) {
   async function references(client: { query<T = any>(sql: string, values?: unknown[]): Promise<{ rows: T[] }> }, id: string) {
     const result = await client.query<{ count: string }>(`SELECT (
+      (SELECT count(*) FROM storage_migration_journal WHERE media_id=$1) +
       (SELECT count(*) FROM user_profiles WHERE avatar_asset_id=$1) +
       (SELECT count(*) FROM research_items WHERE image_asset_id=$1 OR pdf_asset_id=$1) +
       (SELECT count(*) FROM news_items WHERE image_asset_id=$1) +
@@ -26,7 +28,8 @@ export function createMediaService(pool: Pick<Pool, "query" | "connect">, cos: S
   return {
     async list(input: { search?: string; status: string }) {
       const result = await pool.query<MediaRow>(`SELECT media_assets.*,
-        ((SELECT count(*) FROM user_profiles WHERE avatar_asset_id=media_assets.id) +
+        ((SELECT count(*) FROM storage_migration_journal WHERE media_id=media_assets.id) +
+         (SELECT count(*) FROM user_profiles WHERE avatar_asset_id=media_assets.id) +
          (SELECT count(*) FROM research_items WHERE image_asset_id=media_assets.id OR pdf_asset_id=media_assets.id) +
          (SELECT count(*) FROM news_items WHERE image_asset_id=media_assets.id) +
          (SELECT count(*) FROM facility_items WHERE image_asset_id=media_assets.id) +
@@ -38,9 +41,9 @@ export function createMediaService(pool: Pick<Pool, "query" | "connect">, cos: S
       return result.rows.map(map);
     },
     async readFile(id: string, actorId: string, permissions: string[]) {
-      const result = await pool.query<MediaRow>("SELECT * FROM media_assets WHERE id=$1 AND status='active'", [id]);
+      const result = await pool.query<MediaRow>("SELECT m.*,EXISTS(SELECT 1 FROM user_profiles p WHERE p.avatar_asset_id=m.id AND p.user_id=$2) own_avatar, (EXISTS(SELECT 1 FROM lab_asset_public_profiles a WHERE a.image_asset_id=m.id) OR EXISTS(SELECT 1 FROM lab_platform_public_profiles p WHERE p.image_asset_id=m.id)) asset_linked FROM media_assets m WHERE m.id=$1 AND m.status='active'", [id,actorId]);
       const row = result.rows[0];
-      if (!row || (row.owner_user_id !== actorId && !permissions.some(p => ["site.media.write", "site.members.write"].includes(p)))) throw new MediaError("文件不存在或不可访问", "MEDIA_NOT_FOUND", 404);
+      if (!row || (row.owner_user_id !== actorId && !row.own_avatar && !(row.asset_linked && permissions.some(p=>["lab_assets.read","lab_assets.write"].includes(p))) && !permissions.some(p => ["site.media.write", "site.members.write"].includes(p)))) throw new MediaError("文件不存在或不可访问", "MEDIA_NOT_FOUND", 404);
       const provider = cos.forProvider?.(row.storage_provider ?? "cos") ?? cos;
       if (!provider.getObject) throw new MediaError("历史对象请使用原存储地址", "MEDIA_PROVIDER_UNSUPPORTED", 409);
       return { bytes: await provider.getObject(row.object_key), contentType: row.mime_type };
@@ -54,6 +57,7 @@ export function createMediaService(pool: Pick<Pool, "query" | "connect">, cos: S
       const validExtension = input.mimeType === "application/pdf" ? extension === "pdf" : ["jpg", "jpeg", "png", "webp"].includes(extension);
       if (!validExtension) throw new MediaError("文件扩展名与媒体类型不匹配", "MEDIA_EXTENSION_INVALID");
       if (input.body.length < 1 || input.body.length > input.maxBytes) throw new MediaError("媒体文件超过大小限制", "MEDIA_SIZE_INVALID");
+      if(detectMediaType(input.body)!==input.mimeType)throw new MediaError("文件内容与类型不匹配","MEDIA_TYPE_INVALID");
       const checksum = createHash("sha256").update(input.body).digest("hex"); const id = randomUUID(); const key = `${input.pathPrefix.replace(/\/$/, "")}/${new Date().toISOString().slice(0,10)}/${id}-${safeFilename(input.filename)}`; const url = cos.name === "local" ? `/api/media/files/${id}` : `${input.publicBaseUrl.replace(/\/$/, "")}/${key}`;
       try { await cos.putObject({ key, body: input.body, contentType: input.mimeType }); } catch { throw new MediaError("媒体存储服务不可用", "MEDIA_STORAGE_FAILED", 502); }
       const client = await pool.connect(); try { await client.query("BEGIN"); const result = await client.query<MediaRow>(`INSERT INTO media_assets(id,bucket,filename,object_key,url,mime_type,size_bytes,checksum_sha256,status,storage_provider,owner_user_id) VALUES($1,'', $2,$3,$4,$5,$6,$7,'active',$8,$9) RETURNING *`, [id,input.filename,key,url,input.mimeType,input.body.length,checksum,cos.name ?? "cos",actorId]); await client.query("INSERT INTO audit_logs(actor_id,action,target_type,target_id,detail) VALUES($1,'media.upload','media_asset',$2::text,$3::jsonb)",[actorId,id,JSON.stringify({ filename: input.filename, mimeType: input.mimeType, sizeBytes: input.body.length })]); await client.query("COMMIT"); return map(result.rows[0]); } catch(error) { await client.query("ROLLBACK"); try { await cos.deleteObject(key); } catch { /* retain failure for operator cleanup */ } throw error; } finally { client.release(); }

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>Label</key><string>com.rnav.tunnel</string>
+<key>ProgramArguments</key><array><string>/usr/bin/ssh</string><string>-F</string><string>/Users/aaron/.config/rnav/ssh_config</string><string>-NT</string><string>rnav-business-tunnel</string></array>
+<key>RunAtLoad</key><true/><key>KeepAlive</key><true/><key>ThrottleInterval</key><integer>15</integer>
+<key>StandardOutPath</key><string>/Users/aaron/Library/Logs/rnav-tunnel.log</string>
+<key>StandardErrorPath</key><string>/Users/aaron/Library/Logs/rnav-tunnel-error.log</string>
+</dict></plist>

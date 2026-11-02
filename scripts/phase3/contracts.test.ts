@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {z} from 'zod';import {toJsonSchema,schemaType} from './zod-json.js';import {buildContract} from '../ops/generate-openapi.js';
+test('core OpenAPI uses the runtime Zod inputs and generates typed requests',async()=>{
+ const c:any=await buildContract();assert.ok(c.paths['/api/v1/profile'].put.requestBody);assert.ok(c.paths['/api/v1/publications/{id}/approve'].post.requestBody);assert.ok(c.components.schemas.assetRequestSchema.properties.expectedRevision);assert.deepEqual(c.components.schemas.profileUpdateSchema.properties.publicFields.items.enum,['avatar','name_zh','name_en','academic_stage','enrollment_year','graduation_year','major','research','bio','email','phone','links','thesis','destination']);
+ const s=toJsonSchema(z.object({name:z.string(),kind:z.enum(['a','b']).optional()}).strict());assert.deepEqual(s.required,['name']);assert.equal(s.additionalProperties,false);assert.match(schemaType(s),/"kind"\?/);
+});

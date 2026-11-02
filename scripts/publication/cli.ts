@@ -1,4 +1,5 @@
 import "dotenv/config";
+import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { approveBundle, activateBundle } from "@rnav/publication";
 
@@ -9,7 +10,7 @@ if (command === "prepare") {
   const env=loadEnv(); const pool=new pg.Pool({connectionString:env.databaseUrl});
   try { console.log(JSON.stringify(await preparePublication(pool,createStorage(env),resolve(directory)))); } finally { await pool.end(); }
 } else if (command === "approve" && argument) {
-  await approveBundle(resolve(directory),argument); console.log("Reviewed snapshot approved");
+  await approveBundle(resolve(directory),argument,{actor:process.env.PUBLICATION_REVIEWER ?? "local-operator",privateKey:process.env.PUBLICATION_SIGNING_KEY_FILE?await readFile(process.env.PUBLICATION_SIGNING_KEY_FILE,"utf8"):undefined}); console.log("Reviewed snapshot approved");
 } else if (command === "activate" && argument && expectedCurrent) {
-  await activateBundle(resolve(directory),resolve(argument),expectedCurrent); console.log("Public version activated locally");
+  await activateBundle(resolve(directory),resolve(argument),expectedCurrent,{requireSignature:process.env.PUBLICATION_REQUIRE_SIGNATURE === "true",publicKey:process.env.PUBLICATION_VERIFY_KEY_FILE?await readFile(process.env.PUBLICATION_VERIFY_KEY_FILE,"utf8"):undefined}); console.log("Public version activated locally");
 } else throw new Error("Invalid publication command/arguments");

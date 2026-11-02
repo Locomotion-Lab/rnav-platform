@@ -1,0 +1,542 @@
+{
+  "date": "2026-11-02",
+  "scope": "Read-only schema/aggregates only; no business rows or credentials",
+  "items": [
+    {
+      "kind": "database",
+      "bytes": 33664347,
+      "foreignKeys": 96
+    },
+    {
+      "kind": "table",
+      "name": "audit_logs",
+      "count": 523
+    },
+    {
+      "kind": "table",
+      "name": "contact_extra_cards",
+      "count": 2
+    },
+    {
+      "kind": "table",
+      "name": "contact_primary_channels",
+      "count": 3
+    },
+    {
+      "kind": "table",
+      "name": "contact_social_links",
+      "count": 2
+    },
+    {
+      "kind": "table",
+      "name": "dashboard_settings",
+      "count": 2
+    },
+    {
+      "kind": "table",
+      "name": "device_alerts",
+      "count": 1
+    },
+    {
+      "kind": "table",
+      "name": "device_categories",
+      "count": 3
+    },
+    {
+      "kind": "table",
+      "name": "device_current_state",
+      "count": 3
+    },
+    {
+      "kind": "table",
+      "name": "device_events",
+      "count": 145
+    },
+    {
+      "kind": "table",
+      "name": "device_telemetry",
+      "count": 3136
+    },
+    {
+      "kind": "table",
+      "name": "devices",
+      "count": 3
+    },
+    {
+      "kind": "table",
+      "name": "facility_item_specs",
+      "count": 5
+    },
+    {
+      "kind": "table",
+      "name": "facility_items",
+      "count": 3
+    },
+    {
+      "kind": "table",
+      "name": "lab_asset_inventory_batches",
+      "count": 0
+    },
+    {
+      "kind": "table",
+      "name": "lab_asset_inventory_items",
+      "count": 0
+    },
+    {
+      "kind": "table",
+      "name": "lab_asset_notes",
+      "count": 72
+    },
+    {
+      "kind": "table",
+      "name": "lab_asset_public_profiles",
+      "count": 3
+    },
+    {
+      "kind": "table",
+      "name": "lab_asset_specs",
+      "count": 0
+    },
+    {
+      "kind": "table",
+      "name": "lab_asset_usage_requests",
+      "count": 0
+    },
+    {
+      "kind": "table",
+      "name": "lab_assets",
+      "count": 79
+    },
+    {
+      "kind": "table",
+      "name": "lab_device_type_spec_definitions",
+      "count": 0
+    },
+    {
+      "kind": "table",
+      "name": "lab_device_types",
+      "count": 9
+    },
+    {
+      "kind": "table",
+      "name": "lab_platform_notes",
+      "count": 0
+    },
+    {
+      "kind": "table",
+      "name": "lab_platform_public_profiles",
+      "count": 3
+    },
+    {
+      "kind": "table",
+      "name": "lab_platform_specs",
+      "count": 5
+    },
+    {
+      "kind": "table",
+      "name": "lab_platform_type_slots",
+      "count": 0
+    },
+    {
+      "kind": "table",
+      "name": "lab_platform_types",
+      "count": 5
+    },
+    {
+      "kind": "table",
+      "name": "lab_platforms",
+      "count": 14
+    },
+    {
+      "kind": "table",
+      "name": "media_assets",
+      "count": 56
+    },
+    {
+      "kind": "table",
+      "name": "member_scholarly_profiles",
+      "count": 4
+    },
+    {
+      "kind": "table",
+      "name": "monitor_service_status",
+      "count": 3
+    },
+    {
+      "kind": "table",
+      "name": "news_items",
+      "count": 3
+    },
+    {
+      "kind": "table",
+      "name": "notifications",
+      "count": 4
+    },
+    {
+      "kind": "table",
+      "name": "page_content",
+      "count": 8
+    },
+    {
+      "kind": "table",
+      "name": "permission_template_permissions",
+      "count": 22
+    },
+    {
+      "kind": "table",
+      "name": "permission_templates",
+      "count": 7
+    },
+    {
+      "kind": "table",
+      "name": "permissions",
+      "count": 21
+    },
+    {
+      "kind": "table",
+      "name": "procurement_catalog_attribute_definitions",
+      "count": 75
+    },
+    {
+      "kind": "table",
+      "name": "procurement_catalog_categories",
+      "count": 10
+    },
+    {
+      "kind": "table",
+      "name": "procurement_catalog_items",
+      "count": 1189
+    },
+    {
+      "kind": "table",
+      "name": "procurement_catalog_subcategories",
+      "count": 8
+    },
+    {
+      "kind": "table",
+      "name": "procurement_comments",
+      "count": 1
+    },
+    {
+      "kind": "table",
+      "name": "procurement_request_items",
+      "count": 319
+    },
+    {
+      "kind": "table",
+      "name": "procurement_requests",
+      "count": 32
+    },
+    {
+      "kind": "table",
+      "name": "procurement_spend_entries",
+      "count": 30
+    },
+    {
+      "kind": "table",
+      "name": "procurement_spend_entry_items",
+      "count": 1
+    },
+    {
+      "kind": "table",
+      "name": "procurement_status_history",
+      "count": 126
+    },
+    {
+      "kind": "table",
+      "name": "research_item_authors",
+      "count": 930
+    },
+    {
+      "kind": "table",
+      "name": "research_item_keywords",
+      "count": 3
+    },
+    {
+      "kind": "table",
+      "name": "research_item_links",
+      "count": 155
+    },
+    {
+      "kind": "table",
+      "name": "research_items",
+      "count": 154
+    },
+    {
+      "kind": "table",
+      "name": "schema_migrations",
+      "count": 42
+    },
+    {
+      "kind": "table",
+      "name": "scholarly_sync_runs",
+      "count": 54
+    },
+    {
+      "kind": "table",
+      "name": "scholarly_sync_settings",
+      "count": 1
+    },
+    {
+      "kind": "table",
+      "name": "scholarly_work_members",
+      "count": 154
+    },
+    {
+      "kind": "table",
+      "name": "scholarly_works",
+      "count": 155
+    },
+    {
+      "kind": "table",
+      "name": "session_tokens",
+      "count": 137
+    },
+    {
+      "kind": "table",
+      "name": "site_content_revisions",
+      "count": 14
+    },
+    {
+      "kind": "table",
+      "name": "system_secrets",
+      "count": 1
+    },
+    {
+      "kind": "table",
+      "name": "system_settings",
+      "count": 7
+    },
+    {
+      "kind": "table",
+      "name": "team_member_contacts",
+      "count": 9
+    },
+    {
+      "kind": "table",
+      "name": "team_member_links",
+      "count": 10
+    },
+    {
+      "kind": "table",
+      "name": "team_members",
+      "count": 20
+    },
+    {
+      "kind": "table",
+      "name": "user_permission_overrides",
+      "count": 96
+    },
+    {
+      "kind": "table",
+      "name": "user_permission_templates",
+      "count": 19
+    },
+    {
+      "kind": "table",
+      "name": "user_permissions",
+      "count": 102
+    },
+    {
+      "kind": "table",
+      "name": "user_profiles",
+      "count": 40
+    },
+    {
+      "kind": "table",
+      "name": "users",
+      "count": 40
+    },
+    {
+      "kind": "migrations",
+      "items": [
+        {
+          "version": "001_core_auth.sql",
+          "checksum": "3eabf976252f96fe3fb1163e8889787469a9092566c20b9e265d5df716cc2be1"
+        },
+        {
+          "version": "004_procurement.sql",
+          "checksum": "98fa39d24d48a9ef5e0527443110d1fc1e309cac70ff44f210a687f143d8ff77"
+        },
+        {
+          "version": "005_procurement_constraints.sql",
+          "checksum": "ffe462c8617c32015061a21482c03ab5f2ee2e980b49143d9a0ff72a65fdec13"
+        },
+        {
+          "version": "006_public_site_legacy.sql",
+          "checksum": "e7ea7db793f5c51075234c596606defbf5424836fb07c9e9510ce7b75400c9c4"
+        },
+        {
+          "version": "007_public_site_compatibility.sql",
+          "checksum": "e327044e90398437f477f6e8cf77d0afaa59b6d13382094477dc80132c51c3d5"
+        },
+        {
+          "version": "008_site_admin_revisions.sql",
+          "checksum": "ff7d8a29256c4b2d625f1d99f89581f41c060c67b924c098a19ab3a0c3484ad3"
+        },
+        {
+          "version": "009_site_admin_roundtrip.sql",
+          "checksum": "8ba2105d503702056c3f82b4d3d67f6fb035275877376da76040d7245abd0339"
+        },
+        {
+          "version": "010a_lab_assets_legacy_compat.sql",
+          "checksum": "a5942f971c3c957779b6cff4369de097d3833dd44704b7af0d43a7a1abdaf9dc"
+        },
+        {
+          "version": "010b_lab_assets_constraints.sql",
+          "checksum": "f0d04b938a47d2cd8c0c08206a9cf801e52d9cccd4b27cdd27b03e75285f6eab"
+        },
+        {
+          "version": "010_site_admin_link_variants.sql",
+          "checksum": "22644281a602a399f63e589a70ff45a545537a94dd7174982372d650f35a57ad"
+        },
+        {
+          "version": "011_lab_assets_admin.sql",
+          "checksum": "a8d969aeccaa96c3532d1d8b7d13586a7b5d1bcc0989f15b21d19c3af84f565b"
+        },
+        {
+          "version": "012_monitor.sql",
+          "checksum": "4119dcdc643861037d64006cbb27fd2438dabdc5337c7e5176124dd120245683"
+        },
+        {
+          "version": "013_procurement_request_sequence.sql",
+          "checksum": "5cd95c4ba240c1610a131aa0c6d9d75f425d864e8c2fef3adf343d615de1b188"
+        },
+        {
+          "version": "014_account_profile_permissions.sql",
+          "checksum": "83b7385b114b2f0a8793bdeade6af3a563f4d4662dd3453cf11a76abc36b14b0"
+        },
+        {
+          "version": "015_media_settings.sql",
+          "checksum": "809e69484795d18534483e3f0a234e55bee88639eeaa7e58f5f0169ebf43ce40"
+        },
+        {
+          "version": "016_procurement_catalog.sql",
+          "checksum": "7c2267a70bf62f88c028d50915f4c83858247ffa75132b915b174fa3d1c6480f"
+        },
+        {
+          "version": "017_remove_procurement_catalog_examples.sql",
+          "checksum": "d10f0fc5518ecb673594fff01d6eeb0497222e9e59698e71b88e246bd873ea41"
+        },
+        {
+          "version": "018_lab_assets_sequences.sql",
+          "checksum": "cc74efadf0dedc3bb4d74e57cc9647af5f539101211c2fe00d15c55b4209037f"
+        },
+        {
+          "version": "019_member_self_profiles.sql",
+          "checksum": "b7dda0c66144f0a1a456748bb007cbe20a99de412ad1f47ce22925b8a71cf7ae"
+        },
+        {
+          "version": "020_legacy_serial_sequences.sql",
+          "checksum": "1aaa417aad0f7135e0c8ff9c8015eaeca017c8eb954b68c3562fbcde93059a96"
+        },
+        {
+          "version": "021_procurement_catalog_hierarchy_processing.sql",
+          "checksum": "2d0d5b37611599ff9c8adb8a593890ddbf950dcc5f70995ce7259ff6608bc380"
+        },
+        {
+          "version": "022_procurement_actual_spending.sql",
+          "checksum": "54fa093719b0f4f470b5c9066855552f1c5b918d8b47a6eeec622d72e989162f"
+        },
+        {
+          "version": "023_lab_assets_usage_workflow.sql",
+          "checksum": "43058900cb2d8aa63d83caf832a20e1b4e96b9f1b99e98bb442c71912628aff3"
+        },
+        {
+          "version": "024_lab_assets_location_and_batch.sql",
+          "checksum": "57a4ef4ff221f2c577f192ed644a93cc17eede2e3e6024536c3566e5aafc03dc"
+        },
+        {
+          "version": "025_procurement_revision_requested.sql",
+          "checksum": "3ff287e608371d8489babff4b3f1acde878e8478ac166ce48626fad09124217a"
+        },
+        {
+          "version": "026_asset_procurement_source.sql",
+          "checksum": "79020ed8f912319317c4ebb5c7492270ca987d21c8fbb7985cd316b88efcc095"
+        },
+        {
+          "version": "027_member_governance.sql",
+          "checksum": "1e403471408e7f5cec4aebabd81197d56ee12dee457a6d4a0751b58a78d06dad"
+        },
+        {
+          "version": "028_notifications.sql",
+          "checksum": "6b8f4606dff09477dd49d6ead87e6153afaf1f554710327b05f6426aad47dbd6"
+        },
+        {
+          "version": "029_asset_inventory.sql",
+          "checksum": "85081130ebba9d99ad70ab374947f6db9cd3fe002d10f31f69263e5d2eaf7da1"
+        },
+        {
+          "version": "030_procurement_experience.sql",
+          "checksum": "b980f1348464256bc3df12dc364a3280109acdcbe8e75121a13dc618db335107"
+        },
+        {
+          "version": "031_user_account_kind.sql",
+          "checksum": "3078ec5a5d701c779233d4c9959bd427ab9a081cbd706f1dc411ac21cceff592"
+        },
+        {
+          "version": "032_lab_asset_condition_components.sql",
+          "checksum": "996c6489d0d7ddbe1c5bd8b12f913703b41983d0c37a501be75f1bea8ae659ec"
+        },
+        {
+          "version": "033_lab_platform_attributes.sql",
+          "checksum": "a7f6b6948b39fb49b6602ca457aba0a17ff81ee75c7987df3cd1100f28a6ba57"
+        },
+        {
+          "version": "034_lab_asset_specs.sql",
+          "checksum": "2e67bd1c37ec3226441678e5714e89cdb7054f1358b93f80d4603e7e15696d40"
+        },
+        {
+          "version": "035_lab_asset_public_profiles.sql",
+          "checksum": "69e2185d0f5cb6a3794ae5df5dc9e56ba499854da0266103394692fcee01e9f1"
+        },
+        {
+          "version": "036_lab_type_templates.sql",
+          "checksum": "856c0828fd23de136032105232a65e132181d0de45ccec71460f3c14c1092532"
+        },
+        {
+          "version": "037_cms_content_fields.sql",
+          "checksum": "a1003fafbcec7706d3c3b8dd273cc3d72e5e619f0dc72b5f0f83703cda5ef79f"
+        },
+        {
+          "version": "038_bridge_legacy_public_facilities.sql",
+          "checksum": "5e5959f706cb72ea3ee4306a23e02b79b84cd3a14c91a128e1c60c406657eb29"
+        },
+        {
+          "version": "039_member_account_profile_consolidation.sql",
+          "checksum": "a58e24b2c9a28928e36f70753e02a38223862ef1d0dae91055d00daaf04312a9"
+        },
+        {
+          "version": "040_normalize_person_account_names.sql",
+          "checksum": "76162e4477d6d7ff2d3bb48010ca296c96968e504de60a49230c6ad88ac917b9"
+        },
+        {
+          "version": "041_scholarly_sync.sql",
+          "checksum": "3170e51a3acecede64f2b743921aee118b33851735c10676b1071edaba9c9717"
+        },
+        {
+          "version": "042_scholarly_sync_admin_settings.sql",
+          "checksum": "36031e1c5323e93842a05aace6e2baca4777c37ff15474ed308337c8607281c9"
+        }
+      ]
+    },
+    {
+      "kind": "media",
+      "bytes": 59664647,
+      "count": 56,
+      "active": 50,
+      "largest": 9168942,
+      "missingHash": 0,
+      "distinctObjects": 56
+    },
+    {
+      "kind": "references",
+      "avatars": 25,
+      "assetPublic": 0,
+      "researchPdfs": 0,
+      "platformPublic": 3,
+      "retiredCatalog": 1189,
+      "assetProcurementLinks": 0
+    }
+  ]
+}

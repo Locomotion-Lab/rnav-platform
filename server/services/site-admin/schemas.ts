@@ -32,7 +32,7 @@ function inspectJson(value: unknown, context: z.RefinementCtx) {
     if (typeof current === "string") {
       stringChars += current.length;
       if (stringChars > MAX_TOTAL_STRING_CHARS) context.addIssue({ code: z.ZodIssueCode.custom, message: "JSON strings are too large", path });
-      if (current.length > MAX_STRING) context.addIssue({ code: z.ZodIssueCode.too_big, maximum: MAX_STRING, inclusive: true, type: "string", message: "String is too long", path });
+      if (current.length > MAX_STRING) context.addIssue({ code: z.ZodIssueCode.too_big, maximum: MAX_STRING, inclusive: true, origin: "string", message: "String is too long", path });
       return;
     }
     if (current === null || typeof current === "boolean" || typeof current === "number") return;
@@ -43,7 +43,7 @@ function inspectJson(value: unknown, context: z.RefinementCtx) {
     if (Array.isArray(current)) {
       childItems += current.length;
       if (childItems > MAX_CHILD_ITEMS) context.addIssue({ code: z.ZodIssueCode.custom, message: "JSON has too many child items", path });
-      if (current.length > MAX_LIST) context.addIssue({ code: z.ZodIssueCode.too_big, maximum: MAX_LIST, inclusive: true, type: "array", message: "List is too long", path });
+      if (current.length > MAX_LIST) context.addIssue({ code: z.ZodIssueCode.too_big, maximum: MAX_LIST, inclusive: true, origin: "array", message: "List is too long", path });
       current.forEach((item, index) => visit(item, depth + 1, [...path, index]));
       return;
     }

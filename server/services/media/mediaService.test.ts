@@ -27,7 +27,7 @@ class Cos {
 test("upload validates input, stores one object, and writes an auditable asset", async () => {
   const client = new Client(); const cos = new Cos();
   const service = createMediaService({ connect: async () => client } as never, cos);
-  const result = await service.upload({ filename: "a.png", mimeType: "image/png", body: Buffer.from("abc"), maxBytes: 20, publicBaseUrl: "https://cdn.example", pathPrefix: "rnav" }, "user-1");
+  const result = await service.upload({ filename: "a.png", mimeType: "image/png", body: Buffer.from([137,80,78,71,13,10,26,10]), maxBytes: 20, publicBaseUrl: "https://cdn.example", pathPrefix: "rnav" }, "user-1");
   assert.equal(result.mimeType, "image/png"); assert.equal(cos.puts.length, 1); assert.ok(client.calls.some(call => call.sql.includes("media.upload"))); assert.equal(client.calls.at(-1)?.sql, "COMMIT");
 });
 

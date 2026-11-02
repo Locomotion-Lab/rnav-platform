@@ -14,6 +14,7 @@ export const knownPermissionKeys = [
   "profile.write_own",
   "lab_assets.read",
   "site.content.write",
+  "site.publish",
   "site.members.write",
   "site.media.write",
   "lab_assets.write",
@@ -106,7 +107,7 @@ const moduleDefinitions: ConsoleModule[] = [
     key: "site",
     href: "/console/site",
     label: "官网内容",
-    requiredAny: ["site.content.write", "site.members.write"]
+    requiredAny: ["site.content.write", "site.members.write", "site.publish"]
   },
   {
     key: "media",

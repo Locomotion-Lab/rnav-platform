@@ -123,6 +123,8 @@ test("getMigrationFiles returns SQL migrations in lexical order", async () => {
       "041_scholarly_sync.sql",
       "042_scholarly_sync_admin_settings.sql",
       "043_storage_provider.sql",
+      "044_publication_and_storage_journal.sql",
+      "045_safe_profile_field_default.sql",
     ],
   );
 });

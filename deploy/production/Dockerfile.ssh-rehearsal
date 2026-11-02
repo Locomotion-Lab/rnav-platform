@@ -1,0 +1,5 @@
+FROM ubuntu:22.04
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends openssh-server curl iproute2 ca-certificates && rm -rf /var/lib/apt/lists/* && mkdir -p /run/sshd && useradd -m -s /bin/sh rnav-tunnel && usermod -p '*' rnav-tunnel && mkdir -p /home/rnav-tunnel/.ssh && chmod 700 /home/rnav-tunnel/.ssh
+COPY deploy/ssh/sshd-rnav-tunnel.conf /etc/ssh/sshd_config.d/60-rnav-tunnel.conf
+RUN ssh-keygen -A
+CMD ["/usr/sbin/sshd","-D","-e"]

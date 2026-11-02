@@ -1,0 +1,39 @@
+name: rnav-cloud
+services:
+  web:
+    image: ${RNAV_WEB_IMAGE:-rnav-web:phase3}
+    network_mode: host
+    init: true
+    user: '${RNAV_WEB_UID:-1000}:${RNAV_WEB_GID:-1000}'
+    environment:
+      HOSTNAME: 127.0.0.1
+      PORT: '${RNAV_WEB_PORT:-13000}'
+      RNAV_WEB_ORIGIN: ${RNAV_WEB_ORIGIN:-https://r-navigation.com}
+      RNAV_PUBLIC_SOURCE: snapshot
+      RNAV_PUBLIC_ROOT: /data/public
+      RNAV_API_INTERNAL_URL: http://127.0.0.1:14090
+      PUBLICATION_REQUIRE_SIGNATURE: "true"
+      PUBLICATION_VERIFY_KEY_FILE: /run/secrets/publication_verify
+      GATEWAY_TOKEN_FILE: /run/secrets/gateway_token
+    entrypoint: [node, /app/apps/web/service-entry.mjs]
+    command: [node, apps/web/server.js]
+    secrets: [gateway_token, publication_verify]
+    volumes: ['${RNAV_PUBLIC_HOST_ROOT:?Set absolute publication root}:/data/public:ro']
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 1024m
+    cpus: 1
+    pids_limit: 128
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options: {max-size: 10m, max-file: '3'}
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:'+process.env.PORT+'/api/public/bootstrap').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+secrets:
+  publication_verify: {file: '${RNAV_SECRETS_DIR}/publication-verify.pem'}
+  gateway_token: {file: '${RNAV_SECRETS_DIR:?Set absolute secrets directory}/gateway_token'}

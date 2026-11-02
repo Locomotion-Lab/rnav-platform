@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>Label</key><string>com.rnav.backup</string><key>ProgramArguments</key><array><string>/bin/bash</string><string>/Users/aaron/Projects/rnav-platform/scripts/phase3/nightly.sh</string></array>
+<key>StartCalendarInterval</key><dict><key>Hour</key><integer>3</integer><key>Minute</key><integer>0</integer></dict>
+<key>StandardOutPath</key><string>/Users/aaron/Library/Logs/rnav-backup.log</string><key>StandardErrorPath</key><string>/Users/aaron/Library/Logs/rnav-backup-error.log</string>
+</dict></plist>

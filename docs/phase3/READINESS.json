@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "assessment": "NO_GO_FOR_PRODUCTION_UNTIL_AUTHORIZED_GATES_PASS",
+  "engineering": {
+    "synthetic_dual_node_ssh_rehearsal": true,
+    "signed_publication_and_offline_public_site": true,
+    "separate_low_privilege_roles": true,
+    "resumable_media_transfer": true,
+    "joint_isolated_restore": true,
+    "production_dependency_high_or_critical": 0
+  },
+  "production_gates": {
+    "explicit_change_approval": false,
+    "certificate_renewed": false,
+    "authorized_real_data_restore_and_cos_sha256": false,
+    "real_cloud_mac_tunnel_and_https_browser_acceptance": false,
+    "offsite_receiver_key_custody_and_restore": false,
+    "filevault_unlock_and_restart_drill": false
+  }
+}

@@ -1,0 +1,139 @@
+name: rnav-production
+x-service: &service
+  image: ${RNAV_BACKEND_IMAGE:-rnav-backend:phase3}
+  build:
+    context: ../..
+    dockerfile: deploy/docker/Dockerfile.api
+  init: true
+  entrypoint: [node, scripts/phase3/service-entry.mjs]
+  environment: &environment
+    NODE_ENV: production
+    DATABASE_HOST: db
+    DATABASE_ROLE: rnav_app
+    DATABASE_PASSWORD_FILE: /run/secrets/db_app_password
+    SESSION_SECRET_FILE: /run/secrets/session_secret
+    PASSWORD_PEPPER_FILE: /run/secrets/password_pepper
+    REQUIRE_GATEWAY_TOKEN: "true"
+    GATEWAY_TOKEN_FILE: /run/secrets/gateway_token
+    COOKIE_SECURE: ${COOKIE_SECURE:-true}
+    STORAGE_PROVIDER: local
+    STORAGE_ROOT: /data/private-media
+    PUBLICATION_ROOT: /data/publications
+    PUBLICATION_SIGNING_KEY_FILE: /run/secrets/publication_signing
+    BACKEND_WRITE_ENABLED: ${BACKEND_WRITE_ENABLED:-false}
+    PUBLIC_BASE_URL: ${RNAV_WEB_ORIGIN:-https://r-navigation.com}
+    HOST: 0.0.0.0
+    PORT: 4090
+    SCHOLARLY_SYNC_ENABLED: 'false'
+  secrets: [db_app_password, session_secret, password_pepper, gateway_token, publication_signing]
+  volumes: [private_media:/data/private-media, publications:/data/publications]
+  networks: [business]
+  logging:
+    driver: json-file
+    options: {max-size: 10m, max-file: '3'}
+  security_opt: [no-new-privileges:true]
+  cap_drop: [ALL]
+  pids_limit: 128
+services:
+  db:
+    image: ${RNAV_DB_IMAGE:-postgres:14-bookworm}
+    environment:
+      POSTGRES_DB: rnav_platform
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_admin_password
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256 --auth-local=trust
+    secrets: [db_admin_password, db_migrator_password, db_app_password]
+    volumes: [postgres_data:/var/lib/postgresql/data, ./init-db.sql:/docker-entrypoint-initdb.d/10-rnav.sql:ro]
+    networks: [business]
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U postgres -d rnav_platform]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+    mem_limit: 1536m
+    cpus: 2
+    shm_size: 256m
+    logging:
+      driver: json-file
+      options: {max-size: 10m, max-file: '3'}
+  migrate:
+    <<: *service
+    command: [sh, -c, 'node server/dist/db/runMigrations.js && node scripts/phase3/grant-app.mjs']
+    environment:
+      <<: *environment
+      DATABASE_ROLE: rnav_migrator
+      DATABASE_PASSWORD_FILE: /run/secrets/db_migrator_password
+    secrets: [db_migrator_password, session_secret, password_pepper, gateway_token]
+    depends_on:
+      db: {condition: service_healthy}
+    restart: 'no'
+    mem_limit: 512m
+    cpus: 1
+  api:
+    <<: *service
+    command: [node, server/dist/index.js]
+    ports: ['127.0.0.1:${RNAV_MAC_API_PORT:-14090}:4090']
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:4090/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    restart: unless-stopped
+    mem_limit: 1536m
+    cpus: 2
+  job:
+    <<: *service
+    profiles: [jobs]
+    command: [npm, run, scholarly:sync]
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+    restart: 'no'
+    mem_limit: 512m
+    cpus: 1
+  media-migrate:
+    <<: *service
+    profiles: [migration]
+    command: [node_modules/.bin/tsx, scripts/phase3/migrate-media.ts]
+    environment:
+      <<: *environment
+      DATABASE_ROLE: rnav_migrator
+      DATABASE_PASSWORD_FILE: /run/secrets/db_migrator_password
+      COS_SECRET_ID_FILE: /run/secrets/cos_secret_id
+      COS_SECRET_KEY_FILE: /run/secrets/cos_secret_key
+      COS_REGION: ${COS_REGION:-ap-beijing}
+      COS_BUCKET: ${COS_BUCKET:-r-navigation-1326672316}
+      MIGRATION_TARGET: isolated-or-authorized
+    secrets: [db_migrator_password, session_secret, password_pepper, gateway_token, cos_secret_id, cos_secret_key]
+    restart: 'no'
+  dbtools:
+    image: rnav-dbtools:phase3
+    profiles: [maintenance]
+    entrypoint: [node, scripts/phase3/service-entry.mjs]
+    environment:
+      DATABASE_HOST: db
+      DATABASE_ROLE: rnav_migrator
+      DATABASE_PASSWORD_FILE: /run/secrets/db_migrator_password
+      MIGRATION_TARGET: isolated-or-authorized
+    secrets: [db_migrator_password]
+    volumes: ['${RNAV_BACKUP_DIR:-../../backups/phase3}:/backups']
+    networks: [business]
+    command: [node, scripts/phase3/db-transfer.mjs]
+networks:
+  business: {}
+volumes:
+  postgres_data:
+  private_media:
+  publications:
+secrets:
+  cos_secret_id: {file: '${RNAV_SECRETS_DIR}/cos_secret_id'}
+  cos_secret_key: {file: '${RNAV_SECRETS_DIR}/cos_secret_key'}
+  db_admin_password: {file: '${RNAV_SECRETS_DIR:?Set absolute RNAV_SECRETS_DIR}/db_admin_password'}
+  db_migrator_password: {file: '${RNAV_SECRETS_DIR}/db_migrator_password'}
+  db_app_password: {file: '${RNAV_SECRETS_DIR}/db_app_password'}
+  session_secret: {file: '${RNAV_SECRETS_DIR}/session_secret'}
+  password_pepper: {file: '${RNAV_SECRETS_DIR}/password_pepper'}
+  gateway_token: {file: '${RNAV_SECRETS_DIR}/gateway_token'}
+  publication_signing: {file: '${RNAV_SECRETS_DIR}/publication-signing.pem'}

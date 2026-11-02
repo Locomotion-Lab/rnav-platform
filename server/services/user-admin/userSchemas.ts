@@ -54,7 +54,7 @@ export const publicProfileAdminSchema = z.object({
 export const userIdSchema = z.string().uuid();
 export const accountEmailSchema = z.object({ email: z.union([z.literal(""), z.string().trim().email().max(320)]) }).strict();
 export const convertAlumniSchema = z.object({ confirm: z.literal(true) }).strict();
-export const importUserRowSchema = createUserSchema.innerType().omit({ baseTier: true, accountKind: true }).extend({
+export const importUserRowSchema = z.object(createUserSchema.shape).strict().omit({ baseTier: true, accountKind: true }).extend({
   baseTier: z.enum(["normal", "super"]).default("normal"),
   publicEmail: z.union([z.literal(""), z.string().email().max(320)]).default(""),
 }).superRefine((value, context) => {

@@ -96,7 +96,7 @@ export function createProfileService(pool: Pick<Pool, "query" | "connect">) {
         ? `英文名必须为“名-姓”格式：${identity.nameEn}`
         : "中文姓名必须为 2–6 个汉字，不得包含头衔、空格或字母");
       if (body.avatarAssetId) {
-        const asset = await client.query("SELECT 1 FROM media_assets WHERE id=$1 AND status='active' AND mime_type LIKE 'image/%'", [body.avatarAssetId]);
+        const asset = await client.query("SELECT 1 FROM media_assets WHERE id=$1 AND status='active' AND mime_type LIKE 'image/%' AND ($3::boolean OR owner_user_id=$2 OR id=$4::uuid)", [body.avatarAssetId, actorUserId, admin, current.rows[0].avatar_asset_id]);
         if (!asset.rowCount) throw new ProfileAssetError();
       }
       const before = output(current.rows[0]) as Record<string, unknown>;

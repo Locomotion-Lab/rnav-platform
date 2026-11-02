@@ -1,0 +1,37 @@
+{
+  "scope": "npm production dependency tree (--omit=dev); OS image CVEs are not covered",
+  "before": {
+    "info": 0,
+    "low": 0,
+    "moderate": 1,
+    "high": 5,
+    "critical": 2,
+    "total": 8
+  },
+  "after": {
+    "info": 0,
+    "low": 0,
+    "moderate": 0,
+    "high": 0,
+    "critical": 0,
+    "total": 0
+  },
+  "versions": {
+    "next": "16.4.3",
+    "express": "5.2.1",
+    "proxy-addr": "2.0.8",
+    "multer": "2.5.0",
+    "sharp": "0.35.5",
+    "zod": "4.6.7"
+  },
+  "note": "Patched Next, Express transitives, multer, sharp; migrated runtime validation and schema generation to Zod4. Backend runtime prunes development dependencies.",
+  "includingDevelopment": {
+    "info": 0,
+    "low": 0,
+    "moderate": 17,
+    "high": 0,
+    "critical": 0,
+    "total": 17
+  },
+  "developmentNote": "17 moderate development-toolchain advisories remain; no high/critical. Runtime images prune dev dependencies. Do not interpret production audit zero as all tooling or OS vulnerability-free."
+}

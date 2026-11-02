@@ -70,6 +70,11 @@ test('known private payload fields never pass bundle verification',async()=>{
   try {
     f.snapshot.pages.team={password_hash:'never public'};
     await writeFile(join(f.draft,'snapshot.json'),JSON.stringify(f.snapshot));
-    await assert.rejects(validateBundle(f.draft),/Private field/);
+    await assert.rejects(validateBundle(f.draft),/Private field|Unknown public field/);
   } finally { await rm(f.root,{recursive:true,force:true}); }
+});
+
+test('signed approval requires the correct trusted key and records activation audit',async()=>{
+ const {generateKeyPairSync}=await import('node:crypto');const f=await fixture();
+ try{const k=generateKeyPairSync('ed25519'),other=generateKeyPairSync('ed25519');await approveBundle(f.draft,f.hash,{actor:'reviewer-id',privateKey:k.privateKey});await assert.rejects(activateBundle(f.draft,f.publicRoot,'none',{requireSignature:true,publicKey:other.publicKey}));await activateBundle(f.draft,f.publicRoot,'none',{requireSignature:true,publicKey:k.publicKey});assert.match(await readFile(join(f.publicRoot,'audit.ndjson'),'utf8'),/reviewer-id/);}finally{await rm(f.root,{recursive:true,force:true});}
 });
