@@ -10,7 +10,8 @@
   "packageManager": "npm@11.16.0",
   "workspaces": [
     "apps/web",
-    "server"
+    "server",
+    "packages/publication"
   ],
   "scripts": {
     "dev:web": "npm --workspace apps/web run dev",
@@ -25,13 +26,18 @@
     "db:migrate-legacy": "tsx scripts/db/migrate-legacy.ts",
     "db:import-legacy": "tsx scripts/db/import-legacy.ts",
     "db:verify-migration": "tsx scripts/db/verify-migration.ts",
-    "procurement:import-catalog": "tsx scripts/procurement/import-catalog-csv.ts",
-    "procurement:import-history": "tsx scripts/procurement/import-history-csv.ts",
-    "procurement:import-images": "tsx scripts/procurement/import-catalog-images.ts",
-    "procurement:scrape-jd-public": "tsx scripts/procurement/scrape-jd-public.ts",
     "scholarly:sync": "tsx scripts/scholarly/sync-publications.ts",
     "scholarly:backfill": "tsx scripts/scholarly/backfill-existing-publications.ts",
-    "scholarly:reset-member": "tsx scripts/scholarly/reset-member-sync.ts"
+    "scholarly:reset-member": "tsx scripts/scholarly/reset-member-sync.ts",
+    "build:web": "npm --workspace apps/web run build",
+    "build:backend": "npm --workspace server run build",
+    "start:web": "npm --workspace apps/web run start",
+    "start:backend": "npm --workspace server run start",
+    "test:web": "npm --workspace apps/web run test",
+    "test:backend": "npm --workspace server run test",
+    "publication": "tsx scripts/publication/cli.ts",
+    "api:contract": "tsx scripts/ops/generate-openapi.ts",
+    "api:check": "tsx scripts/ops/generate-openapi.ts --check"
   },
   "devDependencies": {
     "csv-parse": "^6.2.1",

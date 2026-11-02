@@ -1,11 +1,18 @@
 import "server-only";
+import { connection } from "next/server";
+import { readPublished } from "@/lib/server/publication";
 import { getInternalApiUrl } from "@/lib/server/api";
 
 export type PublicDataResult<T> = { data: T; degraded: boolean };
 
 export async function getPublicData<T>(path: string, fallback: T): Promise<PublicDataResult<T>> {
+  await connection();
   const endpoint = `/api/public/${path}`;
   try {
+    if (process.env.RNAV_PUBLIC_SOURCE === "snapshot") {
+      const data = await readPublished(path);
+      return data == null ? {data:fallback,degraded:true} : {data:data as T,degraded:false};
+    }
     const response = await fetch(getInternalApiUrl(endpoint), { next: { revalidate: 60 } });
     if (!response.ok) {
       console.error(`[public-site] ${endpoint} returned ${response.status}`);
@@ -19,7 +26,9 @@ export async function getPublicData<T>(path: string, fallback: T): Promise<Publi
 }
 
 export async function getOptionalPublicData(path: string): Promise<unknown | null> {
+  await connection();
   try {
+    if (process.env.RNAV_PUBLIC_SOURCE === "snapshot") return path.startsWith("/api/public/") ? await readPublished(path.slice(12)) : null;
     const response = await fetch(getInternalApiUrl(path), { next: { revalidate: 30 } });
     if (!response.ok) return null;
     return await response.json() as unknown;

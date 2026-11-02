@@ -227,8 +227,6 @@ test("GET /api/console/bootstrap returns normal member modules", async () => {
   repository.permissions.set(user.id, [
     "console.access",
     "lab_assets.read",
-    "procurements.create",
-    "procurements.read_own"
   ]);
   repository.sessions.set(createHash("sha256").update("normal-token").digest("hex"), {
     userId: user.id,
@@ -246,7 +244,7 @@ test("GET /api/console/bootstrap returns normal member modules", async () => {
   assert.equal(body.user.tier, "normal");
   assert.deepEqual(
     body.consoleModules.map((module) => module.key),
-    ["profile", "lab-assets", "procurements"]
+    ["profile", "lab-assets"]
   );
 });
 
@@ -272,16 +270,7 @@ test("GET /api/console/bootstrap returns every module for a super user", async (
     "console.access",
     "lab_assets.read",
     "lab_assets.write",
-    "monitor.devices.read",
-    "monitor.devices.write",
-    "monitor.settings.write",
     "permissions.write",
-    "procurements.close",
-    "procurements.create",
-    "procurements.purchase",
-    "procurements.read_all",
-    "procurements.read_own",
-    "procurements.review",
     "profile.read_own",
     "profile.write_own",
     "site.content.write",
@@ -296,8 +285,6 @@ test("GET /api/console/bootstrap returns every module for a super user", async (
     [
       "profile",
       "lab-assets",
-      "procurements",
-      "monitor",
       "site",
       "media",
       "users",
@@ -368,8 +355,6 @@ test("POST /api/auth/login creates a hashed database session and secure cookie",
     "profile.read_own",
     "profile.write_own",
     "lab_assets.read",
-    "procurements.create",
-    "procurements.read_own"
   ]);
 });
 
@@ -429,8 +414,6 @@ test("GET /api/auth/session returns safe authenticated identity", async () => {
       "profile.read_own",
       "profile.write_own",
       "lab_assets.read",
-      "procurements.create",
-      "procurements.read_own",
       "site.content.write"
     ]
   });

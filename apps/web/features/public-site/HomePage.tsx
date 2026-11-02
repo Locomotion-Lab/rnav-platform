@@ -239,41 +239,6 @@ export function HomePage({ data }: { data: any }) {
         )}
       </section>
     ),
-    status: visible("monitor") && (
-      <section className="v41-wrap v41-status" key="status">
-        <div>
-          <span className="v41-eyebrow">LAB STATUS</span>
-          <h2>{zh ? "实验室运行状态" : "Lab status"}</h2>
-        </div>
-        <div className="v41-status-devices">
-          {data.monitorPreview?.devices?.length ? (
-            data.monitorPreview.devices.slice(0, 4).map((device: any) => (
-              <span key={device.code}>
-                <i className={device.isOnline ? "is-online" : ""} />
-                {device.displayName || device.code}
-                <small>
-                  {device.statusLabel ||
-                    (device.isOnline
-                      ? zh
-                        ? "在线"
-                        : "Online"
-                      : zh
-                        ? "离线"
-                        : "Offline")}
-                </small>
-              </span>
-            ))
-          ) : (
-            <p>
-              {zh
-                ? "当前没有可用的公开设备状态"
-                : "Public device status is currently unavailable"}
-            </p>
-          )}
-        </div>
-        <Link href="/monitor">{zh ? "查看状态" : "View status"} →</Link>
-      </section>
-    ),
     contact: visible("contact") && (
       <ContactCta
         key="contact"

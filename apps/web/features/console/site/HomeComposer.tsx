@@ -6,9 +6,9 @@ import type { SiteModule } from "./model";
 import { asList, asRecord, EditorPanel, LocalizedFields, MediaField, MoveButtons, moveItem } from "./CmsFields";
 
 type Item = Record<string, any>;
-const slots = ["directions", "work", "people", "status", "contact"];
-const labels: Record<string, string> = { directions: "研究方向", work: "研究与实验", people: "团队与动态", status: "实验状态", contact: "联系与加入" };
-const children: Record<string, [string, string][]> = { directions: [["researchAreas", "显示研究方向"]], work: [["featuredResearch", "显示论文成果"], ["facilities", "显示实验平台"]], people: [["members", "显示团队成员"], ["news", "显示新闻"]], status: [["monitor", "显示实验状态"]], contact: [["contact", "显示联系与加入"]] };
+const slots = ["directions", "work", "people", "contact"];
+const labels: Record<string, string> = { directions: "研究方向", work: "研究与实验", people: "团队与动态", contact: "联系与加入" };
+const children: Record<string, [string, string][]> = { directions: [["researchAreas", "显示研究方向"]], work: [["featuredResearch", "显示论文成果"], ["facilities", "显示实验平台"]], people: [["members", "显示团队成员"], ["news", "显示新闻"]], contact: [["contact", "显示联系与加入"]] };
 const title = (item: Item) => item.title?.zh || item.name?.zh || item.title?.en || item.name?.en || item.id || item.slug || "未命名";
 
 function Selector({ titleText, items, selected, identity, onChange }: { titleText: string; items: Item[]; selected: string[]; identity: (item: Item) => string; onChange: (ids: string[]) => void }) {

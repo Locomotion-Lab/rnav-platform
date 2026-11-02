@@ -122,6 +122,7 @@ test("getMigrationFiles returns SQL migrations in lexical order", async () => {
       "040_normalize_person_account_names.sql",
       "041_scholarly_sync.sql",
       "042_scholarly_sync_admin_settings.sql",
+      "043_storage_provider.sql",
     ],
   );
 });

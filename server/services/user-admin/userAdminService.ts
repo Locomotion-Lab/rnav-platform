@@ -702,14 +702,13 @@ export function createUserAdminService(pool: Pick<Pool, "query" | "connect">) {
         if (target.rows[0].base_tier === "super") throw new UserAdminError("Super accounts cannot be converted to alumni", "SUPER_ACCOUNT_ALUMNI", 409);
         const assets = await client.query<{ code: string }>("SELECT code FROM lab_assets WHERE assigned_user_id=$1 AND status='in_use' FOR UPDATE", [userId]);
         if (assets.rowCount) throw new UserAdminError(`Member still has ${assets.rowCount} in-use asset(s)`, "ALUMNI_ASSETS_IN_USE", 409);
-        const procurements = await client.query<{ count: string }>("SELECT count(*)::text count FROM procurement_requests WHERE requester_id=$1 AND status IN ('submitted','approved','purchasing','purchased')", [userId]);
         await client.query("UPDATE user_profiles SET member_status='alumni',profile_content_updated_at=now(),updated_at=now(),version=version+1 WHERE user_id=$1", [userId]);
         await client.query("DELETE FROM user_permission_templates WHERE user_id=$1", [userId]);
         await client.query("DELETE FROM user_permission_overrides WHERE user_id=$1", [userId]);
         await client.query("DELETE FROM session_tokens WHERE user_id=$1", [userId]);
-        await client.query("INSERT INTO audit_logs(actor_id,action,target_type,target_id,detail) VALUES($1,'user.convert_alumni','user',$2,$3::jsonb)", [actor.id, userId, JSON.stringify({ openProcurements: Number(procurements.rows[0]?.count ?? 0) })]);
+        await client.query("INSERT INTO audit_logs(actor_id,action,target_type,target_id,detail) VALUES($1,'user.convert_alumni','user',$2,$3::jsonb)", [actor.id, userId, JSON.stringify({})]);
         await client.query("COMMIT");
-        return { openProcurements: Number(procurements.rows[0]?.count ?? 0) };
+        return { ok: true };
       } catch (error) { await client.query("ROLLBACK"); throw error; } finally { client.release(); }
     },
     async validateImportUsers(body: z.output<typeof importUsersSchema>, actor: Actor) {

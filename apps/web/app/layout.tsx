@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { RNAV_BRAND_ASSETS } from "@/lib/brand";
-import "maplibre-gl/dist/maplibre-gl.css";
 import "@/styles/globals.css";
 
 export const metadata: Metadata = {

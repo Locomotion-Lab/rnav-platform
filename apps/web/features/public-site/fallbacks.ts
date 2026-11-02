@@ -29,7 +29,6 @@ export const homeFallback = {
     "facilities",
     "members",
     "news",
-    "monitor",
     "contact",
   ],
   sectionVisibility: {
@@ -38,7 +37,6 @@ export const homeFallback = {
     facilities: true,
     members: true,
     news: true,
-    monitor: true,
     contact: true,
   },
 };

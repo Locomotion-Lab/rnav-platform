@@ -6,19 +6,14 @@ const valid = { DATABASE_URL: "postgres://rnav:rnav@127.0.0.1/rnav", SESSION_SEC
 
 test("server environment applies safe local defaults", () => {
   const env = loadEnv(valid);
-  assert.equal(env.serverMode, "unified");
-  assert.equal(env.host, "127.0.0.1"); assert.equal(env.port, 4090); assert.equal(env.monitorWsPath, "/ws"); assert.equal(env.monitorOfflineTimeoutSeconds, 60);
+  assert.equal(env.host, "127.0.0.1"); assert.equal(env.port, 4090);
 });
 
-test("server environment accepts opt-in API mode and rejects unknown modes", () => {
-  assert.equal(loadEnv({ ...valid, RNAV_SERVER_MODE: "api" }).serverMode, "api");
-  assert.throws(() => loadEnv({ ...valid, RNAV_SERVER_MODE: "cloud" }), /RNAV_SERVER_MODE/);
-});
+
 
 test("server environment rejects missing secrets and invalid ranges", () => {
   assert.throws(() => loadEnv({ DATABASE_URL: valid.DATABASE_URL }), /SESSION_SECRET/);
   assert.throws(() => loadEnv({ ...valid, PORT: "70000" }), /PORT/);
-  assert.throws(() => loadEnv({ ...valid, MONITOR_WS_PATH: "ws" }), /MONITOR_WS_PATH/);
 });
 
 test("server environment treats an empty optional COS URL as unset", () => {

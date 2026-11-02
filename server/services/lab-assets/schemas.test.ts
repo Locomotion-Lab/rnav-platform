@@ -35,8 +35,6 @@ test("asset import rows preserve bounded source values for row-level validation"
   const row = { code: "CAM-2", nameZh: "相机", nameEn: "Camera", model: "D455", deviceTypeCode: "camera", vendorSerial: "SN-2", storageLocation: "507", status: "idle", platformCode: "", descriptionZh: "" };
   assert.equal(assetImportRequestSchema.safeParse({ rows: [row], expectedRevision: "4" }).success, true);
   assert.equal(assetImportRequestSchema.safeParse({ rows: [row], expectedRevision: "4", createMissingDeviceTypes: true }).success, true);
-  assert.equal(assetImportRequestSchema.safeParse({ rows: [{ ...row, procurementRequestId: "00000000-0000-4000-8000-000000000099" }], expectedRevision: "4" }).success, true);
-  assert.equal(assetImportRequestSchema.safeParse({ rows: [{ ...row, procurementRequestId: "not-a-uuid" }], expectedRevision: "4" }).success, false);
   assert.equal(assetImportRequestSchema.safeParse({ rows: [{ ...row, status: "in_use" }], expectedRevision: "4" }).success, true);
   assert.equal(assetImportRequestSchema.safeParse({ rows: [{ ...row, status: "x".repeat(51) }], expectedRevision: "4" }).success, false);
   assert.equal(assetImportRequestSchema.safeParse({ rows: [{ ...row, status: "mounted" }], expectedRevision: "4" }).success, true);

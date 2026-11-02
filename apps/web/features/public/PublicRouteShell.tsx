@@ -8,7 +8,6 @@ const navigation = [
   { href: "/facilities", label: "实验设施" },
   { href: "/news", label: "新闻动态" },
   { href: "/contact", label: "联系我们" },
-  { href: "/monitor", label: "运行监控" },
 ] as const;
 
 type PublicRouteShellProps = {

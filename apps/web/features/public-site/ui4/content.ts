@@ -84,14 +84,12 @@ export function homeSlots(order: string[] = []) {
     directions: "directions",
     work: "work",
     people: "people",
-    status: "status",
     contact: "contact",
     researchAreas: "directions",
     featuredResearch: "work",
     facilities: "work",
     members: "people",
     news: "people",
-    monitor: "status",
   };
   return [
     ...new Set(

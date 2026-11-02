@@ -29,3 +29,8 @@ Thumbs.db
 *.swp
 *.swo
 *~
+
+# Private files and publication packages
+data/
+publications/
+*.dump

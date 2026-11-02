@@ -25,8 +25,8 @@ async function requestDashboard(authUser?: AuthenticatedUser) {
       async getDashboard(user) {
         return {
           user: { id: user.id, displayName: user.displayName, tier: "normal", roleLabels: ["普通成员"] },
-        tasks: { procurementReviews: 0, procurementPurchases: 0, labUsageReviews: 0, incompleteProfiles: 0, staleProfiles: 0 },
-          mine: { procurementOpen: 1, labUsageOpen: 0, assetsInUse: 0 },
+        tasks: { labUsageReviews: 0, incompleteProfiles: 0, staleProfiles: 0 },
+          mine: { labUsageOpen: 0, assetsInUse: 0 },
           recentItems: [],
         };
       },
@@ -50,7 +50,7 @@ test("GET /api/console/dashboard requires an authenticated account", async () =>
 test("GET /api/console/dashboard returns the role-aware aggregate", async () => {
   const response = await requestDashboard(member);
   assert.equal(response.status, 200);
-  assert.equal(((await response.json()) as { mine: { procurementOpen: number } }).mine.procurementOpen, 1);
+  assert.equal(((await response.json()) as { mine: { labUsageOpen: number } }).mine.labUsageOpen, 0);
 });
 
 test("GET /api/console/dashboard respects the forced password change gate", async () => {

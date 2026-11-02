@@ -16,12 +16,12 @@ const navigationGroups: Array<
   {
     key: "mine",
     label: "我的事务",
-    moduleKeys: ["profile", "lab-assets", "procurements"],
+    moduleKeys: ["profile", "lab-assets"],
   },
   {
     key: "showcase",
     label: "实验与展示",
-    moduleKeys: ["monitor", "site", "media"],
+    moduleKeys: ["site", "media"],
   },
   { key: "system", label: "系统管理", moduleKeys: ["members", "settings"] },
 ];

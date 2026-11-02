@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   reactStrictMode: true,
   devIndicators: false,
   images: {
@@ -17,14 +18,6 @@ const nextConfig: NextConfig = {
         pathname: "/images/**",
       },
     ],
-  },
-  async rewrites() {
-    return [
-      {
-        source: "/api/public/image",
-        destination: `${process.env.RNAV_API_INTERNAL_URL ?? "http://127.0.0.1:4090"}/api/public/image`,
-      },
-    ];
   },
   async redirects() {
     return [

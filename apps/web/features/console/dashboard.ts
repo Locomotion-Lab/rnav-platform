@@ -14,7 +14,7 @@ export const getConsoleDashboard = cache(async (): Promise<ConsoleDashboardResul
   try {
     const response = await fetch(getInternalApiUrl("/api/console/dashboard"), {
       headers: { cookie: cookieStore.toString() },
-      cache: "no-store",
+      cache: "no-store", signal: AbortSignal.timeout(15000),
     });
     if (!response.ok) {
       return { status: "error", message: `工作台服务返回了意外状态（${response.status}）。` };

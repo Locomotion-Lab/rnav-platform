@@ -11,8 +11,6 @@ const sections: Record<string, { label: string; description: string; fields: Fie
   site: { label: "站点信息", description: "网站对外展示的组织名称与备案联系信息。", fields: [{ key: "groupName", label: "课题组名称", type: "text" }, { key: "contact", label: "联系信息", type: "text" }, { key: "icp", label: "ICP备案号", type: "text" }] },
   locale: { label: "语言与时区", description: "控制平台默认语言、日期和时间的显示方式。", fields: [{ key: "defaultLanguage", label: "默认语言", type: "language" }, { key: "timezone", label: "默认时区", type: "timezone" }] },
   security: { label: "安全设置", description: "设置登录会话的有效期限。", fields: [{ key: "sessionDurationHours", label: "会话有效时间（小时）", help: "建议保持在 24–168 小时之间。", type: "number" }] },
-  monitor: { label: "监控设置", description: "控制设备多长时间未上报后显示为离线。", fields: [{ key: "offlineThresholdSeconds", label: "离线阈值（秒）", type: "number" }] },
-  procurement: { label: "采购设置", description: "控制采购编号格式与流程是否可用。", fields: [{ key: "numberPrefix", label: "采购编号前缀", type: "text" }, { key: "workflowEnabled", label: "启用采购工作流", type: "boolean" }] },
   media: { label: "媒体设置", description: "限制单个文件大小与允许上传的文件格式。", fields: [{ key: "maxUploadBytes", label: "单文件上限（字节）", help: "20 MB = 20971520 字节。", type: "number" }, { key: "allowedTypes", label: "允许的 MIME 类型", help: "使用英文逗号分隔。", type: "types" }] },
   maintenance: { label: "维护模式", description: "开启后向访问者显示维护提示。", fields: [{ key: "enabled", label: "开启维护模式", type: "boolean" }, { key: "message", label: "维护提示", type: "textarea" }] },
 };

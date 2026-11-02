@@ -1,0 +1,3961 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "RNAV business API",
+    "version": "1.0.0",
+    "description": "Session-based v1 API. Legacy /api aliases are transitional. Agent and miniapp token authentication are reserved, not implemented. Route inventory is checked against source; detailed domain validation remains in the linked Zod schemas/services."
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "paths": {
+    "/api/v1/auth/login": {
+      "post": {
+        "operationId": "post__api_v1_auth_login",
+        "parameters": [],
+        "security": [],
+        "x-validation-source": "server/routes/auth.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "operationId": "post__api_v1_auth_logout",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/auth.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/auth/session": {
+      "get": {
+        "operationId": "get__api_v1_auth_session",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/auth.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/auth/change-password": {
+      "post": {
+        "operationId": "post__api_v1_auth_change_password",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/auth.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/console/bootstrap": {
+      "get": {
+        "operationId": "get__api_v1_console_bootstrap",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/console.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/console/dashboard": {
+      "get": {
+        "operationId": "get__api_v1_console_dashboard",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/console.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/openapi.json": {
+      "get": {
+        "operationId": "get__api_v1_openapi_json",
+        "parameters": [],
+        "security": [],
+        "x-validation-source": "server/routes/contract.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/lab-assets": {
+      "get": {
+        "operationId": "get__api_v1_lab_assets",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/labAssets.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/lab-assets/page": {
+      "put": {
+        "operationId": "put__api_v1_lab_assets_page",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/labAssets.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/lab-assets/platform-types": {
+      "post": {
+        "operationId": "post__api_v1_lab_assets_platform_types",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/labAssets.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/lab-assets/device-types": {
+      "post": {
+        "operationId": "post__api_v1_lab_assets_device_types",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/labAssets.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/lab-assets/platforms": {
+      "post": {
+        "operationId": "post__api_v1_lab_assets_platforms",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/labAssets.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/lab-assets/platforms/{code}": {
+      "put": {
+        "operationId": "put__api_v1_lab_assets_platforms__code_",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/labAssets.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete__api_v1_lab_assets_platforms__code_",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/labAssets.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/lab-assets/platforms/{code}/components": {
+      "post": {
+        "operationId": "post__api_v1_lab_assets_platforms__code__components",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/labAssets.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/lab-assets/platforms/{code}/components/{assetCode}": {
+      "patch": {
+        "operationId": "patch__api_v1_lab_assets_platforms__code__components__assetCode_",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "assetCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/labAssets.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete__api_v1_lab_assets_platforms__code__components__assetCode_",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "assetCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/labAssets.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/lab-assets/platforms/{code}/components/{assetCode}/transfer": {
+      "post": {
+        "operationId": "post__api_v1_lab_assets_platforms__code__components__assetCode__transfer",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "assetCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/labAssets.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/lab-assets/platform-types/{code}/slots": {
+      "put": {
+        "operationId": "put__api_v1_lab_assets_platform_types__code__slots",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/labAssets.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/lab-assets/device-types/{code}/spec-definitions": {
+      "put": {
+        "operationId": "put__api_v1_lab_assets_device_types__code__spec_definitions",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/labAssets.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/lab-assets/assets": {
+      "post": {
+        "operationId": "post__api_v1_lab_assets_assets",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/labAssets.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/lab-assets/assets/batch": {
+      "post": {
+        "operationId": "post__api_v1_lab_assets_assets_batch",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/labAssets.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/lab-assets/assets/import/validate": {
+      "post": {
+        "operationId": "post__api_v1_lab_assets_assets_import_validate",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/labAssets.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/lab-assets/assets/import/commit": {
+      "post": {
+        "operationId": "post__api_v1_lab_assets_assets_import_commit",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/labAssets.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/lab-assets/assets/{code}": {
+      "put": {
+        "operationId": "put__api_v1_lab_assets_assets__code_",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/labAssets.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete__api_v1_lab_assets_assets__code_",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/labAssets.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/lab-assets/usage-requests": {
+      "post": {
+        "operationId": "post__api_v1_lab_assets_usage_requests",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/labAssets.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/lab-assets/usage-requests/{id}/review": {
+      "post": {
+        "operationId": "post__api_v1_lab_assets_usage_requests__id__review",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/labAssets.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/lab-assets/inventory": {
+      "get": {
+        "operationId": "get__api_v1_lab_assets_inventory",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/labAssets.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      },
+      "post": {
+        "operationId": "post__api_v1_lab_assets_inventory",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/labAssets.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/lab-assets/inventory/{id}": {
+      "get": {
+        "operationId": "get__api_v1_lab_assets_inventory__id_",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/labAssets.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/lab-assets/inventory/{id}/scan": {
+      "post": {
+        "operationId": "post__api_v1_lab_assets_inventory__id__scan",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/labAssets.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/lab-assets/inventory/{id}/complete": {
+      "post": {
+        "operationId": "post__api_v1_lab_assets_inventory__id__complete",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/labAssets.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/lab-assets/platforms/{code}/notes": {
+      "post": {
+        "operationId": "post__api_v1_lab_assets_platforms__code__notes",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/labAssets.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/lab-assets/platforms/{code}/notes/{noteId}": {
+      "delete": {
+        "operationId": "delete__api_v1_lab_assets_platforms__code__notes__noteId_",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "noteId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/labAssets.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/lab-assets/assets/{code}/notes": {
+      "post": {
+        "operationId": "post__api_v1_lab_assets_assets__code__notes",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/labAssets.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/lab-assets/assets/{code}/notes/{noteId}": {
+      "delete": {
+        "operationId": "delete__api_v1_lab_assets_assets__code__notes__noteId_",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "noteId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/labAssets.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/media": {
+      "get": {
+        "operationId": "get__api_v1_media",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/media.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/media/files/{id}": {
+      "get": {
+        "operationId": "get__api_v1_media_files__id_",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/media.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/media/{id}/references": {
+      "get": {
+        "operationId": "get__api_v1_media__id__references",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/media.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/media/upload": {
+      "post": {
+        "operationId": "post__api_v1_media_upload",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/media.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/notifications": {
+      "get": {
+        "operationId": "get__api_v1_notifications",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/notifications.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/notifications/read-all": {
+      "post": {
+        "operationId": "post__api_v1_notifications_read_all",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/notifications.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/notifications/{id}/read": {
+      "post": {
+        "operationId": "post__api_v1_notifications__id__read",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/notifications.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/permissions/catalog": {
+      "get": {
+        "operationId": "get__api_v1_permissions_catalog",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/permissions.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/permissions/users/{id}": {
+      "get": {
+        "operationId": "get__api_v1_permissions_users__id_",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/permissions.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      },
+      "put": {
+        "operationId": "put__api_v1_permissions_users__id_",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/permissions.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/profile": {
+      "get": {
+        "operationId": "get__api_v1_profile",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/profile.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      },
+      "put": {
+        "operationId": "put__api_v1_profile",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/profile.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/public/image": {
+      "get": {
+        "operationId": "get__api_v1_public_image",
+        "parameters": [],
+        "security": [],
+        "x-validation-source": "server/routes/public.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/public/team-members/{slug}": {
+      "get": {
+        "operationId": "get__api_v1_public_team_members__slug_",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [],
+        "x-validation-source": "server/routes/public.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/scholarly-sync/me": {
+      "get": {
+        "operationId": "get__api_v1_scholarly_sync_me",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/scholarly-sync.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patch__api_v1_scholarly_sync_me",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/scholarly-sync.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/scholarly-sync/me/resolve": {
+      "post": {
+        "operationId": "post__api_v1_scholarly_sync_me_resolve",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/scholarly-sync.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/scholarly-sync/me/verify-author": {
+      "post": {
+        "operationId": "post__api_v1_scholarly_sync_me_verify_author",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/scholarly-sync.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/scholarly-sync/me/sync": {
+      "post": {
+        "operationId": "post__api_v1_scholarly_sync_me_sync",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/scholarly-sync.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/scholarly-sync/members/{userId}": {
+      "get": {
+        "operationId": "get__api_v1_scholarly_sync_members__userId_",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/scholarly-sync.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patch__api_v1_scholarly_sync_members__userId_",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/scholarly-sync.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/scholarly-sync/members/{userId}/resolve": {
+      "post": {
+        "operationId": "post__api_v1_scholarly_sync_members__userId__resolve",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/scholarly-sync.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/scholarly-sync/members/{userId}/verify-author": {
+      "post": {
+        "operationId": "post__api_v1_scholarly_sync_members__userId__verify_author",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/scholarly-sync.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/scholarly-sync/members/{userId}/sync": {
+      "post": {
+        "operationId": "post__api_v1_scholarly_sync_members__userId__sync",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/scholarly-sync.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/scholarly-sync/candidates": {
+      "get": {
+        "operationId": "get__api_v1_scholarly_sync_candidates",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/scholarly-sync.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/scholarly-sync/works/{id}/accept": {
+      "post": {
+        "operationId": "post__api_v1_scholarly_sync_works__id__accept",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/scholarly-sync.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/scholarly-sync/works/{id}/merge": {
+      "post": {
+        "operationId": "post__api_v1_scholarly_sync_works__id__merge",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/scholarly-sync.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/scholarly-sync/works/{id}/ignore": {
+      "post": {
+        "operationId": "post__api_v1_scholarly_sync_works__id__ignore",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/scholarly-sync.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/scholarly-sync/works/{id}/restore": {
+      "post": {
+        "operationId": "post__api_v1_scholarly_sync_works__id__restore",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/scholarly-sync.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/scholarly-sync/bulk/plan": {
+      "post": {
+        "operationId": "post__api_v1_scholarly_sync_bulk_plan",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/scholarly-sync.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/scholarly-sync/bulk/accept": {
+      "post": {
+        "operationId": "post__api_v1_scholarly_sync_bulk_accept",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/scholarly-sync.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/scholarly-sync/bulk/ignore": {
+      "post": {
+        "operationId": "post__api_v1_scholarly_sync_bulk_ignore",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/scholarly-sync.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/scholarly-sync/bulk/merge": {
+      "post": {
+        "operationId": "post__api_v1_scholarly_sync_bulk_merge",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/scholarly-sync.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/scholarly-sync/research-items/{id}": {
+      "get": {
+        "operationId": "get__api_v1_scholarly_sync_research_items__id_",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/scholarly-sync.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/scholarly-sync/research-items/{id}/resolve-source": {
+      "post": {
+        "operationId": "post__api_v1_scholarly_sync_research_items__id__resolve_source",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/scholarly-sync.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/scholarly-sync/research-items/{id}/managed-fields": {
+      "patch": {
+        "operationId": "patch__api_v1_scholarly_sync_research_items__id__managed_fields",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/scholarly-sync.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/scholarly-sync/status": {
+      "get": {
+        "operationId": "get__api_v1_scholarly_sync_status",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/scholarly-sync.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/scholarly-sync/providers/openalex/check": {
+      "post": {
+        "operationId": "post__api_v1_scholarly_sync_providers_openalex_check",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/scholarly-sync.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/scholarly-sync/sync-all": {
+      "post": {
+        "operationId": "post__api_v1_scholarly_sync_sync_all",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/scholarly-sync.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/scholarly-sync/runs": {
+      "get": {
+        "operationId": "get__api_v1_scholarly_sync_runs",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/scholarly-sync.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/settings": {
+      "get": {
+        "operationId": "get__api_v1_settings",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/settings.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/settings/scholarly-sync": {
+      "get": {
+        "operationId": "get__api_v1_settings_scholarly_sync",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/settings.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      },
+      "put": {
+        "operationId": "put__api_v1_settings_scholarly_sync",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/settings.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/settings/scholarly-sync/openalex/check": {
+      "post": {
+        "operationId": "post__api_v1_settings_scholarly_sync_openalex_check",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/settings.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/settings/scholarly-sync/members/{userId}": {
+      "patch": {
+        "operationId": "patch__api_v1_settings_scholarly_sync_members__userId_",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/settings.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/settings/scholarly-sync/members/bulk": {
+      "post": {
+        "operationId": "post__api_v1_settings_scholarly_sync_members_bulk",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/settings.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/settings/{key}": {
+      "put": {
+        "operationId": "put__api_v1_settings__key_",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/settings.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/site-admin/snapshot": {
+      "get": {
+        "operationId": "get__api_v1_site_admin_snapshot",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/site-admin.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/site-admin/pages/{pageKey}": {
+      "put": {
+        "operationId": "put__api_v1_site_admin_pages__pageKey_",
+        "parameters": [
+          {
+            "name": "pageKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/site-admin.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/site-admin/research-items": {
+      "put": {
+        "operationId": "put__api_v1_site_admin_research_items",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/site-admin.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/site-admin/news-items": {
+      "put": {
+        "operationId": "put__api_v1_site_admin_news_items",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/site-admin.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/site-admin/facility-items": {
+      "put": {
+        "operationId": "put__api_v1_site_admin_facility_items",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/site-admin.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/site-admin/contact-items": {
+      "put": {
+        "operationId": "put__api_v1_site_admin_contact_items",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/site-admin.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/users": {
+      "get": {
+        "operationId": "get__api_v1_users",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/users.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      },
+      "post": {
+        "operationId": "post__api_v1_users",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/users.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/users/{id}/audit": {
+      "get": {
+        "operationId": "get__api_v1_users__id__audit",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/users.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/users/{id}/deletion-check": {
+      "get": {
+        "operationId": "get__api_v1_users__id__deletion_check",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/users.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/users/{id}/profile": {
+      "get": {
+        "operationId": "get__api_v1_users__id__profile",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/users.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      },
+      "put": {
+        "operationId": "put__api_v1_users__id__profile",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/users.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/users/{id}/account-email": {
+      "put": {
+        "operationId": "put__api_v1_users__id__account_email",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/users.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/users/{id}/account-kind": {
+      "put": {
+        "operationId": "put__api_v1_users__id__account_kind",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/users.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/users/{id}/convert-alumni": {
+      "post": {
+        "operationId": "post__api_v1_users__id__convert_alumni",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/users.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/users/import": {
+      "post": {
+        "operationId": "post__api_v1_users_import",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/users.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/users/import/validate": {
+      "post": {
+        "operationId": "post__api_v1_users_import_validate",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/users.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/users/{id}/status": {
+      "put": {
+        "operationId": "put__api_v1_users__id__status",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/users.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/users/{id}/tier": {
+      "put": {
+        "operationId": "put__api_v1_users__id__tier",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/users.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/users/{id}/public-profile": {
+      "put": {
+        "operationId": "put__api_v1_users__id__public_profile",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/users.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/users/{id}/reset-password": {
+      "post": {
+        "operationId": "post__api_v1_users__id__reset_password",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/users.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/users/{id}/revoke-sessions": {
+      "post": {
+        "operationId": "post__api_v1_users__id__revoke_sessions",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/users.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/users/{id}": {
+      "delete": {
+        "operationId": "delete__api_v1_users__id_",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/users.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/public/bootstrap": {
+      "get": {
+        "operationId": "get__api_v1_public_bootstrap",
+        "parameters": [],
+        "security": [],
+        "x-validation-source": "server/services/public-site/service.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/public/home": {
+      "get": {
+        "operationId": "get__api_v1_public_home",
+        "parameters": [],
+        "security": [],
+        "x-validation-source": "server/services/public-site/service.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/public/directions": {
+      "get": {
+        "operationId": "get__api_v1_public_directions",
+        "parameters": [],
+        "security": [],
+        "x-validation-source": "server/services/public-site/service.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/public/homepage": {
+      "get": {
+        "operationId": "get__api_v1_public_homepage",
+        "parameters": [],
+        "security": [],
+        "x-validation-source": "server/services/public-site/service.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/public/research": {
+      "get": {
+        "operationId": "get__api_v1_public_research",
+        "parameters": [],
+        "security": [],
+        "x-validation-source": "server/services/public-site/service.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/public/news": {
+      "get": {
+        "operationId": "get__api_v1_public_news",
+        "parameters": [],
+        "security": [],
+        "x-validation-source": "server/services/public-site/service.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/public/team": {
+      "get": {
+        "operationId": "get__api_v1_public_team",
+        "parameters": [],
+        "security": [],
+        "x-validation-source": "server/services/public-site/service.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/public/facilities": {
+      "get": {
+        "operationId": "get__api_v1_public_facilities",
+        "parameters": [],
+        "security": [],
+        "x-validation-source": "server/services/public-site/service.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/public/contact": {
+      "get": {
+        "operationId": "get__api_v1_public_contact",
+        "parameters": [],
+        "security": [],
+        "x-validation-source": "server/services/public-site/service.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/media/{id}/recycle": {
+      "post": {
+        "operationId": "post__api_v1_media__id__recycle",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/media.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/media/{id}/restore": {
+      "post": {
+        "operationId": "post__api_v1_media__id__restore",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/media.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/media/{id}/delete": {
+      "post": {
+        "operationId": "post__api_v1_media__id__delete",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/media.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/health": {
+      "get": {
+        "operationId": "get__api_v1_health",
+        "parameters": [],
+        "security": [],
+        "x-validation-source": "server/app.ts",
+        "responses": {
+          "400": {
+            "description": "Validation failed"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Permission, password-change or same-origin restriction"
+          },
+          "409": {
+            "description": "Version conflict or referenced historical record"
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "sessionCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "rnav_session"
+      }
+    }
+  }
+}

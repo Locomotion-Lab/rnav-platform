@@ -314,14 +314,13 @@ export const defaults = {
     featuredResearchIds: [],
     featuredFacilityIds: [],
     featuredMemberSlugs: [],
-    compositionOrder: ["directions", "work", "people", "status", "contact"],
+    compositionOrder: ["directions", "work", "people", "contact"],
     sectionOrder: [
       "researchAreas",
       "featuredResearch",
       "facilities",
       "members",
       "news",
-      "monitor",
       "contact",
     ],
     sectionVisibility: {
@@ -330,7 +329,6 @@ export const defaults = {
       facilities: true,
       members: true,
       news: true,
-      monitor: true,
       contact: true,
     },
     featuredPublication: {

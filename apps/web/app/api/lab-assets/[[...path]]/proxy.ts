@@ -1,3 +1,4 @@
+import { getRequestOrigin } from "../../../../lib/server/request-origin.ts";
 const readMethods = new Set(["GET", "HEAD"]);
 
 function normalizedOrigin(value: string) {
@@ -18,7 +19,7 @@ export function validateIncomingOrigin(request: Request): Response | null {
   if (origin.includes(",")) return Response.json({ error: "Forbidden origin" }, { status: 403 });
 
   try {
-    if (normalizedOrigin(origin) !== new URL(request.url).origin) {
+    if (normalizedOrigin(origin) !== getRequestOrigin(request).origin) {
       return Response.json({ error: "Forbidden origin" }, { status: 403 });
     }
   } catch {
@@ -28,7 +29,7 @@ export function validateIncomingOrigin(request: Request): Response | null {
 }
 
 export function createUpstreamHeaders(request: Request) {
-  const incomingUrl = new URL(request.url);
+  const incomingUrl = getRequestOrigin(request);
   const headers = new Headers();
   const cookie = request.headers.get("cookie");
   const accept = request.headers.get("accept");

@@ -14,7 +14,7 @@ export async function POST(request: Request) {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(body),
-      cache: "no-store",
+      cache: "no-store", signal: AbortSignal.timeout(15000),
     });
     const responseBody = await upstream.text();
     const response = new NextResponse(responseBody || null, {

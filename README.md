@@ -1,75 +1,45 @@
-# RNAV Unified Platform
+# RNAV Platform
 
-RNAV 课题组统一网站与内部业务平台。项目将公开网站、统一账号、实验室资产、机器人监控和零件采购合并为一个代码库、一个 PostgreSQL 数据库和一个 Node 服务。
+课题组官网与内部成员、设备和文件管理平台。继续使用 Monorepo；Web 与业务后端独立运行。
 
-## Routes
+| 逻辑模块 | 目录 | 运行位置 |
+| --- | --- | --- |
+| rnav-web | apps/web | 腾讯云：Next 官网、/console、/ai、同源 API 网关及公开快照 reader |
+| rnav-backend | server | Mac mini：Express REST v1、账号/权限/成员/设备/文件、PostgreSQL |
+| rnav-agent | 后续独立服务 | Mac mini：Agent/RAG 经最小权限 API 访问业务，不直连主库 |
+| rnav-miniapp | 暂不开发 | 未来共享后端 API |
 
-- Public: `/`, `/research`, `/team`, `/news`, `/facilities`, `/contact`, `/monitor`
-- Internal: `/console`, `/console/lab-assets`, `/console/monitor`, `/console/procurements`
-- API: `/api/auth`, `/api/public`, `/api/console`, `/api/lab-assets`, `/api/monitor`, `/api/procurements`, `/api/scholarly-sync`
-- Realtime: `/ws` for public monitor data and `/ws/console` for device readers
+Monitor 和 Procurement 的运行代码已移除；历史表、文件、已应用迁移和跨域引用保护保留。开发分支尚未部署到生产，线上仍运行原版本。
 
-`/admin` is retired and redirects to `/console/site`. The legacy `/lab-assets` route redirects to `/console/lab-assets`.
-
-## Accounts
-
-- `normal`: base member permissions, including own profile, internal asset reading, and own procurement requests.
-- `plus`: derived when a normal account receives one or more advanced permission attributes.
-- `super`: receives every known permission.
-
-Advanced permissions remain granular, for example `monitor.devices.write`, `procurements.review`, and `site.members.write`.
-
-## Development
+## 开发与验证
 
 ```bash
-npm install
+npm ci
 cp .env.example .env
+# 填写本地数据库连接和独立随机秘密，不使用生产凭证。
 npm run db:migrate
 npm run dev:server
+# 另一个终端
+npm run dev:web
 ```
 
-The unified server embeds Next.js, Express APIs, and monitor WebSockets on `http://127.0.0.1:4090`.
-
-## Verification
+Express 默认为 `127.0.0.1:4090`，Next 为 `3000`。不再存在 unified 启动或 Next fallback。`RNAV_API_INTERNAL_URL` 配置独立业务后端；云端 Web 设置 `RNAV_PUBLIC_SOURCE=snapshot`、`RNAV_PUBLIC_ROOT` 后完全从本地发布版本读取公开数据和媒体。
 
 ```bash
+npm run build:backend
+npm run build:web
 npm test
 npm run lint
-npm run build
+npm run api:check
 ```
 
-## Legacy Migration
+## 架构与操作文档
 
-Source databases are read-only during export. Never import into production before staging verification.
+- [最新目标、阶段计划与历史归档边界](docs/architecture/target-2026-11-02.md)
+- [独立 Compose、发布、备份恢复与待审批切换方案](docs/architecture/modular-operations.md)
+- [API v1 契约及当前覆盖边界](docs/api/README.md)
+- [本阶段改动及验证记录](docs/architecture/phase2-validation.md)
+- [Phase 1 实际环境审计（历史）](docs/architecture/audit-2026-11-01.md)
+- [论文同步操作](docs/scholarly-sync-operations.md)
 
-```bash
-npm run db:export-legacy -- \
-  --website-db "$LEGACY_WEBSITE_DATABASE_URL" \
-  --monitor-db "$LEGACY_MONITOR_DATABASE_URL" \
-  --out backups/production-export
-
-npm run db:migrate-legacy -- \
-  --in backups/production-export \
-  --username-map scripts/db/username-map.json
-
-npm run db:import-legacy -- \
-  --in backups/production-export/transformed \
-  --target-db "$DATABASE_URL" \
-  --dry-run
-
-npm run db:verify-migration -- \
-  --in backups/production-export/transformed \
-  --target-db "$DATABASE_URL"
-```
-
-完整的 staging 演练、生产数据导出、账号准备、systemd 部署、nginx 切换、验收与回滚步骤见 [`docs/cutover-runbook.md`](docs/cutover-runbook.md)。
-
-## Scholarly Sync
-
-OpenAlex 负责论文发现，Crossref 负责 DOI 元数据校准，公开站仍只读取 `research_items`。配置、手动同步、定时任务与回滚说明见 [`docs/scholarly-sync-operations.md`](docs/scholarly-sync-operations.md)。
-
-## Hybrid Architecture (local phase 1)
-
-2026-11-01 实际环境审计、目标架构、风险与分阶段迁移方案见 [架构审计](docs/architecture/audit-2026-11-01.md)。
-
-`RNAV_SERVER_MODE=api` 可独立启动现有 Express API 和监控处理；默认 `unified` 保留官网一体化启动。Mac 隔离空库 Compose 和备份恢复步骤见 [本地演练](docs/architecture/mac-compose.md)。这些配置尚未用于生产切换。
+Mac 配置见 compose.mac.yaml；独立云端 Web 配置见 compose.web.yaml。数据库、内部文件、发布包和秘密不提交 Git。生产写入、重启、部署、历史数据或 COS 清理必须另行明确批准。

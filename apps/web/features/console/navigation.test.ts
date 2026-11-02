@@ -43,7 +43,7 @@ test("groups only available modules into task-oriented navigation sections", () 
       keys: group.modules.map((module) => module.key),
     })),
     [
-      { label: "我的事务", keys: ["profile", "procurements"] },
+      { label: "我的事务", keys: ["profile"] },
       { label: "实验与展示", keys: ["site"] },
       { label: "系统管理", keys: ["members"] },
     ],

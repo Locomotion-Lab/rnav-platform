@@ -74,6 +74,8 @@ async function recycleUnreferencedAvatar(client: PoolClient, assetId: string | n
       AND NOT EXISTS (SELECT 1 FROM research_items WHERE image_asset_id=$1 OR pdf_asset_id=$1)
       AND NOT EXISTS (SELECT 1 FROM news_items WHERE image_asset_id=$1)
       AND NOT EXISTS (SELECT 1 FROM facility_items WHERE image_asset_id=$1)
+      AND NOT EXISTS (SELECT 1 FROM lab_asset_public_profiles WHERE image_asset_id=$1)
+      AND NOT EXISTS (SELECT 1 FROM lab_platform_public_profiles WHERE image_asset_id=$1)
       AND NOT EXISTS (SELECT 1 FROM procurement_catalog_items WHERE image_asset_id=$1)
       AND NOT EXISTS (SELECT 1 FROM page_content WHERE content_json::text LIKE '%' || $1::text || '%')`, [assetId]);
 }

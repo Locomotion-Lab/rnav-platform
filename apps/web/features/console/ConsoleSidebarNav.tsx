@@ -11,7 +11,7 @@ import { ConsoleIcon, type ConsoleIconName } from "@/features/console/ui/Console
 
 type ConsoleSidebarNavProps = { modules: ConsoleNavigationModule[] };
 const linkClassName = "flex min-h-9 items-center gap-3 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition-colors";
-const icons: Record<string, ConsoleIconName> = { profile: "user", "lab-assets": "asset", procurements: "cart", monitor: "monitor", site: "site", media: "media", members: "users", settings: "settings" };
+const icons: Record<string, ConsoleIconName> = { profile: "user", "lab-assets": "asset", site: "site", media: "media", members: "users", settings: "settings" };
 
 export function ConsoleSidebarNav({ modules }: ConsoleSidebarNavProps) {
   const pathname = usePathname();
@@ -35,7 +35,7 @@ export function ConsoleSidebarNav({ modules }: ConsoleSidebarNavProps) {
               return (
                 <Link aria-current={isActive ? "page" : undefined} className={`${linkClassName} ${isActive ? "bg-cyan-50 text-cyan-900" : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"}`} href={link.href} key={link.key}>
                   <ConsoleIcon className="size-4" name={icons[link.key] || "site"}/>
-                  {link.label === "采购申请" ? "采购事务" : link.label === "用户管理" ? "成员管理" : link.label}
+                  {link.label === "用户管理" ? "成员管理" : link.label}
                 </Link>
               );
             })}

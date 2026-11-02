@@ -15,3 +15,6 @@ scripts/db/username-map.json
 **/*.pem
 **/*.key
 **/.DS_Store
+
+data
+publications

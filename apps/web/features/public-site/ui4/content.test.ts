@@ -12,13 +12,12 @@ import { publicNavigation } from "./navigation.ts";
 test("4.1 composition pairs old CMS sections without duplication", () => {
   assert.deepEqual(
     homeSlots(["news", "facilities", "members", "featuredResearch", "unknown"]),
-    ["people", "work", "directions", "status", "contact"],
+    ["people", "work", "directions", "contact"],
   );
   assert.deepEqual(homeSlots(), [
     "directions",
     "work",
     "people",
-    "status",
     "contact",
   ]);
   assert.deepEqual(homeSlots(["people", "directions", "contact", "work"]), [
@@ -26,7 +25,6 @@ test("4.1 composition pairs old CMS sections without duplication", () => {
     "directions",
     "contact",
     "work",
-    "status",
   ]);
 });
 test("featured selections preserve ID order and never invent missing records", () => {

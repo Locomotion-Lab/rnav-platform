@@ -49,7 +49,7 @@ export const getConsoleBootstrap = cache(async (): Promise<ConsoleBootstrapResul
   try {
     const response = await fetch(getInternalApiUrl("/api/console/bootstrap"), {
       headers: { cookie: cookieStore.toString() },
-      cache: "no-store",
+      cache: "no-store", signal: AbortSignal.timeout(15000),
     });
 
     if (response.status === 401) {

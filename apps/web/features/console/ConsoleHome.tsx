@@ -9,14 +9,14 @@ import { ConsoleStatusBadge } from "@/features/console/ui/ConsoleStatusBadge";
 import { ConsoleIcon } from "@/features/console/ui/ConsoleIcon";
 
 const statusLabels: Record<string, string> = {
-  submitted: "待审批", approved: "已批准", purchasing: "采购中", purchased: "待收货",
-  received: "已到货", closed: "已完成", rejected: "已驳回", cancelled: "已取消", pending: "待处理",
+  approved: "已批准",
+  closed: "已完成", rejected: "已驳回", cancelled: "已取消", pending: "待处理",
 };
 
 function taskTone(status: string) {
   if (["rejected", "cancelled"].includes(status)) return "danger" as const;
-  if (["closed", "received"].includes(status)) return "success" as const;
-  if (["submitted", "pending", "purchasing"].includes(status)) return "warning" as const;
+  if (["closed", "approved"].includes(status)) return "success" as const;
+  if (["pending"].includes(status)) return "warning" as const;
   return "info" as const;
 }
 
@@ -37,20 +37,15 @@ function SectionHeading({ id, title, description }: { id: string; title: string;
 }
 
 function DashboardContent({ dashboard, permissions }: { dashboard: ConsoleDashboard; permissions: string[] }) {
-  const canReview = permissions.includes("procurements.review");
-  const canPurchase = permissions.includes("procurements.purchase");
   const canReviewUsage = permissions.includes("lab_assets.write");
   const canManageMembers=permissions.includes("site.members.write");
-  const taskCount = dashboard.tasks.procurementReviews + dashboard.tasks.procurementPurchases + dashboard.tasks.labUsageReviews + dashboard.tasks.incompleteProfiles + dashboard.tasks.staleProfiles;
+  const taskCount = dashboard.tasks.labUsageReviews + dashboard.tasks.incompleteProfiles + dashboard.tasks.staleProfiles;
   const taskCards = [
-    canReview ? { count: dashboard.tasks.procurementReviews, href: "/console/procurements?view=review", label: "待审核采购", detail: "查看申请理由与采购清单" } : null,
-    canPurchase ? { count: dashboard.tasks.procurementPurchases, href: "/console/procurements?view=purchase", label: "待采购申请", detail: "继续处理已批准采购" } : null,
     canReviewUsage ? { count: dashboard.tasks.labUsageReviews, href: "/console/lab-assets?view=requests", label: "设备申请审批", detail: "处理成员的设备使用申请" } : null,
     canManageMembers ? { count: dashboard.tasks.incompleteProfiles, href: "/console/members?profile=incomplete", label: "资料待完善", detail: "补齐成员官网展示资料" } : null,
     canManageMembers ? { count: dashboard.tasks.staleProfiles, href: "/console/members?profile=stale", label: "年度资料复核", detail: "超过一年未更新的成员资料" } : null,
   ].filter((item): item is NonNullable<typeof item> => Boolean(item));
   const quickActions = [
-    permissions.includes("procurements.create") ? { href: "/console/procurements?view=create", label: "新建采购" } : null,
     permissions.includes("lab_assets.read") ? { href: "/console/lab-assets?view=assets", label: "申请设备" } : null,
     permissions.includes("lab_assets.read") ? { href: "/console/lab-assets", label: "查看资产" } : null,
     permissions.includes("profile.write_own") ? { href: "/console/profile", label: "编辑资料" } : null,
@@ -79,8 +74,7 @@ function DashboardContent({ dashboard, permissions }: { dashboard: ConsoleDashbo
 
       <section aria-labelledby="dashboard-mine" className="mt-8">
         <SectionHeading description="与你直接相关、仍在进行中的申请与设备。" id="dashboard-mine" title="我的事务" />
-        <div className="mt-4 grid gap-3 sm:grid-cols-3">
-          <MetricLink count={dashboard.mine.procurementOpen} detail="进行中的采购申请" href="/console/procurements?scope=mine" label="我的采购" />
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <MetricLink count={dashboard.mine.labUsageOpen} detail="等待处理的设备申请" href="/console/lab-assets?view=requests" label="设备申请" />
           <MetricLink count={dashboard.mine.assetsInUse} detail="当前分配给我的设备" href="/console/lab-assets?view=assets" label="正在使用" />
         </div>
@@ -98,20 +92,20 @@ function DashboardContent({ dashboard, permissions }: { dashboard: ConsoleDashbo
       </section>
 
       <section aria-labelledby="dashboard-recent" className="mt-8">
-        <SectionHeading description="你可查看的采购与设备申请更新。" id="dashboard-recent" title="最近动态" />
+        <SectionHeading description="你可查看的设备申请更新。" id="dashboard-recent" title="最近动态" />
         {dashboard.recentItems.length ? (
           <div className="mt-4 divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
             {dashboard.recentItems.map((item) => (
               <Link className="flex items-center justify-between gap-4 px-4 py-3 transition-colors hover:bg-slate-50" href={item.href} key={`${item.type}-${item.id}`}>
                 <span className="min-w-0">
                   <span className="block truncate font-semibold text-slate-900">{item.title}</span>
-                  <span className="mt-1 block text-xs text-slate-500">{item.type === "procurement" ? "采购事务" : "设备使用"} · {new Intl.DateTimeFormat("zh-CN", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(item.updatedAt))}</span>
+                  <span className="mt-1 block text-xs text-slate-500">设备使用 · {new Intl.DateTimeFormat("zh-CN", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(item.updatedAt))}</span>
                 </span>
                 <ConsoleStatusBadge tone={taskTone(item.status)}>{statusLabels[item.status] ?? item.status}</ConsoleStatusBadge>
               </Link>
             ))}
           </div>
-        ) : <div className="mt-5"><ConsoleEmptyState description="提交采购或设备使用申请后，最新进度会显示在这里。" title="还没有最近动态" /></div>}
+        ) : <div className="mt-5"><ConsoleEmptyState description="提交设备使用申请后，最新进度会显示在这里。" title="还没有最近动态" /></div>}
       </section>
     </>
   );

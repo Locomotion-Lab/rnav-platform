@@ -1,3 +1,4 @@
+import { proxyResponse } from "@/lib/server/proxy-response";
 import { NextResponse } from "next/server";
 import { getInternalApiUrl } from "@/lib/server/api";
 import { createUpstreamHeaders, validateIncomingOrigin } from "./proxy";
@@ -16,12 +17,9 @@ async function proxy(request: Request, context: { params: Promise<{ path?: strin
       method: request.method,
       headers: createUpstreamHeaders(request),
       body: ["GET", "HEAD"].includes(request.method.toUpperCase()) ? undefined : await request.arrayBuffer(),
-      cache: "no-store",
+      cache: "no-store", signal: AbortSignal.timeout(15000),
     });
-    return new NextResponse(await upstream.arrayBuffer(), {
-      status: upstream.status,
-      headers: { "content-type": upstream.headers.get("content-type") ?? "application/json" },
-    });
+    return proxyResponse(upstream,request.method);
   } catch {
     return NextResponse.json({ error: "Lab assets service unavailable" }, { status: 502 });
   }

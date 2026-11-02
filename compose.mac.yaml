@@ -4,14 +4,18 @@ x-api: &api
   build:
     context: .
     dockerfile: deploy/docker/Dockerfile.api
-  image: rnav-api:phase1
+  image: rnav-backend:phase2
   env_file: .env.mac
   environment:
     NODE_ENV: production
-    RNAV_SERVER_MODE: api
+    STORAGE_PROVIDER: local
+    STORAGE_ROOT: /data/private-media
     HOST: 0.0.0.0
     PORT: 4090
     DATABASE_URL: postgres://rnav:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env.mac}@db:5432/rnav_platform
+  volumes:
+    - private_media:/data/private-media
+    - publications:/data/publications
   init: true
   networks: [internal]
   logging:
@@ -74,3 +78,5 @@ networks:
 
 volumes:
   postgres_data:
+  private_media:
+  publications:

@@ -13,19 +13,10 @@ export const knownPermissionKeys = [
   "profile.read_own",
   "profile.write_own",
   "lab_assets.read",
-  "procurements.create",
-  "procurements.read_own",
   "site.content.write",
   "site.members.write",
   "site.media.write",
-  "monitor.devices.read",
-  "monitor.devices.write",
-  "monitor.settings.write",
   "lab_assets.write",
-  "procurements.read_all",
-  "procurements.review",
-  "procurements.purchase",
-  "procurements.close",
   "users.read",
   "users.write",
   "permissions.write",
@@ -37,8 +28,6 @@ export const basePermissionKeys = [
   "profile.read_own",
   "profile.write_own",
   "lab_assets.read",
-  "procurements.create",
-  "procurements.read_own"
 ] as const;
 
 const basePermissions = new Set<string>(basePermissionKeys);
@@ -91,16 +80,12 @@ export function resolvePermissions({
     effective.delete(key);
     sources[key] = [{ type: "revoke" }];
   }
-  if (["procurements.review", "procurements.purchase", "procurements.close"].some((key) => effective.has(key))) {
-    effective.add("procurements.read_all");
-    sources["procurements.read_all"] ??= [{ type: "grant" }];
-  }
   return { permissions: [...effective], sources };
 }
 
 export function restrictAlumniPermissions(permissions: string[], baseTier: BaseTier) {
   if (baseTier === "super") return permissions;
-  const internalMemberPermissions = new Set(["lab_assets.read", "procurements.create", "procurements.read_own"]);
+  const internalMemberPermissions = new Set(["lab_assets.read"]);
   return permissions.filter((permission) => !internalMemberPermissions.has(permission));
 }
 
@@ -116,29 +101,6 @@ const moduleDefinitions: ConsoleModule[] = [
     href: "/console/lab-assets",
     label: "实验室资产",
     requiredAny: ["lab_assets.read", "lab_assets.write"]
-  },
-  {
-    key: "procurements",
-    href: "/console/procurements",
-    label: "采购申请",
-    requiredAny: [
-      "procurements.create",
-      "procurements.read_own",
-      "procurements.read_all",
-      "procurements.review",
-      "procurements.purchase",
-      "procurements.close"
-    ]
-  },
-  {
-    key: "monitor",
-    href: "/console/monitor",
-    label: "监控管理",
-    requiredAny: [
-      "monitor.devices.read",
-      "monitor.devices.write",
-      "monitor.settings.write"
-    ]
   },
   {
     key: "site",
@@ -180,7 +142,7 @@ export function deriveDisplayTier(
     return "super";
   }
 
-  return permissions.some((permission) => !basePermissions.has(permission))
+  return permissions.some((permission) => knownPermissionKeys.includes(permission as never) && !basePermissions.has(permission))
     ? "plus"
     : "normal";
 }

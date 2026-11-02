@@ -1,0 +1,22 @@
+name: rnav-web-dev
+services:
+  web:
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile.web
+    image: rnav-web:phase2
+    environment:
+      RNAV_WEB_ORIGIN: ${RNAV_WEB_ORIGIN:-http://127.0.0.1:13000}
+      RNAV_PUBLIC_SOURCE: snapshot
+      RNAV_PUBLIC_ROOT: /data/public
+      # Set this to the authenticated private gateway for production, never a public DB address.
+      RNAV_API_INTERNAL_URL: ${RNAV_API_INTERNAL_URL:-http://host.docker.internal:14090}
+    volumes:
+      - ${RNAV_PUBLIC_HOST_ROOT:-./data/public}:/data/public:ro
+    ports:
+      - "127.0.0.1:${RNAV_WEB_PORT:-13000}:3000"
+    restart: unless-stopped
+    init: true
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }

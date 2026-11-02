@@ -122,7 +122,6 @@ export const assetImportRowSchema = z.object({
   status: text(50),
   platformCode: text(191),
   descriptionZh: text(5_000),
-  procurementRequestId: z.string().uuid().optional(),
 }).strict();
 export const assetImportRequestSchema = z.object({ rows: z.array(assetImportRowSchema).min(1).max(1_000), expectedRevision: revisionSchema, createMissingDeviceTypes: z.boolean().optional() }).strict();
 export const inventoryCreateSchema = z.object({ name: text(200).min(1), assetCodes: z.array(codeSchema).max(5_000).default([]) }).strict();

@@ -8,20 +8,17 @@ export type ConsoleDashboard = {
     roleLabels: string[];
   };
   tasks: {
-    procurementReviews: number;
-    procurementPurchases: number;
     labUsageReviews: number;
     incompleteProfiles: number;
     staleProfiles: number;
   };
   mine: {
-    procurementOpen: number;
     labUsageOpen: number;
     assetsInUse: number;
   };
   recentItems: Array<{
     id: string;
-    type: "procurement" | "lab_usage";
+    type: "lab_usage";
     title: string;
     status: string;
     href: string;
@@ -67,14 +64,11 @@ export function normalizeConsoleDashboard(value: unknown): ConsoleDashboard {
       roleLabels: user.roleLabels,
     },
     tasks: {
-      procurementReviews: count(tasks.procurementReviews),
-      procurementPurchases: count(tasks.procurementPurchases),
       labUsageReviews: count(tasks.labUsageReviews),
       incompleteProfiles: count(tasks.incompleteProfiles ?? 0),
       staleProfiles: count(tasks.staleProfiles ?? 0),
     },
     mine: {
-      procurementOpen: count(mine.procurementOpen),
       labUsageOpen: count(mine.labUsageOpen),
       assetsInUse: count(mine.assetsInUse),
     },
@@ -82,7 +76,7 @@ export function normalizeConsoleDashboard(value: unknown): ConsoleDashboard {
       const item = object(value);
       if (
         typeof item.id !== "string" ||
-        !["procurement", "lab_usage"].includes(String(item.type)) ||
+        item.type !== "lab_usage" ||
         typeof item.title !== "string" ||
         typeof item.status !== "string" ||
         typeof item.href !== "string" ||

@@ -19,14 +19,14 @@ test("deriveDisplayTier returns plus when a normal user has an advanced permissi
 
 test("deriveDisplayTier returns normal when a normal user has only base permissions", () => {
   assert.equal(
-    deriveDisplayTier("normal", ["console.access", "procurements.create"]),
+    deriveDisplayTier("normal", ["console.access", "lab_assets.read"]),
     "normal"
   );
 });
 
-test("getConsoleModules returns procurement for normal members", () => {
+test("getConsoleModules returns assets for normal members", () => {
   const modules = getConsoleModules([]);
-  assert.ok(modules.some((module) => module.key === "procurements"));
+  assert.ok(modules.some((module) => module.key === "lab-assets"));
 });
 
 test("normal base permissions are immutable and reported as base sources", () => {
@@ -46,17 +46,17 @@ test("templates, grants, and revokes resolve in the approved order", () => {
       { permissionKey: "site.content.write", templateKey: "site-editor" },
       { permissionKey: "site.media.write", templateKey: "site-editor" }
     ],
-    explicitGrants: ["monitor.devices.read"],
+    explicitGrants: ["lab_assets.write"],
     explicitRevokes: ["site.media.write"]
   });
 
   assert.ok(result.permissions.includes("site.content.write"));
-  assert.ok(result.permissions.includes("monitor.devices.read"));
+  assert.ok(result.permissions.includes("lab_assets.write"));
   assert.equal(result.permissions.includes("site.media.write"), false);
   assert.deepEqual(result.sources["site.content.write"], [
     { type: "template", templateKey: "site-editor" }
   ]);
-  assert.deepEqual(result.sources["monitor.devices.read"], [{ type: "grant" }]);
+  assert.deepEqual(result.sources["lab_assets.write"], [{ type: "grant" }]);
   assert.deepEqual(result.sources["site.media.write"], [{ type: "revoke" }]);
 });
 
@@ -66,10 +66,8 @@ test("super receives every known permission with a super source", () => {
   assert.deepEqual(result.sources["system.settings.write"], [{ type: "super" }]);
 });
 
-test("procurement operators inherit read-all access needed for their workflow", () => {
-  for (const permission of ["procurements.review", "procurements.purchase", "procurements.close"]) {
-    assert.ok(getEffectivePermissions([permission]).includes("procurements.read_all"));
-  }
+test("retired permissions never resolve or expose a module", () => {
+  assert.equal(getEffectivePermissions(["monitor.devices.write", "procurements.review"]).some(p => /^(monitor|procurements)\./.test(p)), false);
 });
 
 test("alumni retain profile access but lose ordinary internal member access", () => {
@@ -77,7 +75,6 @@ test("alumni retain profile access but lose ordinary internal member access", ()
   assert.ok(permissions.includes("console.access"));
   assert.ok(permissions.includes("profile.write_own"));
   assert.equal(permissions.includes("lab_assets.read"), false);
-  assert.equal(permissions.includes("procurements.create"), false);
 });
 
 test("getConsoleModules returns users for permission managers", () => {
@@ -93,15 +90,6 @@ test("every known permission maps to its console module", () => {
     "profile.write_own": "profile",
     "lab_assets.read": "lab-assets",
     "lab_assets.write": "lab-assets",
-    "procurements.create": "procurements",
-    "procurements.read_own": "procurements",
-    "procurements.read_all": "procurements",
-    "procurements.review": "procurements",
-    "procurements.purchase": "procurements",
-    "procurements.close": "procurements",
-    "monitor.devices.read": "monitor",
-    "monitor.devices.write": "monitor",
-    "monitor.settings.write": "monitor",
     "site.content.write": "site",
     "site.members.write": "site",
     "site.media.write": "media",
