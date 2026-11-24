@@ -4,11 +4,11 @@
 
 ## 域名与上线
 
-1. **DNSPod**：为 `r-navigation.com` 添加主机记录 `console`，类型 `CNAME`，记录值 `r-navigation.com.`，线路默认，TTL 600 秒。2026-11-24 查到该子域为 NXDOMAIN，主域 A 记录为 `82.156.156.43`。主域地址由现有记录维护。
-2. **HTTPS**：申请或续签覆盖 `r-navigation.com`、`www.r-navigation.com` 与 `console.r-navigation.com` 的证书。2026-11-24 直连官网确认，当前服务送出的证书已在北京时间 11 月 13 日 07:59:59 到期，且无 `console` SAN。已有站点的证书续期可独立于本版本上线办理。
+1. **DNSPod**：`r-navigation.com`、`www.r-navigation.com` 和 `console.r-navigation.com` 已解析到腾讯云 `82.156.156.43`。
+2. **HTTPS**：2026-11-24 安装了覆盖三个域名的 Let’s Encrypt 证书，有效至北京时间 2027-02-22 15:45:41。证书使用 `/etc/letsencrypt/live/r-navigation-com-rnav/`，由 Certbot 定时续期。HTTP 验证目录 `/var/www/rnav-acme` 必须随 Nginx 配置保留，续期成功后会校验并 reload Nginx。本次 `certbot renew --cert-name r-navigation-com-rnav --dry-run` 已通过。
 3. **云服务器候选应用**：按 [deploy/cloud](../../deploy/cloud/) 的两个 unit 和两个环境示例组织运行配置。编译 Linux 发布件，保留旧版本及 Nginx 配置。Web 发布包采用 [Dockerfile.web](../../deploy/docker/Dockerfile.web) 同样的文件布局，将 Next standalone 内容、静态文件、`public/` 和 `service-entry.mjs` 放在 unit 指定的 Web 目录。后端目录包含编译的 `server/dist` 及运行依赖。Node 安装到 unit 指定的 `/opt/rnav/node`。写入环境文件时保留原库连接、会话与 COS 秘密，生成新网关 token 和签名密钥。
 4. **数据与首发**：用现有备份方式做一次云端 PostgreSQL 备份并验证可读，在隔离库验证增量迁移 043–046 后再应用到现有云库。迁移命令需从专用运行环境提供 `DATABASE_URL`。部署首版时保留 `RNAV_FACULTY_PAPERS_ONLY=false`，以防历史论文未复核时整页清空。用控制台发布权限或 `npm run publication -- prepare/approve/activate` 分步准备、签署并激活首份快照，验证两域后再替换生产 Nginx。保留旧同步 timer，切换时将其指向新代码，避免旧任务继续按成员同步。
-5. **切换与回退**：用现有证书路径安装已核实的新证书及 [Nginx 配置](../../deploy/nginx/rnav)，执行 `nginx -t` 后再 reload。检查官网主页、成员详情、论文和文件；检查控制台登录 Cookie、普通用户与管理员权限、成员及设备管理。失败时恢复旧 Nginx 站点、服务与 timer 的版本，保持同一个云库，保留新数据和新证书。快照可通过现有 CLI 激活上一个已签名版本。
+5. **切换与回退**：应用 [Nginx 配置](../../deploy/nginx/rnav) 前核对两个生产上游、证书和 HTTP 验证路径，执行 `nginx -t` 后再 reload。检查官网主页、成员详情、论文和文件；检查控制台登录 Cookie、普通用户与管理员权限、成员及设备管理。失败时恢复旧 Nginx 站点、服务与 timer 的版本，保持同一个云库，保留新数据和新证书。快照可通过现有 CLI 激活上一个已签名版本。
 6. **论文复核**：在对外展示信息管理配置已核验的老师来源，从审核队列收录论文，复核现有论文的老师归属并勾选“已核实”。作者编辑器根据中英文姓名给出成员建议，由编辑确认关联。核对首页精选与论文数量后开启 `RNAV_FACULTY_PAPERS_ONLY=true`，生成新预览并发布。历史未通过复核的记录留在数据库和编辑器。
 
 ## 小砺接口
@@ -17,6 +17,12 @@
 - `GET /api/v1/assistant/equipment` 沿用设备阅读权限，只提供查询用字段，省略借用人联系方式、序列号等内部信息。
 - 后续在云上接入语雀和远程使用系统。语雀按课题组批准的知识库范围做只读检索，并返回引用链接。远程使用只提供成员可见的资源和使用说明。服务端保管外部凭证，查询始终按发起人的业务权限执行。
 - 当前接口只有读取。后续新增、修改、清理工具只可由管理员（现有 `super` 账号）使用，后端还要检查对应业务权限。普通用户保留问答和检索。执行请求通过明确的业务操作传递，账号、数据库、文件的通用写入能力留在原业务服务。
+
+## 2026-11-24 云端候选验收
+
+已在腾讯云构建并启动 `ffba6d0`。候选源码位于 `/srv/rnav-candidate/ffba6d0`，配置在 `/etc/rnav-candidate`，数据在 `/var/lib/rnav-candidate`。systemd 单元为 `rnav-candidate-web`、`rnav-candidate-backend` 和 `rnav-candidate-db`。候选 HTTPS 监听 `127.0.0.1:13443`，Web/API 监听回环，候选数据库仅开放独立 Unix socket。
+
+通过云端候选 HTTPS 验证分域跳转、Cookie、跨域拒绝、设备只读权限、签名发布、论文过滤、作者高亮、成员详情和注销。候选数据库只装入合成数据并应用到 046。公网主域和 `www` 仍指向现有应用，均返回 200；公网控制台已支持可信 HTTPS，返回 503 待上线。旧 Nginx 配置备份在 `/var/backups/rnav-certificate-20261124`，正式切换时使用保留新证书的版本作为回退起点。
 
 ## 2026-11-24 只读盘点
 
