@@ -102,6 +102,7 @@ test("former postdocs map to teachers with a doctorate", async () => {
   assert.equal(member.group, "advisor");
   assert.deepEqual(member.role, { zh: "老师", en: "Faculty" });
   assert.deepEqual(member.degree, { zh: "博士", en: "PhD" });
+  assert.deepEqual(member.enrollmentYear, { zh: "", en: "" });
 });
 
 test("public member detail is privacy-gated and loads distinct accepted final publications in two queries", async () => {

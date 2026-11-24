@@ -57,4 +57,5 @@ test("teacher preview separates the teacher role from the degree", () => {
   });
   assert.deepEqual(preview.role, { zh: "老师", en: "Faculty" });
   assert.deepEqual(preview.degree, { zh: "博士", en: "PhD" });
+  assert.deepEqual(preview.enrollmentYear, { zh: "", en: "" });
 });

@@ -12,9 +12,9 @@ export function memberPreview(member: MemberProfile) {
   const highest = (Object.keys(degrees) as Degree[]).find((key) => member.degrees.includes(key));
   const [degreeZh, degreeEn] = highest ? degrees[highest] : ["", ""];
   const identityVisible = fields.has("academic_stage");
-  const enrollmentVisible = fields.has("enrollment_year") && member.enrollmentYear;
-  const graduationVisible = fields.has("graduation_year") && member.graduationYear;
   const teacher = member.memberRole === "teacher";
+  const enrollmentVisible = !teacher && fields.has("enrollment_year") && member.enrollmentYear;
+  const graduationVisible = fields.has("graduation_year") && member.graduationYear;
   return {
     name: {
       zh: fields.has("name_zh") ? member.nameZh : "",
@@ -22,11 +22,11 @@ export function memberPreview(member: MemberProfile) {
     },
     role: identityVisible && teacher ? { zh: "老师", en: "Faculty" } : { zh: "", en: "" },
     degree: !alumni && identityVisible && degreeZh
-      ? !teacher && enrollmentVisible
+      ? enrollmentVisible
         ? { zh: `${member.enrollmentYear}级${degreeZh}`, en: `${degreeEn}, Class of ${member.enrollmentYear}` }
         : { zh: degreeZh, en: degreeEn }
       : { zh: "", en: "" },
-    enrollmentYear: !alumni && !(identityVisible && degreeZh && !teacher) && enrollmentVisible
+    enrollmentYear: !alumni && !(identityVisible && degreeZh) && enrollmentVisible
       ? { zh: `${member.enrollmentYear}级`, en: `Class of ${member.enrollmentYear}` }
       : { zh: "", en: "" },
     graduation: alumni

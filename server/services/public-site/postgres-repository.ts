@@ -28,10 +28,10 @@ export function mapPublicTeamMember(row: PublicRecord) {
     phd: { zh: "博士", en: "PhD" }, master: { zh: "硕士", en: "Master" }, undergrad: { zh: "本科", en: "Bachelor" },
   };
   const identityVisible = fields.has("academic_stage");
-  const yearVisible = fields.has(alumni ? "graduation_year" : "enrollment_year");
+  const yearVisible = alumni ? fields.has("graduation_year") : !teacher && fields.has("enrollment_year");
   const year = alumni ? row.graduation_year : row.enrollment_year;
   const degree = identityVisible && degrees[0] ? names[degrees[0]] : { zh: "", en: "" };
-  const showCohort = !teacher && degree.zh && yearVisible && year;
+  const showCohort = degree.zh && yearVisible && year;
   const currentDegree = showCohort
     ? { zh: `${year}级${degree.zh}`, en: `${degree.en}, Class of ${year}` }
     : degree;

@@ -130,16 +130,12 @@ function Range({ label, value, min, max, step = 1, onChange }: { label: string; 
 function AvatarPreview({ alt, className, profile }: { alt: string; className: string; profile: Pick<Profile, "avatarUrl" | "avatarPositionX" | "avatarPositionY" | "avatarZoom"> }) { return <div className={`aspect-square overflow-hidden bg-slate-100 ${className}`}><img alt={alt} className="h-full w-full object-cover" src={profile.avatarUrl ?? ""} style={{ objectPosition: `${profile.avatarPositionX}% ${profile.avatarPositionY}%`, transform: `scale(${profile.avatarZoom})`, transformOrigin: `${profile.avatarPositionX}% ${profile.avatarPositionY}%` }} /></div>; }
 function PublicProfilePanel({ busy, draft, onSave, update, visible }: { busy: boolean; draft: Profile; onSave(): Promise<void>; update<K extends keyof Profile>(key: K, value: Profile[K]): void; visible: Set<string> }) {
   const alumni = draft.memberStatus === "alumni";
-  const stage = draft.memberRole === "teacher" ? memberRoleLabels.teacher : draft.degrees.map((degree) => degreeLabels[degree]).join("、");
-  const identity = alumni
-    ? `${visible.has("graduation_year") && draft.graduationYear ? `${draft.graduationYear}届` : ""}${visible.has("academic_stage") ? stage : ""}`
-    : visible.has("academic_stage") && visible.has("enrollment_year") && draft.enrollmentYear
-      ? `${draft.enrollmentYear}级${stage}`
-      : visible.has("academic_stage")
-        ? stage
-        : visible.has("enrollment_year") && draft.enrollmentYear
-          ? `${draft.enrollmentYear}级`
-          : "";
+  const teacher = draft.memberRole === "teacher";
+  const degree = visible.has("academic_stage") && draft.degrees[0] ? degreeLabels[draft.degrees[0]] : "";
+  const cohort = !teacher && visible.has("enrollment_year") && draft.enrollmentYear ? `${draft.enrollmentYear}级` : "";
+  const graduation = visible.has("graduation_year") && draft.graduationYear ? `${draft.graduationYear}届` : "";
+  const role = teacher && visible.has("academic_stage") ? memberRoleLabels.teacher : "";
+  const identity = [role, alumni ? graduation + degree : cohort + degree].filter(Boolean).join(" · ");
   return <div className="mt-7 grid gap-8 lg:grid-cols-[1fr_1.2fr]">
     <div>
       <p className={`p-3 text-sm ${draft.publicVisible ? "bg-emerald-50 text-emerald-800" : "bg-amber-50 text-amber-900"}`}>{draft.publicVisible ? "管理员已将你的账号列入官网成员页。" : "当前账号未被管理员列入官网成员页；你的展示设置会被保存，启用后生效。"}</p>
