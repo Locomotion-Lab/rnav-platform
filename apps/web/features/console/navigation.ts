@@ -5,7 +5,7 @@ export type ConsoleNavigationModule = {
 };
 
 export type ConsoleNavigationGroup = {
-  key: "mine" | "showcase" | "system";
+  key: "business" | "tools" | "account";
   label: string;
   modules: ConsoleNavigationModule[];
 };
@@ -13,17 +13,9 @@ export type ConsoleNavigationGroup = {
 const navigationGroups: Array<
   Omit<ConsoleNavigationGroup, "modules"> & { moduleKeys: string[] }
 > = [
-  {
-    key: "mine",
-    label: "我的事务",
-    moduleKeys: ["profile", "lab-assets", "assistant"],
-  },
-  {
-    key: "showcase",
-    label: "实验与展示",
-    moduleKeys: ["site", "media"],
-  },
-  { key: "system", label: "系统管理", moduleKeys: ["members", "settings"] },
+  { key: "business", label: "业务", moduleKeys: ["site", "members", "lab-assets"] },
+  { key: "tools", label: "工具", moduleKeys: ["media", "assistant"] },
+  { key: "account", label: "账号与设置", moduleKeys: ["profile", "settings"] },
 ];
 
 export function groupConsoleModules(
@@ -53,8 +45,6 @@ export function groupConsoleModules(
 }
 
 export function isConsoleRouteActive(pathname: string, href: string) {
-  return (
-    pathname === href ||
-    (href !== "/console" && pathname.startsWith(`${href}/`))
-  );
+  const path = href.split(/[?#]/, 1)[0];
+  return pathname === path || (path !== "/console" && pathname.startsWith(`${path}/`));
 }

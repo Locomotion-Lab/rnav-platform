@@ -1,15 +1,19 @@
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import type { ReactNode } from "react";
 import { ConsoleShell } from "@/features/console/ConsoleShell";
 import { ConsoleState } from "@/features/console/ConsoleState";
 import { getConsoleBootstrap } from "@/features/console/bootstrap";
 import { ConsolePasswordGate } from "@/features/console/ConsolePasswordGate";
+import { normalizePostLoginPath } from "@/features/auth/redirect";
 
 export default async function ConsoleLayout({ children }: Readonly<{ children: ReactNode }>) {
   const result = await getConsoleBootstrap();
 
   if (result.status === "anonymous") {
-    redirect("/login?next=/console");
+    const path = (await headers()).get("x-rnav-console-return");
+    const next = normalizePostLoginPath(path ?? undefined);
+    redirect(`/login?${new URLSearchParams({ next })}`);
   }
   if (result.status === "forbidden") {
     return (

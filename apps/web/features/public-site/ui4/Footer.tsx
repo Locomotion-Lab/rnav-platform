@@ -2,7 +2,7 @@
 import Image from "next/image";
 import { RNAV_BRAND_ASSETS } from "@/lib/brand";
 import { getLocalizedText, type Locale } from "../i18n";
-import { sanitizeActionUrl } from "../url-sanitizer";
+import { publicChromeHref } from "../url-sanitizer";
 export function Footer({ site, locale }: { site: any; locale: Locale }) {
   return (
     <footer className="v41-footer">
@@ -21,27 +21,20 @@ export function Footer({ site, locale }: { site: any; locale: Locale }) {
         <div className="v41-footer-contacts">
           {(site.publicContacts ?? [])
             .filter((item: any) =>
-              /^(mailto:|tel:|https?:)/.test(item.href ?? ""),
+              /^(mailto:|tel:|https?:)/.test(publicChromeHref(item.href)),
             )
             .slice(0, 2)
             .map((item: any, index: number) => (
-              <a href={sanitizeActionUrl(item.href)} key={index}>
+              <a href={publicChromeHref(item.href)} key={index}>
                 {getLocalizedText(item.value, locale) ||
                   getLocalizedText(item.title, locale)}
               </a>
             ))}
           <nav>
-            {(site.footer?.links ?? []).map(
-              (link: any, index: number) =>
-                sanitizeActionUrl(link.href) && (
-                  <a href={sanitizeActionUrl(link.href)} key={index}>
-                    {getLocalizedText(link.label, locale)}
-                  </a>
-                ),
-            )}
-            <a href="/login">
-              {locale === "zh" ? "成员登录" : "Member sign in"}
-            </a>
+            {(site.footer?.links ?? []).map((link: any, index: number) => {
+              const href = publicChromeHref(link.href);
+              return href ? <a href={href} key={index}>{getLocalizedText(link.label, locale)}</a> : null;
+            })}
           </nav>
         </div>
         <p className="v41-footer-motto">

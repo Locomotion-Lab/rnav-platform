@@ -36,6 +36,16 @@ export function sanitizeActionUrl(value: unknown): string {
   return sanitizePublicUrl(url);
 }
 
+export function publicChromeHref(value: unknown) {
+  const href = sanitizeActionUrl(value);
+  if (!href) return "";
+  const target = new URL(href, "https://r-navigation.com");
+  if (target.hostname === "console.r-navigation.com") return "";
+  if (["r-navigation.com", "www.r-navigation.com"].includes(target.hostname) &&
+      /^\/(?:login|console|admin|ai|lab-assets)(?:\/|$)/.test(target.pathname)) return "";
+  return href;
+}
+
 export function sanitizeEmbedUrl(value: unknown): string {
   const url = sanitizePublicUrl(value);
   if (!url.startsWith("https://")) return "";

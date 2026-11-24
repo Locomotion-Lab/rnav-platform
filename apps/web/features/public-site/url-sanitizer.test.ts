@@ -1,6 +1,14 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { sanitizeActionUrl, sanitizePublicUrl } from "./url-sanitizer.ts";
+import { publicChromeHref, sanitizeActionUrl, sanitizePublicUrl } from "./url-sanitizer.ts";
+
+test("public chrome excludes internal destinations from configured links", () => {
+  for (const href of ["/login", "/console/settings", "/ai", "https://www.r-navigation.com/admin", "https://console.r-navigation.com/"]) {
+    assert.equal(publicChromeHref(href), "", href);
+  }
+  assert.equal(publicChromeHref("/research#publications"), "/research#publications");
+  assert.equal(publicChromeHref("https://liesmars.whu.edu.cn/"), "https://liesmars.whu.edu.cn/");
+});
 
 test("contact actions allow strict mailto and tel links", () => {
   assert.equal(sanitizeActionUrl("mailto:lab@example.com"), "mailto:lab@example.com");

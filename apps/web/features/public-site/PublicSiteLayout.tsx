@@ -10,6 +10,7 @@ import { getLocalizedText, normalizeInternalHref, type Locale } from "./i18n";
 import { Icon } from "./ui/PublicUi";
 import { Footer } from "./ui4/Footer";
 import { publicNavigation } from "./ui4/navigation";
+import { publicChromeHref } from "./url-sanitizer";
 import "./ui4/public.css";
 
 function Chrome({
@@ -26,8 +27,12 @@ function Chrome({
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const navigation = Array.isArray(site.navigation) && site.navigation.length ? site.navigation : publicNavigation;
-  const filteredNavigation = navigation.filter((item: any) =>
+  const configured: typeof publicNavigation = Array.isArray(site.navigation) ? site.navigation : [];
+  const publicLinks = configured
+    .map((item) => ({ ...item, href: publicChromeHref(normalizeInternalHref(item.href)) }))
+    .filter((item) => item.href);
+  const navigation = publicLinks.length ? publicLinks : publicNavigation;
+  const filteredNavigation = navigation.filter((item) =>
     getLocalizedText(item.label, locale)
       .toLowerCase()
       .includes(query.trim().toLowerCase()),
@@ -70,8 +75,8 @@ function Chrome({
             className="hidden h-full items-center gap-5 lg:flex"
             aria-label={locale === "zh" ? "主导航" : "Primary navigation"}
           >
-            {navigation.map((item: any) => {
-              const href = normalizeInternalHref(item.href);
+            {navigation.map((item) => {
+              const href = item.href;
               const active =
                 href === "/" ? pathname === "/" : pathname.startsWith(href);
               return (
@@ -118,12 +123,6 @@ function Chrome({
                 </span>
               ))}
             </div>
-            <Link
-              className="hidden min-h-11 items-center px-2 text-sm font-semibold text-[#66758f] hover:text-[#1266f1] xl:flex"
-              href="/login"
-            >
-              {locale === "zh" ? "登录" : "Sign in"}
-            </Link>
             <button
               aria-expanded={menuOpen}
               aria-label={locale === "zh" ? "打开导航" : "Open navigation"}
@@ -158,10 +157,10 @@ function Chrome({
               </label>
               {query ? (
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {filteredNavigation.map((item: any) => (
+                  {filteredNavigation.map((item) => (
                     <Link
                       className="rounded-full border border-[#e4eaf2] px-3 py-2 text-sm text-[#09275f] hover:border-[#1266f1]"
-                      href={normalizeInternalHref(item.href)}
+                      href={item.href}
                       key={item.key}
                       onClick={() => setSearchOpen(false)}
                     >
@@ -178,8 +177,8 @@ function Chrome({
             aria-label={locale === "zh" ? "移动端导航" : "Mobile navigation"}
             className="border-t border-[#e4eaf2] bg-white px-5 pb-5 pt-3 lg:hidden"
           >
-            {navigation.map((item: any) => {
-              const href = normalizeInternalHref(item.href);
+            {navigation.map((item) => {
+              const href = item.href;
               const active =
                 href === "/" ? pathname === "/" : pathname.startsWith(href);
               return (
@@ -194,26 +193,6 @@ function Chrome({
                 </Link>
               );
             })}
-            <div className="mt-3 flex items-center justify-between border-t border-[#e4eaf2] pt-4">
-              <div className="flex items-center gap-2">
-                {(["en", "zh"] as Locale[]).map((item) => (
-                  <button
-                    className={`min-h-11 rounded-lg px-3 text-sm font-semibold ${locale === item ? "bg-[#09275f] text-white" : "text-[#66758f]"}`}
-                    key={item}
-                    onClick={() => setLocale(item)}
-                    type="button"
-                  >
-                    {item === "zh" ? "中文" : "EN"}
-                  </button>
-                ))}
-              </div>
-              <Link
-                className="flex min-h-11 items-center text-sm font-semibold text-[#09275f]"
-                href="/login"
-              >
-                {locale === "zh" ? "登录" : "Sign in"}
-              </Link>
-            </div>
           </nav>
         ) : null}
       </header>
