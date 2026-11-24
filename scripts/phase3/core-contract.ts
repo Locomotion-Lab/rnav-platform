@@ -1,5 +1,6 @@
-import {z} from 'zod';import * as assets from '../../server/services/lab-assets/schemas.js';import * as users from '../../server/services/user-admin/userSchemas.js';import * as profile from '../../server/services/account/profileSchemas.js';import * as media from '../../server/services/media/mediaSchemas.js';import {approvePublicationSchema} from '../../server/routes/publications.js';import {toJsonSchema,schemaType} from './zod-json.js';
+import {z} from 'zod';import * as assets from '../../server/services/lab-assets/schemas.js';import * as users from '../../server/services/user-admin/userSchemas.js';import * as profile from '../../server/services/account/profileSchemas.js';import * as media from '../../server/services/media/mediaSchemas.js';import {activatePublicationSchema,approvePublicationSchema} from '../../server/routes/publications.js';import {toJsonSchema,schemaType} from './zod-json.js';
 const ref=(name:string)=>({$ref:`#/components/schemas/${name}`});
+import { assistantCapabilitiesSchema, assistantEquipmentSchema } from '../../server/routes/assistant.js';
 export function coreSchemas(){
  const schemas:any={};
  for(const group of [assets,users,profile,media])for(const [key,s]of Object.entries(group))if(key.endsWith('Schema')&&s instanceof z.ZodType)schemas[key]=toJsonSchema(s);
@@ -13,9 +14,12 @@ export function coreSchemas(){
   MediaResponse:z.object({id:z.string().uuid(),filename:z.string(),objectKey:z.string(),url:z.string(),mimeType:z.enum(media.mediaMimeTypes),sizeBytes:z.number().int(),checksumSha256:z.string(),status:z.string(),recycledAt:z.string().nullable(),createdAt:z.string(),references:z.number()}).strict(),
   RevisionResponse:z.object({revision:z.string().regex(/^\d+$/)}).strict(),
   AssetSnapshot:z.object({page:z.unknown(),revision:z.string(),assets:z.array(z.object(assets.assetSchema.shape).passthrough()),platforms:z.array(assets.platformSchema.passthrough()),deviceTypes:z.array(assets.deviceTypeSchema),platformTypes:z.array(assets.platformTypeSchema)}).passthrough(),
-  PublicationReview:z.object({id:z.string().uuid(),sha256:z.string().regex(/^[a-f0-9]{64}$/),publication:z.object({schemaVersion:z.literal(1),publicationId:z.string(),generatedAt:z.string(),pages:z.record(z.string(),z.unknown()),members:z.record(z.string(),z.unknown()),media:z.array(z.object({path:z.string(),size:z.number().int(),sha256:z.string(),contentType:z.string()}).strict())}).strict()}).strict(),
+  PublicationReview:z.object({id:z.string().uuid(),currentId:z.string(),sha256:z.string().regex(/^[a-f0-9]{64}$/),publication:z.object({schemaVersion:z.literal(1),publicationId:z.string(),generatedAt:z.string(),pages:z.record(z.string(),z.unknown()),members:z.record(z.string(),z.unknown()),media:z.array(z.object({path:z.string(),size:z.number().int(),sha256:z.string(),contentType:z.string()}).strict())}).strict()}).strict(),
   PublicationApproval:z.object({id:z.string().uuid(),sha256:z.string(),approved:z.literal(true)}).strict(),
   approvePublicationSchema,
+  activatePublicationSchema,
+  AssistantCapabilities: assistantCapabilitiesSchema,
+  AssistantEquipment: assistantEquipmentSchema,
  };
  for(const [key,s]of Object.entries(response))schemas[key]=toJsonSchema(s);
  return schemas;
@@ -31,7 +35,8 @@ export function enrichContract(contract:any){
  'post /api/v1/lab-assets/platforms':'platformRequestSchema','put /api/v1/lab-assets/platforms/{code}':'platformRequestSchema',
  'post /api/v1/lab-assets/device-types':'deviceTypeRequestSchema','post /api/v1/lab-assets/platform-types':'platformTypeRequestSchema',
  'post /api/v1/lab-assets/assets/import/commit':'assetImportRequestSchema','post /api/v1/lab-assets/assets/import/validate':'assetImportRequestSchema',
- 'post /api/v1/publications/{id}/approve':'approvePublicationSchema'
+ 'post /api/v1/publications/{id}/approve':'approvePublicationSchema',
+ 'post /api/v1/publications/{id}/activate':'activatePublicationSchema'
  };
  for(const [key,name]of Object.entries(requests)){const space=key.indexOf(' '),method=key.slice(0,space),path=key.slice(space+1);const operation=contract.paths[path]?.[method];if(operation)operation.requestBody={required:true,content:{'application/json':{schema:ref(name)}}};}
  for(const [path,operations]of Object.entries(contract.paths) as any){for(const [method,operation]of Object.entries(operations)as any){
@@ -41,6 +46,7 @@ export function enrichContract(contract:any){
  }}
  const response=(path:string,method:string,name:string)=>{contract.paths[path][method].responses['200']={description:'Validated core DTO',content:{'application/json':{schema:ref(name)}}};};
  response('/api/v1/users','get','MembersResponse');response('/api/v1/auth/session','get','SessionResponse');response('/api/v1/auth/login','post','SessionResponse');response('/api/v1/profile','get','ProfileResponse');response('/api/v1/profile','put','ProfileResponse');response('/api/v1/lab-assets','get','AssetSnapshot');response('/api/v1/publications/{id}','get','PublicationReview');response('/api/v1/publications/{id}/approve','post','PublicationApproval');
+ response('/api/v1/assistant/capabilities','get','AssistantCapabilities');response('/api/v1/assistant/equipment','get','AssistantEquipment');
  contract.paths['/api/v1/media/upload'].post.requestBody={required:true,content:{'multipart/form-data':{schema:{type:'object',required:['file'],properties:{file:{type:'string',format:'binary'}},additionalProperties:false}}}};
  contract.paths['/api/v1/media/upload'].post.responses['201']={description:'Uploaded private asset',content:{'application/json':{schema:ref('MediaResponse')}}};
  contract.paths['/api/v1/media/files/{id}'].get.responses['200']={description:'Authorized binary content',content:{'image/png':{schema:{type:'string',format:'binary'}},'application/pdf':{schema:{type:'string',format:'binary'}}}};

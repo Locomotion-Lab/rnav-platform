@@ -115,7 +115,7 @@ const itemFields: Allowlist = {
   links: [linkFields],
   contacts: [{ label: localized, value: localized }],
   keywords: [localized],
-  authors: [{ name: localized, highlight: true }],
+  authors: [{ name: localized, highlight: true, slug: true }],
   specs: [{ label: localized, value: localized }],
   tags:[true],
   components:[{role:localized,deviceType:true,manufacturer:true,model:true,count:true}],

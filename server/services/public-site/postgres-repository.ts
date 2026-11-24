@@ -5,7 +5,15 @@ export type Queryable = Pick<Pool, "query">;
 
 const locale = (row: PublicRecord, prefix: string) => ({ zh: row[`${prefix}_zh`] ?? "", en: row[`${prefix}_en`] ?? "" });
 const image = (row: PublicRecord) => row.image_asset_id || row.image_src ? { assetId: row.image_asset_id ?? "", src: row.image_src, alt: row.image_alt ?? "", dataAlt: row.image_data_alt ?? "" } : null;
-const groupBy = (rows: PublicRecord[], key: string) => rows.reduce((map, row) => map.set(row[key], [...(map.get(row[key]) ?? []), row]), new Map<unknown, PublicRecord[]>());
+function groupBy(rows: PublicRecord[], key: string) {
+  const groups = new Map<unknown, PublicRecord[]>();
+  for (const row of rows) {
+    const group = groups.get(row[key]) ?? [];
+    group.push(row);
+    groups.set(row[key], group);
+  }
+  return groups;
+}
 
 export function mapPublicTeamMember(row: PublicRecord) {
   const fields = new Set<string>(row.public_fields ?? []);
@@ -52,7 +60,16 @@ export function mapPublicTeamMember(row: PublicRecord) {
   };
 }
 
-export function createPostgresPublicSiteRepository(pool: Queryable): PublicSiteRepository {
+export function createPostgresPublicSiteRepository(pool: Queryable, {
+  editing = false, facultyOnly = process.env.RNAV_FACULTY_PAPERS_ONLY === "true",
+} = {}): PublicSiteRepository {
+  const filterFaculty = !editing && facultyOnly;
+  const authorMemberSlug = `(
+    SELECT COALESCE(NULLIF(profile.member_slug,''),account.username)
+    FROM user_profiles profile JOIN users account ON account.id=profile.user_id
+    WHERE profile.user_id=author.member_user_id AND account.account_kind='person' AND profile.public_visible
+      AND profile.public_fields && ARRAY['name_zh','name_en']::text[]
+  )`;
   return {
     async getPageContent(key) {
       const result = await pool.query("SELECT content_json FROM page_content WHERE page_key = $1 LIMIT 1", [key]);
@@ -60,13 +77,26 @@ export function createPostgresPublicSiteRepository(pool: Queryable): PublicSiteR
     },
     async getResearchItems() {
       const [items, keywords, authors, links] = await Promise.all([
-        pool.query("SELECT * FROM research_items ORDER BY sort_order, publication_year DESC NULLS LAST, title_en, id"),
+        pool.query(`SELECT * FROM research_items ${filterFaculty ? "WHERE faculty_confirmed " : ""}ORDER BY sort_order, publication_year DESC NULLS LAST, title_en, id`),
         pool.query("SELECT * FROM research_item_keywords ORDER BY research_item_id, sort_order, id"),
-        pool.query("SELECT * FROM research_item_authors ORDER BY research_item_id, sort_order, id"),
+        pool.query(`SELECT author.*, ${authorMemberSlug} AS public_slug FROM research_item_authors author ORDER BY research_item_id, sort_order, id`),
         pool.query("SELECT * FROM research_item_links ORDER BY research_item_id, sort_order, id")
       ]);
       const keywordMap = groupBy(keywords.rows, "research_item_id"), authorMap = groupBy(authors.rows, "research_item_id"), linkMap = groupBy(links.rows, "research_item_id");
-      return items.rows.map((row) => ({ id: row.id, sortOrder: row.sort_order, title: locale(row, "title"), year: row.publication_year ?? "", venue: locale(row, "venue"), type: row.publication_type, topic: row.topic, image: image(row), pdf: row.pdf_asset_id || row.pdf_src ? { assetId: row.pdf_asset_id ?? "", src: row.pdf_src, label: locale(row, "pdf_label") } : null, keywords: (keywordMap.get(row.id) ?? []).map((item: PublicRecord) => locale(item, "value")), authors: (authorMap.get(row.id) ?? []).map((item: PublicRecord) => ({ name: locale(item, "name"), highlight: item.highlight })), links: (linkMap.get(row.id) ?? []).map((item: PublicRecord) => ({ label: locale(item, "label"), href: item.href, icon: item.icon, variant: item.variant ?? "" })) }));
+      return items.rows.map((row) => ({
+        id: row.id, sortOrder: row.sort_order, title: locale(row, "title"), year: row.publication_year ?? "",
+        venue: locale(row, "venue"), type: row.publication_type, topic: row.topic, image: image(row),
+        pdf: row.pdf_asset_id || row.pdf_src ? { assetId: row.pdf_asset_id ?? "", src: row.pdf_src, label: locale(row, "pdf_label") } : null,
+        keywords: (keywordMap.get(row.id) ?? []).map((item) => locale(item, "value")),
+        authors: (authorMap.get(row.id) ?? []).map((author) => ({
+          name: locale(author, "name"),
+          highlight: filterFaculty ? Boolean(author.public_slug) : author.highlight,
+          ...(filterFaculty && author.public_slug ? { slug: author.public_slug } : {}),
+          ...(editing ? { memberUserId: author.member_user_id ?? null } : {}),
+        })),
+        links: (linkMap.get(row.id) ?? []).map((item) => ({ label: locale(item, "label"), href: item.href, icon: item.icon, variant: item.variant ?? "" })),
+        ...(editing ? { facultyConfirmed: Boolean(row.faculty_confirmed) } : {}),
+      }));
     },
     async getNewsItems() {
       const { rows } = await pool.query("SELECT * FROM news_items ORDER BY sort_order, title_en, id");
@@ -90,15 +120,19 @@ export function createPostgresPublicSiteRepository(pool: Queryable): PublicSiteR
       const row = memberResult.rows[0];
       if (!row) return null;
       const publications = await pool.query(`WITH final_ids AS (
-          SELECT DISTINCT COALESCE(work.research_item_id,work.source_snapshot->>'mergedIntoResearchItemId') AS id
+          SELECT research_item_id AS id FROM research_item_authors author WHERE member_user_id=$1
+          ${filterFaculty ? `AND ${authorMemberSlug} IS NOT NULL` : ""}
+          ${filterFaculty ? "" : `UNION
+          SELECT COALESCE(work.research_item_id,work.source_snapshot->>'mergedIntoResearchItemId') AS id
           FROM scholarly_work_members member JOIN scholarly_works work ON work.id=member.work_id
           WHERE member.user_id=$1 AND work.decision='accepted'
-            AND COALESCE(work.research_item_id,work.source_snapshot->>'mergedIntoResearchItemId') IS NOT NULL
+            AND COALESCE(work.research_item_id,work.source_snapshot->>'mergedIntoResearchItemId') IS NOT NULL`}
         )
         SELECT item.*,
-          COALESCE((SELECT jsonb_agg(jsonb_build_object('name',jsonb_build_object('zh',author.name_zh,'en',author.name_en),'highlight',author.highlight) ORDER BY author.sort_order,author.id) FROM research_item_authors author WHERE author.research_item_id=item.id),'[]'::jsonb) AS public_authors,
+          COALESCE((SELECT jsonb_agg(jsonb_build_object('name',jsonb_build_object('zh',author.name_zh,'en',author.name_en),'highlight',${filterFaculty ? `${authorMemberSlug} IS NOT NULL` : 'author.highlight'}) ORDER BY author.sort_order,author.id) FROM research_item_authors author WHERE author.research_item_id=item.id),'[]'::jsonb) AS public_authors,
           COALESCE((SELECT jsonb_agg(jsonb_build_object('label',jsonb_build_object('zh',link.label_zh,'en',link.label_en),'href',link.href,'icon',link.icon,'variant',COALESCE(link.variant,'')) ORDER BY link.sort_order,link.id) FROM research_item_links link WHERE link.research_item_id=item.id),'[]'::jsonb) AS public_links
-        FROM final_ids JOIN research_items item ON item.id=final_ids.id
+        FROM (SELECT DISTINCT id FROM final_ids) final_ids JOIN research_items item ON item.id=final_ids.id
+        ${filterFaculty ? "WHERE item.faculty_confirmed" : ""}
         ORDER BY item.publication_year DESC NULLS LAST,item.sort_order,item.title_en,item.id`, [row.account_user_id]);
       return {
         member: mapPublicTeamMember(row),

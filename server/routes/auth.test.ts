@@ -244,7 +244,7 @@ test("GET /api/console/bootstrap returns normal member modules", async () => {
   assert.equal(body.user.tier, "normal");
   assert.deepEqual(
     body.consoleModules.map((module) => module.key),
-    ["profile", "lab-assets"]
+    ["profile", "lab-assets", "assistant"]
   );
 });
 
@@ -290,6 +290,7 @@ test("GET /api/console/bootstrap returns every module for a super user", async (
       "media",
       "users",
       "permissions",
+      "assistant",
       "settings"
     ]
   );

@@ -25,5 +25,5 @@ export default async function ConsoleLayout({ children }: Readonly<{ children: R
 
   const { consoleModules, user } = result.data;
 
-  return <ConsoleShell modules={consoleModules} user={user}><ConsolePasswordGate required={user.mustChangePassword}>{children}</ConsolePasswordGate></ConsoleShell>;
+  return <ConsoleShell modules={consoleModules} user={user} publicHome={process.env.RNAV_CONSOLE_ORIGIN ? process.env.RNAV_WEB_ORIGIN : undefined}><ConsolePasswordGate required={user.mustChangePassword}>{children}</ConsolePasswordGate></ConsoleShell>;
 }

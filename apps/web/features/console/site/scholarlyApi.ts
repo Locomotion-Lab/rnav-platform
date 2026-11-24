@@ -23,7 +23,10 @@ export type PublicationSourceCandidate = { openalexWorkId: string; doi: string |
 export type BulkPlan = { requested: number; counts: Record<"safe_accept" | "suggested_merge" | "already_accepted" | "needs_review" | "conflict", number>; items: Array<{ workId: string; action: string; reason: string; suggestedResearchItemId?: string }> };
 export type BulkResult = { requested: number; accepted?: number; ignored?: number; merged?: number; alreadyAccepted?: number; alreadyIgnored?: number; alreadyMerged?: number; skipped?: number; failed: number; results: Array<{ workId: string; status: string; error?: string }> };
 
+export type AuthorMember = { id: string; nameZh: string; nameEn: string; faculty: boolean };
+
 export const scholarlyApi = {
+  authorMembers: () => consoleApi<{ members: AuthorMember[] }>("/api/v1/scholarly-sync/author-members"),
   status: () => consoleApi<ScholarlyStatus>("/api/scholarly-sync/status"),
   candidates: (status: "pending" | "ignored") => consoleApi<{ candidates: PublicationCandidate[] }>(`/api/scholarly-sync/candidates?status=${status}`),
   syncAll: () => consoleApi("/api/scholarly-sync/sync-all", { method: "POST" }),

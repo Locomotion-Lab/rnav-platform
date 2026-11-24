@@ -44,35 +44,18 @@ async function request(method: string, path: string, options: { user?: Authentic
   } finally { await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve())); }
 }
 
-test("scholarly member profiles require member administration permission", async () => {
+test("faculty sources require site content permission", async () => {
   assert.equal((await request("GET", `/api/scholarly-sync/members/${memberId}`)).status, 401);
-  assert.equal((await request("GET", `/api/scholarly-sync/members/${memberId}`, { user: user(["site.content.write"]) })).status, 403);
-  assert.equal((await request("GET", `/api/scholarly-sync/members/${memberId}`, { user: user(["site.members.write"]) })).status, 200);
+  assert.equal((await request("GET", `/api/scholarly-sync/members/${memberId}`, { user: user(["site.members.write"]) })).status, 403);
+  assert.equal((await request("GET", `/api/scholarly-sync/members/${memberId}`, { user: user(["site.content.write"]) })).status, 200);
 });
 
-test("self scholarly routes use the logged-in member without administrative permissions", async () => {
-  const current = user([]);
-  const read = await request("GET", "/api/scholarly-sync/me?userId=00000000-0000-4000-8000-000000000099", { user: current });
-  assert.equal(read.status, 200); assert.deepEqual(read.calls, ["getProfile"]);
-  const saved = await request("PATCH", "/api/scholarly-sync/me", { user: current, origin: "same", body: { orcidId: null, syncFromYear: 2020, syncToYear: 2026, syncEnabled: false } });
-  assert.equal(saved.status, 200); assert.deepEqual(saved.calls, ["updateProfile"]);
-  const resolved = await request("POST", "/api/scholarly-sync/me/resolve", { user: current, origin: "same", body: { name: "Alice" } });
-  assert.equal(resolved.status, 200); assert.deepEqual(resolved.calls, ["resolveAuthor"]);
-});
-
-test("self scholarly mutations require same origin and reject governance or target fields", async () => {
-  const current = user([]);
-  assert.equal((await request("PATCH", "/api/scholarly-sync/me", { user: current, body: {} })).status, 403);
-  const governance = await request("PATCH", "/api/scholarly-sync/me", { user: current, origin: "same", body: { newWorkPolicy: "auto" } });
-  assert.equal(governance.status, 400); assert.deepEqual(governance.calls, []);
-  const target = await request("PATCH", "/api/scholarly-sync/me", { user: current, origin: "same", body: { userId: memberId } });
-  assert.equal(target.status, 400); assert.deepEqual(target.calls, []);
-});
-
-test("system accounts are indistinguishable from missing self scholarly profiles", async () => {
-  const response = await request("GET", "/api/scholarly-sync/me", { user: user([]), missingProfile: true });
-  assert.equal(response.status, 404);
-  assert.deepEqual(response.body, { error: "成员不存在" });
+test("personal scholarly routes are retired for signed-in members", async () => {
+  for (const [method, tail] of [["GET", ""], ["PATCH", ""], ["POST", "/resolve"], ["POST", "/verify-author"], ["POST", "/sync"]]) {
+    const result = await request(method, `/api/scholarly-sync/me${tail}`, { user: user([]), origin: "same" });
+    assert.equal(result.status, 404);
+    assert.deepEqual(result.calls, []);
+  }
 });
 
 test("scholarly mutations require their domain permission and same origin", async () => {
@@ -92,7 +75,7 @@ test("scholarly routes reject malformed identifiers and managed fields before se
 
 test("duplicate external identities return a safe conflict response", async () => {
   const error = Object.assign(new Error("database detail must not leak"), { code: "23505" });
-  const response = await request("PATCH", `/api/scholarly-sync/members/${memberId}`, { user: user(["site.members.write"]), origin: "same", body: {}, error });
+  const response = await request("PATCH", `/api/scholarly-sync/members/${memberId}`, { user: user(["site.content.write"]), origin: "same", body: {}, error });
   assert.equal(response.status, 409);
   assert.deepEqual(response.body, { error: "ORCID、OpenAlex ID 或 DOI 已被其他记录使用", code: "EXTERNAL_ID_CONFLICT" });
 });

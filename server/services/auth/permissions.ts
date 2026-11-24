@@ -100,13 +100,13 @@ const moduleDefinitions: ConsoleModule[] = [
   {
     key: "lab-assets",
     href: "/console/lab-assets",
-    label: "实验室资产",
+    label: "设备管理",
     requiredAny: ["lab_assets.read", "lab_assets.write"]
   },
   {
     key: "site",
     href: "/console/site",
-    label: "官网内容",
+    label: "对外展示信息管理",
     requiredAny: ["site.content.write", "site.members.write", "site.publish"]
   },
   {
@@ -126,6 +126,12 @@ const moduleDefinitions: ConsoleModule[] = [
     href: "/console/permissions",
     label: "权限管理",
     requiredAny: ["permissions.write"]
+  },
+  {
+    key: "assistant",
+    href: "/console/assistant",
+    label: "小砺智能体",
+    requiredAny: ["console.access"]
   },
   {
     key: "settings",

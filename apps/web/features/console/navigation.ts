@@ -16,7 +16,7 @@ const navigationGroups: Array<
   {
     key: "mine",
     label: "我的事务",
-    moduleKeys: ["profile", "lab-assets"],
+    moduleKeys: ["profile", "lab-assets", "assistant"],
   },
   {
     key: "showcase",
@@ -40,7 +40,7 @@ export function groupConsoleModules(
     normalized.push({
       key: "members",
       href: "/console/members",
-      label: "成员管理",
+      label: "成员与账号管理",
     });
   return navigationGroups
     .map(({ moduleKeys, ...group }) => ({

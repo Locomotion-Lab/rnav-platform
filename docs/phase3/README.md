@@ -1,5 +1,7 @@
 # Phase 3：正式迁移前准备
 
+> **历史方案。** 2026-11-24 起采用[云端单节点与双域名方案](../architecture/target-2026-11-24.md)。本目录保留双节点的设计和演练记录，原迁移 Runbook 和就绪门槛停止用于上线。旧双节点部署文件可在提交 `70111be` 查阅。
+
 入口：[正式Runbook](RUNBOOK.md) · [待审批变更单](APPROVALS.md) · [验证报告](VALIDATION.md) · [实际盘点](ENVIRONMENT.md) · [就绪门槛](READINESS.json)
 
 当前分支 `codex/production-readiness-phase3`，继承 Phase2 `62d53af`。本地工程/隔离演练完成不等于生产迁移批准。`node scripts/phase3/readiness.mjs` 当前按设计返回No-Go及阻塞门槛，不会调用部署命令。

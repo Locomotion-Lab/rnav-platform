@@ -100,7 +100,8 @@ const researchItem = z.object({
   venue: localized.optional(), type: optionalText, topic: optionalText, image,
   pdf: z.object({ assetId: nullableUuid, src: optionalNullableText, label: localized.optional() }).strict().nullable().optional(),
   keywords: z.array(localized).max(MAX_LIST).optional(),
-  authors: z.array(z.object({ name: localized.optional(), highlight: z.boolean().optional() }).strict()).max(MAX_LIST).optional(),
+  facultyConfirmed: z.boolean().optional(),
+  authors: z.array(z.object({ name: localized.optional(), highlight: z.boolean().optional(), memberUserId: z.string().uuid().nullable().optional() }).strict()).max(MAX_LIST).optional(),
   links
 }).strict();
 

@@ -4,9 +4,10 @@
 
 | 逻辑模块 | 目录 | 运行位置 |
 | --- | --- | --- |
-| rnav-web | apps/web | 腾讯云：Next 官网、/console、/ai、同源 API 网关及公开快照 reader |
-| rnav-backend | server | Mac mini：Express REST v1、账号/权限/成员/设备/文件、PostgreSQL |
-| rnav-agent | 后续独立服务 | Mac mini：Agent/RAG 经最小权限 API 访问业务，不直连主库 |
+| rnav-web | apps/web | 腾讯云：Next.js 公开官网 `r-navigation.com`、内部控制台 `console.r-navigation.com` |
+| rnav-backend | server | 腾讯云：Express REST v1、账号/权限/成员/设备/文件，与现有 PostgreSQL 和 COS 同属云端架构 |
+| 小砺智能体 | 后续功能 | 腾讯云：控制台登录后使用，通过业务 API 访问获准数据 |
+| 云服务器远程使用 | 后续功能 | 腾讯云：控制台登录后使用，独立授权 |
 | rnav-miniapp | 暂不开发 | 未来共享后端 API |
 
 Monitor 和 Procurement 的运行代码已移除；历史表、文件、已应用迁移和跨域引用保护保留。开发分支尚未部署到生产，线上仍运行原版本。
@@ -35,13 +36,13 @@ npm run api:check
 
 ## 架构与操作文档
 
-Phase3最新入口：[迁移准备、验证和正式Runbook](docs/phase3/README.md)。生产依赖已更新，当前生产仍未切换；原Phase2记录是历史证据。
+当前目标是云端单节点和双域名。控制台集中管理官网内容、老师论文、成员账号及设备。该方案尚未部署。
 
-- [最新目标、阶段计划与历史归档边界](docs/architecture/target-2026-11-02.md)
-- [独立 Compose、发布、备份恢复与待审批切换方案](docs/architecture/modular-operations.md)
+- [云端双域名目标、论文简化与实施顺序](docs/architecture/target-2026-11-24.md)
+- [云端上线、小砺接口与生产清理盘点](docs/architecture/cloud-operations.md)
+- [实施进度与历史方案](docs/architecture/PROGRESS.md)
 - [API v1 契约及当前覆盖边界](docs/api/README.md)
-- [本阶段改动及验证记录](docs/architecture/phase2-validation.md)
-- [Phase 1 实际环境审计（历史）](docs/architecture/audit-2026-11-01.md)
-- [论文同步操作](docs/scholarly-sync-operations.md)
+- [Phase 3 双节点准备与验证（历史）](docs/phase3/README.md)
+- [老师论文同步与发布操作](docs/scholarly-sync-operations.md)
 
-Mac 配置见 compose.mac.yaml；独立云端 Web 配置见 compose.web.yaml。数据库、内部文件、发布包和秘密不提交 Git。生产写入、重启、部署、历史数据或 COS 清理必须另行明确批准。
+数据库、内部文件、发布包和秘密不提交 Git。生产写入、重启、部署、历史数据或 COS 清理必须另行明确批准。

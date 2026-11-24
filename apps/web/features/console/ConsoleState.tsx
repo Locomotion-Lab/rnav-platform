@@ -21,7 +21,7 @@ export function ConsoleState({ description, title }: ConsoleStateProps) {
         />
         <h1 className="mt-4 font-serif text-3xl font-bold text-slate-950">{title}</h1>
         <p className="mt-4 leading-7 text-slate-600">{description}</p>
-        <Link className="mt-7 inline-block font-semibold text-cyan-800 underline" href="/">
+        <Link className="mt-7 inline-block font-semibold text-cyan-800 underline" href={(process.env.RNAV_CONSOLE_ORIGIN && process.env.RNAV_WEB_ORIGIN) || "/"}>
           返回网站首页
         </Link>
       </section>

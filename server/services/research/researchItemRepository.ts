@@ -28,8 +28,8 @@ export async function upsertResearchItem(client: ResearchClient, item: SiteRecor
     `INSERT INTO research_items (
       id, sort_order, title_zh, title_en, publication_year, venue_zh, venue_en,
       publication_type, topic, image_asset_id, image_src, image_alt, image_data_alt,
-      pdf_asset_id, pdf_src, pdf_label_zh, pdf_label_en, updated_at
-    ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,now())
+      pdf_asset_id, pdf_src, pdf_label_zh, pdf_label_en, faculty_confirmed, updated_at
+    ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,COALESCE($18,false),now())
     ON CONFLICT (id) DO UPDATE SET
       sort_order=EXCLUDED.sort_order, title_zh=EXCLUDED.title_zh, title_en=EXCLUDED.title_en,
       publication_year=EXCLUDED.publication_year, venue_zh=EXCLUDED.venue_zh,
@@ -37,13 +37,13 @@ export async function upsertResearchItem(client: ResearchClient, item: SiteRecor
       topic=EXCLUDED.topic, image_asset_id=EXCLUDED.image_asset_id, image_src=EXCLUDED.image_src,
       image_alt=EXCLUDED.image_alt, image_data_alt=EXCLUDED.image_data_alt,
       pdf_asset_id=EXCLUDED.pdf_asset_id, pdf_src=EXCLUDED.pdf_src,
-      pdf_label_zh=EXCLUDED.pdf_label_zh, pdf_label_en=EXCLUDED.pdf_label_en,
+      pdf_label_zh=EXCLUDED.pdf_label_zh, pdf_label_en=EXCLUDED.pdf_label_en, faculty_confirmed=COALESCE($18,research_items.faculty_confirmed),
       updated_at=now()`,
     [
       item.id, number(item.sortOrder ?? fallbackSortOrder), titleZh, titleEn,
       item.year === "" || item.year == null ? null : number(item.year), venueZh, venueEn,
       value(item.type), value(item.topic), ...imageValues(item.image),
-      nested(item.pdf).assetId || null, nested(item.pdf).src || null, pdfZh, pdfEn,
+      nested(item.pdf).assetId || null, nested(item.pdf).src || null, pdfZh, pdfEn, item.facultyConfirmed ?? null,
     ],
   );
 
@@ -55,8 +55,8 @@ export async function upsertResearchItem(client: ResearchClient, item: SiteRecor
     list(item.keywords).map((entry, index) => [item.id, index, ...locale(entry)]),
   );
   await insertMany(client,
-    "INSERT INTO research_item_authors (research_item_id, sort_order, name_zh, name_en, highlight) VALUES ($1,$2,$3,$4,$5)",
-    list(item.authors).map((entry, index) => [item.id, index, ...locale(entry.name), Boolean(entry.highlight)]),
+    "INSERT INTO research_item_authors (research_item_id, sort_order, name_zh, name_en, highlight, member_user_id) VALUES ($1,$2,$3,$4,$5,(SELECT id FROM users WHERE id=$6 AND account_kind='person'))",
+    list(item.authors).map((entry, index) => [item.id, index, ...locale(entry.name), Boolean(entry.highlight), entry.memberUserId ?? null]),
   );
   await insertMany(client,
     "INSERT INTO research_item_links (research_item_id, sort_order, label_zh, label_en, href, icon, variant) VALUES ($1,$2,$3,$4,$5,$6,$7)",

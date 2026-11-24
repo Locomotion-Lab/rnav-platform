@@ -3,6 +3,7 @@ import { createServer } from "node:http";
 import pg from "pg";
 import { createAuthMiddleware, createPostgresAuthRepository } from "./middleware/auth.js";
 import { createContractRouter } from "./routes/contract.js";
+import { createAssistantRouter } from "./routes/assistant.js";
 import { createPublisherService } from "./services/public-site/publisher-service.js";
 import { createPublicationsRouter } from "./routes/publications.js";
 import { createApp } from "./app.js";
@@ -68,11 +69,13 @@ const scholarlySyncService = createScholarlySyncService({
   },
   openAlexStatus,
 });
+const labAssets = createLabAssetsService(pool);
 const app = createApp({
   gatewayToken: env.gatewayToken, writeEnabled:env.writeEnabled,
   health: { database: async () => { await pool.query("SELECT 1"); return true; } },
   routers: [
     createContractRouter(),
+    createAssistantRouter(authMiddleware, labAssets),
     createPublicationsRouter({authMiddleware,service:createPublisherService(pool,createStorage(env),{root:env.publicationRoot,signingKey:env.publicationSigningKey})}),
     createAuthRouter({ repository: authRepository, authMiddleware, cookieSecure: env.cookieSecure, accountService: createAccountService(pool), trustProxy: true }),
     createProfileRouter({ authMiddleware, service: profileService, trustProxy: true }),
@@ -84,7 +87,7 @@ const app = createApp({
     createScholarlySyncRouter({ authMiddleware, service: scholarlySyncService, trustProxy: true }),
     createConsoleRouter({ authMiddleware, dashboardService: createConsoleDashboardService(pool) }), createPublicRouter({ service: publicService }),
     createSiteAdminRouter({ authMiddleware, service: siteAdminService, trustProxy: true }),
-    createLabAssetsRouter({ authMiddleware, service: createLabAssetsService(pool), trustProxy: true }),
+    createLabAssetsRouter({ authMiddleware, service: labAssets, trustProxy: true }),
   ],
 });
 const server = createServer(app);

@@ -1,5 +1,7 @@
 # 精简架构本地操作与待审批切换
 
+> 本文记录历史双节点方案。当前生产部署入口是[云端版上线与清理记录](cloud-operations.md)。
+
 适用分支 `codex/modular-platform-phase2`。11 月 1 日审计和 phase1-validation 是历史记录；最终目标以 [11 月 2 日方案](target-2026-11-02.md) 为准。不要把旧 README 的 unified 启动用于此分支。
 
 ## 独立开发、构建与部署

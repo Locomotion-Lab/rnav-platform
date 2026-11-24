@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState, type CSSProperties, type ReactNode } from "react";
+import { Fragment, useState, type CSSProperties, type ReactNode } from "react";
 import { RNAV_BRAND_ASSETS } from "../../../lib/brand";
 import { getLocalizedText, type Locale } from "../i18n";
 import { sanitizeActionUrl, sanitizePublicUrl } from "../url-sanitizer";
@@ -266,6 +266,21 @@ export function ContactCta({
   );
 }
 
+export function PublicationAuthors({ authors, locale }: {
+  authors: Array<{ name: unknown; highlight?: boolean; slug?: string }>;
+  locale: Locale;
+}) {
+  return authors.filter((author) => getLocalizedText(author.name, locale)).map((author, index) => {
+    const name = getLocalizedText(author.name, locale);
+    return <Fragment key={index}>
+      {index > 0 && ", "}
+      {author.highlight ? (
+        <strong>{author.slug ? <Link href={`/team#${encodeURIComponent(author.slug)}`}>{name}</Link> : name}</strong>
+      ) : name}
+    </Fragment>;
+  });
+}
+
 export function Publication({
   item,
   locale,
@@ -290,9 +305,7 @@ export function Publication({
         </p>
         <h3>{getLocalizedText(item.title, locale)}</h3>
         <p className="v41-muted">
-          {(item.authors ?? [])
-            .map((author: any) => getLocalizedText(author.name, locale))
-            .join(", ")}
+          <PublicationAuthors authors={item.authors ?? []} locale={locale} />
         </p>
         {Array.isArray(item.keywords) && item.keywords.length ? (
           <div className="v41-tags">

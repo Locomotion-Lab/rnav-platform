@@ -77,7 +77,7 @@ test("a member-triggered sync always leaves newly discovered works for review", 
     crossref: {} as never, enabled: true,
     providerConfig: { openAlexKeyConfigured: true, crossrefContactConfigured: false },
   });
-  const result = await service.syncMember("member-1", "member-1", "self");
+  const result = await service.syncMember("member-1", "member-1");
   assert.equal(result.candidatesCreated, 1);
   assert.equal(result.worksUpdated, 0);
   assert.equal(queries.some((sql) => sql.startsWith("SELECT * FROM scholarly_works")), false);
@@ -113,8 +113,8 @@ test("system accounts are rejected before author lookup or synchronization", asy
     crossref: {} as never, enabled: true,
     providerConfig: { openAlexKeyConfigured: true, crossrefContactConfigured: false },
   });
-  await assert.rejects(service.verifyAuthor("system-1", "A1", "system-1", "self"), /成员不存在/);
-  await assert.rejects(service.syncMember("system-1", "system-1", "self"), /成员不存在/);
+  await assert.rejects(service.verifyAuthor("system-1", "A1", "system-1"), /成员不存在/);
+  await assert.rejects(service.syncMember("system-1", "system-1"), /成员不存在/);
   assert.equal(providerCalled, false);
   assert.equal(connected, false);
 });

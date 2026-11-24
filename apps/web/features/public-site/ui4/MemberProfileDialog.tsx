@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { memberProfileLoader, type MemberProfilePayload } from "../member-profile";
 import { getLocalizedText, type Locale } from "../i18n";
 import { sanitizePublicUrl } from "../url-sanitizer";
-import { Media } from "./Primitives";
+import { Media, PublicationAuthors } from "./Primitives";
 import "./member-profile-dialog.css";
 
 export function MemberProfileDialog({ locale, member, onClose }: { locale: Locale; member: any | null; onClose: () => void }) {
@@ -49,7 +49,7 @@ export function MemberProfileDialog({ locale, member, onClose }: { locale: Local
           {facts.length ? <dl className="rnav-member-dialog-facts">{facts.map(([label, value]) => <div key={String(label)}><dt>{String(label)}</dt><dd>{text(value)}</dd></div>)}</dl> : null}
           {(profile?.links?.length || profile?.contacts?.length) ? <div className="rnav-member-dialog-links">{(profile.links ?? []).map((link: any, index: number) => sanitizePublicUrl(link.href) ? <a href={sanitizePublicUrl(link.href)} key={index} rel="noopener noreferrer" target="_blank">{text(link.label) || (zh ? "个人主页" : "Website")} ↗</a> : null)}{(profile.contacts ?? []).map((contact: any, index: number) => <span key={index}>{text(contact.label)} · {text(contact.value)}</span>)}</div> : null}
         </section> : <section aria-label={zh ? "成员论文" : "Member publications"}>
-          {publications.length ? <ol className="rnav-member-publications">{publications.map((publication: any) => <li key={publication.id}><p className="rnav-member-publication-meta">{[publication.year, text(publication.venue)].filter(Boolean).join(" · ")}</p><h3>{text(publication.title)}</h3>{publication.authors?.length ? <p>{publication.authors.map((author: any) => text(author.name)).filter(Boolean).join(", ")}</p> : null}<div>{(publication.links ?? []).map((link: any, index: number) => sanitizePublicUrl(link.href) ? <a href={sanitizePublicUrl(link.href)} key={index} rel="noopener noreferrer" target="_blank">{text(link.label) || "Link"} ↗</a> : null)}</div></li>)}</ol> : <p className="rnav-member-dialog-muted">{zh ? "暂无已审核发布的关联论文。" : "No reviewed publications are currently linked."}</p>}
+          {publications.length ? <ol className="rnav-member-publications">{publications.map((publication: any) => <li key={publication.id}><p className="rnav-member-publication-meta">{[publication.year, text(publication.venue)].filter(Boolean).join(" · ")}</p><h3>{text(publication.title)}</h3>{publication.authors?.length ? <p><PublicationAuthors authors={publication.authors} locale={locale} /></p> : null}<div>{(publication.links ?? []).map((link: any, index: number) => sanitizePublicUrl(link.href) ? <a href={sanitizePublicUrl(link.href)} key={index} rel="noopener noreferrer" target="_blank">{text(link.label) || "Link"} ↗</a> : null)}</div></li>)}</ol> : <p className="rnav-member-dialog-muted">{zh ? "暂无已审核发布的关联论文。" : "No reviewed publications are currently linked."}</p>}
         </section>}
       </div>
     </div> : null}

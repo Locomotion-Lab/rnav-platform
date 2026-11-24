@@ -10,12 +10,10 @@ function auth(user?: AuthenticatedUser): RequestHandler { return (request, _resp
 
 async function invoke(method: string, path: string, options: { user?: AuthenticatedUser; origin?: "same" | "cross"; body?: unknown } = {}) {
   const calls: string[] = [];
-  const overview = { settings: { enabled: true, crossrefContactEmail: "sync@example.org", version: 2, updatedAt: null, source: "database", openAlexApiKey: { configured: true, masked: "••••••••1234", version: 1 } }, members: [], lastScheduledRun: null };
+  const overview = { settings: { enabled: true, crossrefContactEmail: "sync@example.org", version: 2, updatedAt: null, source: "database", openAlexApiKey: { configured: true, masked: "••••••••1234", version: 1 } }, lastScheduledRun: null };
   const scholarlySettings = {
     getOverview: async () => { calls.push("getOverview"); return overview; },
     updateGlobal: async () => { calls.push("updateGlobal"); return { keyChanged: true }; },
-    updateMember: async () => { calls.push("updateMember"); return {}; },
-    bulkMembers: async () => { calls.push("bulkMembers"); return {}; },
   };
   const scholarlySync = {
     status: async () => { calls.push("status"); return { providers: { openAlex: {}, crossref: {} } }; },
@@ -44,11 +42,11 @@ test("scholarly settings never return the complete OpenAlex key", async () => {
   assert.equal((response.body as any).settings.openAlexApiKey.masked, "••••••••1234");
 });
 
-test("global and bulk scholarly mutations require same origin and validate allowed operations", async () => {
+test("global sync settings enforce same origin and retired bulk settings return 404", async () => {
   const global = { enabled: true, crossrefContactEmail: "sync@example.org", version: 2, openAlexApiKey: "new-key-123" };
   assert.equal((await invoke("PUT", "/api/settings/scholarly-sync", { user: actor, body: global })).status, 403);
   const saved = await invoke("PUT", "/api/settings/scholarly-sync", { user: actor, origin: "same", body: global });
   assert.equal(saved.status, 200); assert.deepEqual(saved.calls, ["updateGlobal", "resetOpenAlexStatus", "getOverview", "status"]);
   const rejected = await invoke("POST", "/api/settings/scholarly-sync/members/bulk", { user: actor, origin: "same", body: { operation: "auto_all" } });
-  assert.equal(rejected.status, 400); assert.deepEqual(rejected.calls, []);
+  assert.equal(rejected.status, 404); assert.deepEqual(rejected.calls, []);
 });

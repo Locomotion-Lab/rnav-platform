@@ -128,7 +128,7 @@ test("public member detail is privacy-gated and loads distinct accepted final pu
   assert.equal(calls[0].values?.[0], "alice");
   assert.match(calls[0].sql, /public_visible=true/);
   assert.match(calls[0].sql, /account_kind='person'/);
-  assert.match(calls[1].sql, /SELECT DISTINCT COALESCE/);
+  assert.match(calls[1].sql, /SELECT DISTINCT id FROM final_ids/);
   assert.match(calls[1].sql, /decision='accepted'/);
   assert.match(calls[1].sql, /mergedIntoResearchItemId/);
   assert.deepEqual(detail?.member.name, { zh: "张三", en: "" });

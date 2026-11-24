@@ -1,6 +1,5 @@
 export type ScholarlyIdentityStatus = "unconfigured" | "pending" | "verified" | "conflict";
 export type ScholarlyDecision = "pending" | "accepted" | "ignored";
-export type NewWorkPolicy = "review" | "auto";
 
 export type NormalizedScholarlyAuthor = {
   openalexAuthorId: string | null;
@@ -43,7 +42,6 @@ export type ScholarlyProfile = {
   syncEnabled: boolean;
   syncFromYear: number | null;
   syncToYear: number | null;
-  newWorkPolicy: NewWorkPolicy;
   verifiedAt: string | null;
   lastSyncedAt: string | null;
   lastSyncStatus: string | null;

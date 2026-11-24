@@ -9,6 +9,7 @@ import { DirectionsEditor } from "./DirectionsEditor";
 import { NewsLibraryEditor, PublicationLibraryEditor } from "./LibraryEditors";
 import { ContactItemsEditor, ContactPageEditor, FacilitiesPageEditor, LegacyFacilitiesEditor, PublicPageSettingsEditor, SiteSettingsEditor, TeamPageEditor } from "./PageEditors";
 import { readSiteAdminError } from "./api";
+import { PublicationRelease } from "./PublicationRelease";
 import { ConsoleAlert, ConsoleButton, ConsoleIcon } from "@/features/console/ui";
 import {
   applyConflictSnapshot,
@@ -25,7 +26,7 @@ import {
   type SiteModule,
 } from "./model";
 
-type Props = { permissions?: string[] };
+type Props = { permissions?: string[]; publicOrigin?: string };
 type LoadState = "loading" | "ready" | "error";
 type SaveState = "idle" | "saving" | "saved";
 type EditorMode = "form" | "generic" | "json";
@@ -37,7 +38,7 @@ const moduleGroups = [
 ];
 const publicPages: Record<string, string> = { home: "/", "directions-page": "/directions", "research-page": "/research", "facilities-page": "/facilities", "team-page": "/team", "news-page": "/news", "contact-page": "/contact" };
 
-export function SiteContentConsole({ permissions }: Props) {
+export function SiteContentConsole({ permissions, publicOrigin = "" }: Props) {
   const [modules, setModules] = useState<SiteModule[]>([]);
   const [selectedKey, setSelectedKey] = useState("");
   const [draftValue, setDraftValue] = useState<unknown>({});
@@ -311,7 +312,7 @@ export function SiteContentConsole({ permissions }: Props) {
             className="mt-1.5 text-3xl font-bold tracking-tight text-slate-950"
             id="site-console-heading"
           >
-            官网内容
+            对外展示信息管理
           </h1>
         </div>
         <div className="flex items-center gap-3">
@@ -342,6 +343,8 @@ export function SiteContentConsole({ permissions }: Props) {
           </ConsoleButton>
         </div>
       </div>
+
+      {permissions?.includes("site.publish") && <PublicationRelease dirty={dirty}/>}
 
       <fieldset
         aria-busy={editorInteraction.busy}
@@ -378,7 +381,7 @@ export function SiteContentConsole({ permissions }: Props) {
             <p className="mt-1 text-xs text-slate-500">
               修订版本 {selectedModule.revision ?? "未提供"}
             </p>
-            {publicPages[selectedModule.key] ? <Link className="mt-2 inline-block text-xs font-semibold text-cyan-800 underline underline-offset-4" href={publicPages[selectedModule.key]} target="_blank">打开公开页面 ↗</Link> : null}
+            {publicPages[selectedModule.key] ? <Link className="mt-2 inline-block text-xs font-semibold text-cyan-800 underline underline-offset-4" href={publicOrigin + publicPages[selectedModule.key]} target="_blank">打开公开页面 ↗</Link> : null}
           </div>
           <div
             aria-label="编辑模式"

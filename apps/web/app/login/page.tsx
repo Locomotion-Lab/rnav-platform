@@ -16,7 +16,7 @@ async function LoginContent({ searchParams }: LoginPageProps) {
   return (
     <main className="grid min-h-screen place-items-center bg-surface px-5 py-12">
       <section className="w-full max-w-md border-t-4 border-cyan-600 bg-white px-6 py-8 shadow-sm sm:px-9">
-        <Link aria-label="RNAV 首页" className="inline-flex" href="/">
+        <Link aria-label="RNAV 首页" className="inline-flex" href={(process.env.RNAV_CONSOLE_ORIGIN && process.env.RNAV_WEB_ORIGIN) || "/"}>
           <Image
             alt="RNAV — Resilient Navigation"
             className="h-auto w-40"

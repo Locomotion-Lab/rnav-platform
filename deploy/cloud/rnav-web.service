@@ -1,0 +1,17 @@
+[Unit]
+Description=RNAV public website and console
+After=network.target rnav-backend.service
+Wants=rnav-backend.service
+
+[Service]
+User=rnav
+WorkingDirectory=/srv/rnav/current/web
+EnvironmentFile=/etc/rnav/web.env
+Environment=HOSTNAME=127.0.0.1 PORT=13000 NODE_ENV=production
+ExecStart=/opt/rnav/node/bin/node apps/web/service-entry.mjs /opt/rnav/node/bin/node apps/web/server.js
+Restart=on-failure
+NoNewPrivileges=true
+ReadOnlyPaths=/srv/rnav_public
+
+[Install]
+WantedBy=multi-user.target

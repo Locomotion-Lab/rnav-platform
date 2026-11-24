@@ -1,0 +1,16 @@
+[Unit]
+Description=RNAV business API
+After=postgresql.service
+Wants=postgresql.service
+
+[Service]
+User=rnav
+WorkingDirectory=/srv/rnav/current
+EnvironmentFile=/etc/rnav/backend.env
+Environment=HOST=127.0.0.1 PORT=14090 NODE_ENV=production COOKIE_SECURE=true REQUIRE_GATEWAY_TOKEN=true
+ExecStart=/opt/rnav/node/bin/node server/dist/index.js
+Restart=on-failure
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

@@ -10,6 +10,12 @@ const candidateSelect = `SELECT work.id,work.decision,work.source_type,work.open
   FROM scholarly_works work LEFT JOIN scholarly_work_members member ON member.work_id=work.id
   LEFT JOIN users ON users.id=member.user_id LEFT JOIN user_profiles profile ON profile.user_id=users.id`;
 
+const hasFacultySource = `EXISTS (
+  SELECT 1 FROM scholarly_work_members source
+  JOIN user_profiles teacher ON teacher.user_id=source.user_id AND teacher.degree_level='faculty'
+  WHERE source.work_id=work.id AND source.author_position IS NOT NULL
+)`;
+
 const normalizedName = (value: string) => value.toLocaleLowerCase().normalize("NFKD").replace(/[^\p{L}\p{N}]+/gu, "");
 export function countAuthorOverlap(candidateAuthors: string[], existingAuthors: string[]) {
   const candidates = new Set(candidateAuthors.map(normalizedName).filter(Boolean));
@@ -51,7 +57,6 @@ function profileRow(row: Record<string, unknown>): ScholarlyProfile {
     identityStatus: String(row.identity_status ?? "unconfigured") as ScholarlyProfile["identityStatus"],
     syncEnabled: Boolean(row.sync_enabled), syncFromYear: row.sync_from_year == null ? null : Number(row.sync_from_year),
     syncToYear: row.sync_to_year == null ? null : Number(row.sync_to_year),
-    newWorkPolicy: String(row.new_work_policy ?? "review") as ScholarlyProfile["newWorkPolicy"],
     verifiedAt: row.verified_at ? new Date(String(row.verified_at)).toISOString() : null,
     lastSyncedAt: row.last_synced_at ? new Date(String(row.last_synced_at)).toISOString() : null,
     lastSyncStatus: row.last_sync_status ? String(row.last_sync_status) : null,
@@ -68,10 +73,8 @@ export function resolveScholarlyProfileUpdate(current: ScholarlyProfile, input: 
   const syncEnabled = orcidChanged ? false : (input.syncEnabled ?? current.syncEnabled);
   const syncFromYear = input.syncFromYear === undefined ? current.syncFromYear : input.syncFromYear;
   const syncToYear = input.syncToYear === undefined ? current.syncToYear : input.syncToYear;
-  const newWorkPolicy = orcidChanged ? "review" : (input.newWorkPolicy ?? current.newWorkPolicy);
   if (syncEnabled && identityStatus !== "verified") throw new Error("请先验证 OpenAlex 作者身份再启用同步");
-  if (newWorkPolicy === "auto" && (!Number.isInteger(syncFromYear) || !Number.isInteger(syncToYear) || syncFromYear! > syncToYear!)) throw new Error("自动接收前必须设置有效的同步起止年份");
-  return { orcidId, orcidChanged, identityStatus, openalexAuthorId, syncEnabled, syncFromYear, syncToYear, newWorkPolicy };
+  return { orcidId, orcidChanged, identityStatus, openalexAuthorId, syncEnabled, syncFromYear, syncToYear };
 }
 
 const profileSelect = `SELECT users.id user_id,users.display_name,user_profiles.name_zh,user_profiles.name_en,
@@ -80,13 +83,12 @@ const profileSelect = `SELECT users.id user_id,users.display_name,user_profiles.
   COALESCE(scholarly.sync_enabled,false) sync_enabled,
   COALESCE(scholarly.sync_from_year,CASE WHEN user_profiles.degree_level IN ('phd','master','undergrad') AND user_profiles.enrollment_year ~ '^\\d{4}$' THEN user_profiles.enrollment_year::int END) sync_from_year,
   COALESCE(scholarly.sync_to_year,CASE WHEN user_profiles.member_status='alumni' AND user_profiles.graduation_year ~ '^\\d{4}$' THEN user_profiles.graduation_year::int END) sync_to_year,
-  COALESCE(scholarly.new_work_policy,'review') new_work_policy,scholarly.verified_at,scholarly.last_synced_at,
   scholarly.last_sync_status,scholarly.last_sync_message
   FROM users JOIN user_profiles ON user_profiles.user_id=users.id
   LEFT JOIN member_scholarly_profiles scholarly ON scholarly.user_id=users.id`;
 
 async function readProfile(queryable: Queryable, userId: string) {
-  const result = await queryable.query<Record<string, unknown>>(`${profileSelect} WHERE users.id=$1 AND users.account_kind='person'`, [userId]);
+  const result = await queryable.query<Record<string, unknown>>(`${profileSelect} WHERE users.id=$1 AND users.account_kind='person' AND user_profiles.degree_level='faculty'`, [userId]);
   return result.rows[0] ? { ...profileRow(result.rows[0]), memberName: String(result.rows[0].name_zh || result.rows[0].name_en || result.rows[0].display_name), academicStage: String(result.rows[0].degree_level ?? ""), memberStatus: String(result.rows[0].member_status ?? "current") } : null;
 }
 
@@ -96,29 +98,38 @@ export function createScholarlySyncRepository(pool: Pick<Pool, "query" | "connec
     return enrichCandidates(pool, result.rows);
   };
   return {
+    async listAuthorMembers() {
+      const result = await pool.query<{ id: string; nameZh: string; nameEn: string; faculty: boolean }>(
+        `SELECT users.id, COALESCE(NULLIF(p.name_zh,''), users.display_name) "nameZh",
+                COALESCE(p.name_en,'') "nameEn", p.degree_level='faculty' faculty
+         FROM users JOIN user_profiles p ON p.user_id=users.id
+         WHERE users.account_kind='person' ORDER BY p.name_zh, p.name_en, users.id`,
+      );
+      return result.rows;
+    },
     getProfile: (userId: string) => readProfile(pool, userId),
-    async saveProfile(userId: string, input: Partial<ScholarlyProfile>, actorId: string, source: "admin" | "self" = "admin") {
+    async saveProfile(userId: string, input: Partial<ScholarlyProfile>, actorId: string) {
       const client = await pool.connect();
       try {
         await client.query("BEGIN");
         const current = await readProfile(client, userId);
         if (!current) { await client.query("ROLLBACK"); return null; }
-        const { orcidId, orcidChanged, identityStatus, openalexAuthorId, syncEnabled, syncFromYear, syncToYear, newWorkPolicy } = resolveScholarlyProfileUpdate(current, input);
+        const { orcidId, orcidChanged, identityStatus, openalexAuthorId, syncEnabled, syncFromYear, syncToYear } = resolveScholarlyProfileUpdate(current, input);
         await client.query(
           `INSERT INTO member_scholarly_profiles(user_id,orcid_id,openalex_author_id,identity_status,sync_enabled,sync_from_year,sync_to_year,new_work_policy,updated_at)
-           VALUES($1,$2,$3,$4,$5,$6,$7,$8,now())
+           VALUES($1,$2,$3,$4,$5,$6,$7,'review',now())
            ON CONFLICT(user_id) DO UPDATE SET orcid_id=EXCLUDED.orcid_id,openalex_author_id=EXCLUDED.openalex_author_id,
            identity_status=EXCLUDED.identity_status,sync_enabled=EXCLUDED.sync_enabled,sync_from_year=EXCLUDED.sync_from_year,
            sync_to_year=EXCLUDED.sync_to_year,new_work_policy=EXCLUDED.new_work_policy,updated_at=now()`,
-          [userId, orcidId, openalexAuthorId, identityStatus, syncEnabled, syncFromYear, syncToYear, newWorkPolicy],
+          [userId, orcidId, openalexAuthorId, identityStatus, syncEnabled, syncFromYear, syncToYear],
         );
-        await client.query("INSERT INTO audit_logs(actor_id,action,target_type,target_id,detail) VALUES($1,'scholarly.profile.update','member_scholarly_profile',$2,$3::jsonb)", [actorId, userId, JSON.stringify({ source, orcidChanged, syncEnabled, syncFromYear, syncToYear, newWorkPolicy })]);
+        await client.query("INSERT INTO audit_logs(actor_id,action,target_type,target_id,detail) VALUES($1,'scholarly.profile.update','member_scholarly_profile',$2,$3::jsonb)", [actorId, userId, JSON.stringify({ source: "admin", orcidChanged, syncEnabled, syncFromYear, syncToYear })]);
         const saved = await readProfile(client, userId);
         await client.query("COMMIT");
         return saved;
       } catch (error) { await client.query("ROLLBACK"); throw error; } finally { client.release(); }
     },
-    async verifyAuthor(userId: string, openalexAuthorId: string, orcidId: string | null, actorId: string, source: "admin" | "self" = "admin") {
+    async verifyAuthor(userId: string, openalexAuthorId: string, orcidId: string | null, actorId: string) {
       const client = await pool.connect();
       try {
         await client.query("BEGIN");
@@ -129,14 +140,14 @@ export function createScholarlySyncRepository(pool: Pick<Pool, "query" | "connec
            openalex_author_id=EXCLUDED.openalex_author_id,identity_status='verified',verified_at=now(),verified_by=$4,updated_at=now()`,
           [userId, orcidId, openalexAuthorId, actorId],
         );
-        await client.query("INSERT INTO audit_logs(actor_id,action,target_type,target_id,detail) VALUES($1,'scholarly.author.verify','member_scholarly_profile',$2,$3::jsonb)", [actorId, userId, JSON.stringify({ source, openalexAuthorId })]);
+        await client.query("INSERT INTO audit_logs(actor_id,action,target_type,target_id,detail) VALUES($1,'scholarly.author.verify','member_scholarly_profile',$2,$3::jsonb)", [actorId, userId, JSON.stringify({ source: "admin", openalexAuthorId })]);
         const saved = await readProfile(client, userId);
         await client.query("COMMIT");
         return saved;
       } catch (error) { await client.query("ROLLBACK"); throw error; } finally { client.release(); }
     },
     async listSyncProfiles(userId?: string) {
-      const result = await pool.query<Record<string, unknown>>(`${profileSelect} WHERE scholarly.identity_status='verified' AND scholarly.sync_enabled=true${userId ? " AND users.id=$1" : ""} ORDER BY users.id`, userId ? [userId] : []);
+      const result = await pool.query<Record<string, unknown>>(`${profileSelect} WHERE users.account_kind='person' AND user_profiles.degree_level='faculty' AND scholarly.identity_status='verified' AND scholarly.sync_enabled=true${userId ? " AND users.id=$1" : ""} ORDER BY users.id`, userId ? [userId] : []);
       return result.rows.map((row) => ({ ...profileRow(row), memberName: String(row.name_zh || row.name_en || row.display_name), academicStage: String(row.degree_level ?? "") }));
     },
     async findStoredWork(work: NormalizedScholarlyWork) {
@@ -202,7 +213,7 @@ export function createScholarlySyncRepository(pool: Pick<Pool, "query" | "connec
       await pool.query(`UPDATE scholarly_sync_runs SET status=$2,finished_at=now(),members_checked=$3,works_seen=$4,candidates_created=$5,works_updated=$6,failures=$7,error_summary=$8::jsonb WHERE id=$1`, [id, summary.status, summary.membersChecked, summary.worksSeen, summary.candidatesCreated, summary.worksUpdated, summary.failures, JSON.stringify(summary.errors)]);
     },
     async listCandidates(decision: "pending" | "ignored") {
-      return candidateRows("work.decision=$1 AND work.source_type='openalex'", [decision]);
+      return candidateRows(`work.decision=$1 AND work.source_type='openalex' AND ${hasFacultySource}`, [decision]);
     },
     async getWorksByIds(ids: string[]) {
       if (!ids.length) return [];
@@ -210,9 +221,9 @@ export function createScholarlySyncRepository(pool: Pick<Pool, "query" | "connec
     },
     async status() {
       const [profiles, candidates, ignored, lastRun] = await Promise.all([
-        pool.query<{ verified: number; enabled: number; total: number }>("SELECT count(*)::int total,count(*) FILTER(WHERE identity_status='verified')::int verified,count(*) FILTER(WHERE sync_enabled)::int enabled FROM member_scholarly_profiles"),
-        pool.query<{ count: number }>("SELECT count(*)::int count FROM scholarly_works WHERE decision='pending'"),
-        pool.query<{ count: number }>("SELECT count(*)::int count FROM scholarly_works WHERE decision='ignored'"),
+        pool.query<{ verified: number; enabled: number; total: number }>("SELECT count(*)::int total,count(*) FILTER(WHERE identity_status='verified')::int verified,count(*) FILTER(WHERE sync_enabled)::int enabled FROM member_scholarly_profiles source JOIN user_profiles teacher ON teacher.user_id=source.user_id WHERE teacher.degree_level='faculty'"),
+        pool.query<{ count: number }>(`SELECT count(*)::int count FROM scholarly_works work WHERE decision='pending' AND ${hasFacultySource}`),
+        pool.query<{ count: number }>(`SELECT count(*)::int count FROM scholarly_works work WHERE decision='ignored' AND ${hasFacultySource}`),
         pool.query<Record<string, unknown>>("SELECT * FROM scholarly_sync_runs ORDER BY started_at DESC LIMIT 1"),
       ]);
       return { profiles: profiles.rows[0], pending: candidates.rows[0].count, ignored: ignored.rows[0].count, lastRun: lastRun.rows[0] ?? null };

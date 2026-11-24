@@ -14,12 +14,16 @@ export async function proxyInternalApi(
   let incoming: URL;
   try { incoming=getRequestOrigin(request); } catch {return NextResponse.json({code:"ORIGIN_DENIED",error:"Forbidden host"},{status:403});}
   const origin = request.headers.get("origin");
+  const publicApi = /^\/api\/(?:v1\/)?public(?:\/|$)/.test(upstreamPath);
+  if (process.env.RNAV_CONSOLE_ORIGIN && !publicApi && incoming.origin !== new URL(process.env.RNAV_CONSOLE_ORIGIN).origin) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
   if (!readMethods.has(request.method.toUpperCase()) && origin !== incoming.origin) {
     return NextResponse.json({ code:"ORIGIN_DENIED", error: "Forbidden origin" }, { status: 403 });
   }
 
   const headers = gatewayHeaders();
-  for (const name of ["accept", "content-type", "cookie"]) {
+  for (const name of publicApi ? ["accept"] : ["accept", "content-type", "cookie"]) {
     const value = request.headers.get(name);
     if (value) headers.set(name, value);
   }

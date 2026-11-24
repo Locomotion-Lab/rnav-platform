@@ -1,4 +1,4 @@
-import type { Pool, PoolClient, QueryResult } from "pg";
+import type { Pool, PoolClient } from "pg";
 import { createPostgresPublicSiteRepository } from "../public-site/postgres-repository.js";
 import { pageKeys, type ContactItems, type PageKey, type SiteRecord } from "./schemas.js";
 import type { PublicSiteRepository } from "../public-site/service.js";
@@ -35,10 +35,6 @@ const imageValues = (input: unknown) => {
   const item = nested(input);
   return [item.assetId || null, item.src || null, item.alt || null, item.dataAlt || null];
 };
-
-async function queryOne<T extends Record<string, unknown>>(queryable: Queryable, sql: string, values?: readonly unknown[]) {
-  return (await queryable.query<T>(sql, values ? [...values] : undefined)).rows[0];
-}
 
 async function claimRevision(client: PoolClient, moduleKey: string, expected: string) {
   const result = await client.query<{ revision: string }>(
@@ -130,7 +126,8 @@ export function createPostgresSiteAdminRepository(
   pool: TransactionPool,
   dependencies: { publicRepositoryFactory?: (queryable: Queryable) => PublicSiteRepository } = {}
 ): SiteAdminRepository {
-  const publicRepositoryFactory = dependencies.publicRepositoryFactory ?? createPostgresPublicSiteRepository;
+  const publicRepositoryFactory = dependencies.publicRepositoryFactory ??
+    ((client: Queryable) => createPostgresPublicSiteRepository(client, { editing: true }));
 
   const replaceSimpleCollection = (
     moduleKey: string,

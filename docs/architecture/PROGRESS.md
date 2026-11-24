@@ -1,7 +1,7 @@
 # 架构重构进度入口
 
-当前开发分支：`codex/production-readiness-phase3`。最新入口：[Phase3准备状态](../phase3/README.md)、[正式Runbook](../phase3/RUNBOOK.md)、[验证报告](../phase3/VALIDATION.md)、[待审批变更](../phase3/APPROVALS.md)。
+当前目标见[云端单节点与双域名方案](target-2026-11-24.md)。已实现分域、控制台发布、老师论文审核与小砺只读接口。隔离验证、DNS/TLS 状态及生产清理盘点见[云端运维](cloud-operations.md)。
 
-Phase1实际审计和Phase2本地演练已完成；Phase3生产部署准备与隔离双节点演练见上述记录。**生产迁移尚未执行，正式迁移当前No-Go，必须先完成授权/真实数据/真实链路/证书和恢复门槛。**
+Phase 1 审计、Phase 2 功能精简与前后端分离、Phase 3 隔离双节点演练均已记录。Phase 3 的 Mac 迁移、隧道与切换操作已停用；已有 API、公开投影、发布和备份能力可沿用。
 
-历史材料保留用于追溯：[Phase2目标](target-2026-11-02.md)、[Phase2验证](phase2-validation.md)、[Phase1审计](audit-2026-11-01.md)。
+历史材料：[Phase 3 验证](../phase3/VALIDATION.md)、[Phase 2 目标](target-2026-11-02.md)、[Phase 2 验证](phase2-validation.md)、[Phase 1 审计](audit-2026-11-01.md)。

@@ -11,6 +11,180 @@
     }
   ],
   "paths": {
+    "/api/v1/assistant/capabilities": {
+      "get": {
+        "operationId": "get__api_v1_assistant_capabilities",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/assistant.ts",
+        "responses": {
+          "200": {
+            "description": "Validated core DTO",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistantCapabilities"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "API error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "API error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "API error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "API error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "API error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Unavailable or business write freeze",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
+    "/api/v1/assistant/equipment": {
+      "get": {
+        "operationId": "get__api_v1_assistant_equipment",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/assistant.ts",
+        "responses": {
+          "200": {
+            "description": "Validated core DTO",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistantEquipment"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "API error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "API error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "API error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "API error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "API error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Unavailable or business write freeze",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
     "/api/v1/auth/login": {
       "post": {
         "operationId": "post__api_v1_auth_login",
@@ -5009,16 +5183,25 @@
         }
       }
     },
-    "/api/v1/scholarly-sync/me": {
-      "get": {
-        "operationId": "get__api_v1_scholarly_sync_me",
-        "parameters": [],
+    "/api/v1/publications/{id}/activate": {
+      "post": {
+        "operationId": "post__api_v1_publications__id__activate",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "security": [
           {
             "sessionCookie": []
           }
         ],
-        "x-validation-source": "server/routes/scholarly-sync.ts",
+        "x-validation-source": "server/routes/publications.ts",
         "responses": {
           "400": {
             "description": "API error",
@@ -5082,245 +5265,24 @@
           },
           "2XX": {
             "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        },
+        "x-request-schema": "activatePublicationSchema",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/activatePublicationSchema"
+              }
+            }
           }
         }
-      },
-      "patch": {
-        "operationId": "patch__api_v1_scholarly_sync_me",
-        "parameters": [],
-        "security": [
-          {
-            "sessionCookie": []
-          }
-        ],
-        "x-validation-source": "server/routes/scholarly-sync.ts",
-        "responses": {
-          "400": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "413": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Unavailable or business write freeze",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "2XX": {
-            "description": "Success (status depends on operation); see validation source for domain DTO"
-          }
-        },
-        "x-request-schema": "selfScholarlyProfilePatchSchema"
       }
     },
-    "/api/v1/scholarly-sync/me/resolve": {
-      "post": {
-        "operationId": "post__api_v1_scholarly_sync_me_resolve",
-        "parameters": [],
-        "security": [
-          {
-            "sessionCookie": []
-          }
-        ],
-        "x-validation-source": "server/routes/scholarly-sync.ts",
-        "responses": {
-          "400": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "413": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Unavailable or business write freeze",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "2XX": {
-            "description": "Success (status depends on operation); see validation source for domain DTO"
-          }
-        },
-        "x-request-schema": "resolveAuthorSchema"
-      }
-    },
-    "/api/v1/scholarly-sync/me/verify-author": {
-      "post": {
-        "operationId": "post__api_v1_scholarly_sync_me_verify_author",
-        "parameters": [],
-        "security": [
-          {
-            "sessionCookie": []
-          }
-        ],
-        "x-validation-source": "server/routes/scholarly-sync.ts",
-        "responses": {
-          "400": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "413": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Unavailable or business write freeze",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "2XX": {
-            "description": "Success (status depends on operation); see validation source for domain DTO"
-          }
-        },
-        "x-request-schema": "verifyAuthorSchema"
-      }
-    },
-    "/api/v1/scholarly-sync/me/sync": {
-      "post": {
-        "operationId": "post__api_v1_scholarly_sync_me_sync",
+    "/api/v1/scholarly-sync/author-members": {
+      "get": {
+        "operationId": "get__api_v1_scholarly_sync_author_members",
         "parameters": [],
         "security": [
           {
@@ -7359,169 +7321,6 @@
     "/api/v1/settings/scholarly-sync/openalex/check": {
       "post": {
         "operationId": "post__api_v1_settings_scholarly_sync_openalex_check",
-        "parameters": [],
-        "security": [
-          {
-            "sessionCookie": []
-          }
-        ],
-        "x-validation-source": "server/routes/settings.ts",
-        "responses": {
-          "400": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "413": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Unavailable or business write freeze",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "2XX": {
-            "description": "Success (status depends on operation); see validation source for domain DTO"
-          }
-        }
-      }
-    },
-    "/api/v1/settings/scholarly-sync/members/{userId}": {
-      "patch": {
-        "operationId": "patch__api_v1_settings_scholarly_sync_members__userId_",
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "security": [
-          {
-            "sessionCookie": []
-          }
-        ],
-        "x-validation-source": "server/routes/settings.ts",
-        "responses": {
-          "400": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "413": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Unavailable or business write freeze",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "2XX": {
-            "description": "Success (status depends on operation); see validation source for domain DTO"
-          }
-        }
-      }
-    },
-    "/api/v1/settings/scholarly-sync/members/bulk": {
-      "post": {
-        "operationId": "post__api_v1_settings_scholarly_sync_members_bulk",
         "parameters": [],
         "security": [
           {
@@ -15236,6 +15035,9 @@
             "format": "uuid",
             "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
           },
+          "currentId": {
+            "type": "string"
+          },
           "sha256": {
             "type": "string",
             "pattern": "^[a-f0-9]{64}$"
@@ -15310,6 +15112,7 @@
         },
         "required": [
           "id",
+          "currentId",
           "sha256",
           "publication"
         ],
@@ -15352,6 +15155,154 @@
           "sha256"
         ],
         "additionalProperties": false
+      },
+      "activatePublicationSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "expectedCurrent": {
+            "anyOf": [
+              {
+                "type": "string",
+                "const": "none"
+              },
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              }
+            ]
+          }
+        },
+        "required": [
+          "expectedCurrent"
+        ],
+        "additionalProperties": false
+      },
+      "AssistantCapabilities": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "enum": [
+                    "equipment",
+                    "yuque",
+                    "remote-use"
+                  ]
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "available",
+                    "forbidden",
+                    "unconfigured"
+                  ]
+                },
+                "href": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "status"
+              ]
+            }
+          },
+          "canRequestChanges": {
+            "type": "boolean"
+          },
+          "writeToolsEnabled": {
+            "type": "boolean",
+            "const": false
+          }
+        },
+        "required": [
+          "sources",
+          "canRequestChanges",
+          "writeToolsEnabled"
+        ]
+      },
+      "AssistantEquipment": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 191
+                },
+                "name": {
+                  "type": "object",
+                  "properties": {
+                    "zh": {
+                      "type": "string",
+                      "maxLength": 20000
+                    },
+                    "en": {
+                      "type": "string",
+                      "maxLength": 20000
+                    }
+                  },
+                  "required": [
+                    "zh",
+                    "en"
+                  ],
+                  "additionalProperties": false
+                },
+                "manufacturer": {
+                  "default": "",
+                  "type": "string",
+                  "maxLength": 500
+                },
+                "model": {
+                  "type": "string",
+                  "maxLength": 500
+                },
+                "condition": {
+                  "default": "normal",
+                  "type": "string",
+                  "enum": [
+                    "normal",
+                    "maintenance",
+                    "retired"
+                  ]
+                },
+                "currentPlatformCode": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 191
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "code",
+                "name",
+                "model",
+                "currentPlatformCode"
+              ]
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
       }
     }
   }
