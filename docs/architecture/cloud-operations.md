@@ -2,6 +2,10 @@
 
 当前代码使用同一腾讯云服务器上的 Nginx、Next.js、Express 和现有 PostgreSQL。Web 和 API 监听回环端口，分别为 13000 与 14090。保留现有 COS 和账号数据。
 
+## 2026-11-24 成员目录上线
+
+活动代码为 `29e75b5`，数据库已应用 047–048，官网已切换到新签名快照。账号停用记录、上线前备份位置、验证和回退步骤见[成员目录发布记录](member-directory-release.md)。
+
 ## 2026-11-24 正式上线
 
 - 生产版本 `fc3544b` 运行于 `/srv/rnav/current`。公网 `r-navigation.com` 提供官网，`console.r-navigation.com` 提供控制台，`www` 重定向至主域。Nginx 保留 Certbot 的 HTTP 验证目录。Web、API、定时同步已设为开机启动；旧服务与旧 4092 进程已停止。
