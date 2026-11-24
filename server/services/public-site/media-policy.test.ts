@@ -6,3 +6,9 @@ test("external scholarly PDF links are never treated as owned objects",()=>{
  assert.equal(shouldCopyMedia('/api/media/files/id','src',true),true);
  assert.equal(shouldCopyMedia('https://r-navigation-1326672316.cos.ap-beijing.myqcloud.com/rnav/a.pdf','href',false),true);
 });
+
+test("links to an approved origin's web pages are preserved as links", () => {
+  assert.equal(shouldCopyMedia("https://liesmars.whu.edu.cn/", "href", false), false);
+  assert.equal(shouldCopyMedia("https://liesmars.whu.edu.cn/images/banner.jpg", "src", false), true);
+  assert.equal(shouldCopyMedia("https://liesmars.whu.edu.cn/images/banner.jpg", "href", false), true);
+});

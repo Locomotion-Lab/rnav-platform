@@ -7,5 +7,10 @@ export function shouldCopyMedia(value: string, field: string, registered: boolea
   if (!value || !["src","href"].includes(field)) return false;
   if (/^\/(?:brand\/|og-default\.svg$)/.test(value)) return false;
   if (registered || value.startsWith("/api/media/files/")) return true;
-  try { const url=new URL(value); return ownedMediaOrigins.has(url.origin) || (field === "src" && !/\.pdf$/i.test(url.pathname) && !(url.hostname === "arxiv.org" && url.pathname.startsWith("/pdf/"))); } catch { return field === "src"; }
+  try {
+    const url = new URL(value);
+    const owned = ownedMediaOrigins.has(url.origin);
+    if (field === "href") return owned && /\.(?:png|jpe?g|webp|pdf)$/i.test(url.pathname);
+    return owned || (!/\.pdf$/i.test(url.pathname) && !(url.hostname === "arxiv.org" && url.pathname.startsWith("/pdf/")));
+  } catch { return field === "src"; }
 }
