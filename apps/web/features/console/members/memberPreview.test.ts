@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { memberPreview } from "./memberPreview.ts";
-import type { Member } from "./MemberManagement";
+import type { MemberProfile } from "./profileModel.ts";
 const member = {
   publicFields: [],
   memberStatus: "current",
-  academicStage: "master",
+  memberRole: "student", degrees: ["master"],
   nameZh: "成员",
   nameEn: "Member",
   publicEmail: "public@example.com",
@@ -21,7 +21,7 @@ const member = {
   thesisEn: "Thesis",
   destinationZh: "去向",
   destinationEn: "Destination",
-} as unknown as Member;
+} as unknown as MemberProfile;
 test("preview omits all unchecked fields and never exposes private account contact data", () => {
   const hidden = memberPreview(member);
   assert.deepEqual(hidden.name, { zh: "", en: "" });
@@ -48,13 +48,13 @@ test("preview only publishes graduation, thesis and destination for alumni", () 
   assert.deepEqual(alumni.enrollmentYear, { zh: "", en: "" });
 });
 
-test("postdoc preview separates the postdoc title from the PhD cohort", () => {
+test("teacher preview separates the teacher role from the degree", () => {
   const preview = memberPreview({
     ...member,
-    academicStage: "postdoc",
+    memberRole: "teacher", degrees: ["phd"],
     enrollmentYear: "2024",
     publicFields: ["academic_stage", "enrollment_year"],
   });
-  assert.deepEqual(preview.role, { zh: "博士后", en: "Postdoctoral Researcher" });
-  assert.deepEqual(preview.degree, { zh: "2024级博士", en: "PhD, Class of 2024" });
+  assert.deepEqual(preview.role, { zh: "老师", en: "Faculty" });
+  assert.deepEqual(preview.degree, { zh: "博士", en: "PhD" });
 });

@@ -3,13 +3,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ConsoleApiError, consoleApi } from "@/lib/consoleApi";
-import { MediaPicker } from "@/features/console/ui/MediaPicker";
-import { academicStageLabels, publicProfileFieldGroups, type AcademicStage } from "@/features/console/members/profileModel";
+import { degreeLabels, memberRoleLabels, memberStatusLabels, publicProfileFieldGroups, type MemberStatus, type MemberRole, type Degree } from "@/features/console/members/profileModel";
 import { personIdentityFromChineseName } from "@/features/console/members/memberIdentity";
 
 type PersonalLink = { labelZh: string; labelEn: string; url: string };
 type Profile = {
-  version: number; username: string; accountKind: "person" | "system"; memberStatus: "current" | "alumni"; academicStage: AcademicStage;
+  version: number; username: string; accountKind: "person" | "system"; memberStatus: MemberStatus; memberRole: MemberRole; degrees: Degree[];
   publicVisible: boolean; nameZh: string; nameEn: string; publicEmail: string; phone: string; bioZh: string; bioEn: string;
   researchInterestsZh: string; researchInterestsEn: string; enrollmentYear: string; graduationYear: string;
   majorZh: string; majorEn: string; thesisZh: string; thesisEn: string; destinationZh: string; destinationEn: string;
@@ -27,7 +26,6 @@ export function ProfileConsole({ mustChangePassword }: { mustChangePassword: boo
   const initial: Tab = mustChangePassword ? "security" : requestedSection === "security" || requestedSection === "public" ? requestedSection : "profile";
   const [tab, setTab] = useState<Tab>(initial), [profile, setProfile] = useState<Profile | null>(null), [draft, setDraft] = useState<Profile | null>(null);
   const [busy, setBusy] = useState(false), [message, setMessage] = useState(""), [error, setError] = useState("");
-  const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
   useEffect(() => { if (!mustChangePassword) consoleApi<Profile>("/api/profile").then((value) => { setProfile(value); setDraft(value); }).catch((reason) => setError(reason.message)); }, [mustChangePassword]);
   const visible = useMemo(() => new Set(draft?.publicFields ?? []), [draft]);
   const update = <K extends keyof Profile>(key: K, value: Profile[K]) => setDraft((current) => current ? { ...current, [key]: value } : current);
@@ -66,12 +64,12 @@ export function ProfileConsole({ mustChangePassword }: { mustChangePassword: boo
     const file = event.target.files?.[0]; if (!file) return;
     setBusy(true); setError(""); setMessage("");
     try {
-      const data = new FormData(); data.append("file", file);
+      const data = new FormData(); data.append("file", file); data.append("category", "avatar");
       const asset = await consoleApi<{ id: string; url: string }>("/api/media/upload", { method: "POST", body: data });
       setDraft((current) => current ? {
         ...current,
         avatarAssetId: asset.id,
-        avatarUrl: asset.url,
+        avatarUrl: `/api/v1/media/files/${asset.id}`,
         avatarPositionX: 50,
         avatarPositionY: 50,
         avatarZoom: 1,
@@ -103,13 +101,14 @@ export function ProfileConsole({ mustChangePassword }: { mustChangePassword: boo
     {tab === "profile" ? <div className="mt-7 space-y-8">
       <section className="grid gap-5 rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:grid-cols-[160px_1fr]">
         <div>{draft.avatarUrl ? <AvatarPreview alt="个人照片预览" className="w-40" profile={draft} /> : <div className="grid aspect-square w-40 place-items-center bg-slate-100 text-sm text-slate-500">尚未上传照片</div>}</div>
-        <div><h2 className="font-semibold text-blue-950">个人照片</h2><p className="mt-2 text-sm text-slate-600">支持 JPG、PNG、WebP。重新上传并保存后，原照片若未被其他业务引用会进入回收站。</p><div className="mt-4 flex flex-wrap gap-3"><label className="cursor-pointer rounded-lg bg-cyan-700 px-4 py-2 text-sm font-semibold text-white">{draft.avatarUrl ? "重新上传" : "上传照片"}<input accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={uploadAvatar} type="file" /></label><button className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700" onClick={() => setMediaPickerOpen(true)} type="button">从资源库选择</button>{draft.avatarAssetId ? <button className="rounded-lg border border-slate-300 px-4 py-2 text-sm" onClick={() => { update("avatarAssetId", null); update("avatarUrl", null); }} type="button">移除照片</button> : null}</div>{draft.avatarUrl ? <div className="mt-5 grid gap-4 sm:grid-cols-3"><Range label="水平位置" max={100} min={0} onChange={(value) => update("avatarPositionX", value)} value={draft.avatarPositionX} /><Range label="垂直位置" max={100} min={0} onChange={(value) => update("avatarPositionY", value)} value={draft.avatarPositionY} /><Range label="缩放" max={3} min={1} onChange={(value) => update("avatarZoom", value)} step={0.05} value={draft.avatarZoom} /></div> : null}</div>
+        <div><h2 className="font-semibold text-blue-950">个人照片</h2><p className="mt-2 text-sm text-slate-600">支持 JPG、PNG、WebP。重新上传并保存后，原照片若未被其他业务引用会进入回收站。</p><div className="mt-4 flex flex-wrap gap-3"><label className="cursor-pointer rounded-lg bg-cyan-700 px-4 py-2 text-sm font-semibold text-white">{draft.avatarUrl ? "重新上传" : "上传照片"}<input accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={uploadAvatar} type="file" /></label>{draft.avatarAssetId ? <button className="rounded-lg border border-slate-300 px-4 py-2 text-sm" onClick={() => { update("avatarAssetId", null); update("avatarUrl", null); }} type="button">移除照片</button> : null}</div>{draft.avatarUrl ? <div className="mt-5 grid gap-4 sm:grid-cols-3"><Range label="水平位置" max={100} min={0} onChange={(value) => update("avatarPositionX", value)} value={draft.avatarPositionX} /><Range label="垂直位置" max={100} min={0} onChange={(value) => update("avatarPositionY", value)} value={draft.avatarPositionY} /><Range label="缩放" max={3} min={1} onChange={(value) => update("avatarZoom", value)} step={0.05} value={draft.avatarZoom} /></div> : null}</div>
       </section>
-      <div className="grid gap-5 sm:grid-cols-2"><ReadOnly label="用户名（中文姓名全拼，姓在前）" value={draft.username} /><ReadOnly label="成员状态（由管理员维护）" value={draft.memberStatus === "alumni" ? "校友" : "在组"} />
+      <div className="grid gap-5 sm:grid-cols-2"><ReadOnly label="用户名（中文姓名全拼，姓在前）" value={draft.username} /><ReadOnly label="在校状态" value={memberStatusLabels[draft.memberStatus]} />
         <TextField label="中文姓名" value={draft.nameZh} onChange={updateIdentity} />
         {draft.accountKind === "person" ? <ReadOnly label="英文姓名（名-姓，自动生成）" value={draft.nameEn} /> : <TextField label="英文姓名" value={draft.nameEn} onChange={(value) => update("nameEn", value)} />}
         <TextField label={alumni ? "毕业年份" : "入学年份"} placeholder="例如 2024" value={alumni ? draft.graduationYear : draft.enrollmentYear} onChange={(value) => update(alumni ? "graduationYear" : "enrollmentYear", value)} />
-        <ReadOnly label="学术身份（由管理员维护）" value={academicStageLabels[draft.academicStage]} />
+        <ReadOnly label="在组身份" value={memberRoleLabels[draft.memberRole]} />
+        <ReadOnly label="学位身份" value={draft.degrees.map((degree) => degreeLabels[degree]).join("、") || "待补充"} />
         <TextField label="中文专业" value={draft.majorZh} onChange={(value) => update("majorZh", value)} /><TextField label="英文专业" value={draft.majorEn} onChange={(value) => update("majorEn", value)} />
         <TextField label="公开联系邮箱（可独立选择官网展示）" value={draft.publicEmail} onChange={(value) => update("publicEmail", value)} /><TextField label="联系电话（可独立选择官网展示）" value={draft.phone} onChange={(value) => update("phone", value)} />
         <TextArea label="中文研究方向" value={draft.researchInterestsZh} onChange={(value) => update("researchInterestsZh", value)} /><TextArea label="英文研究方向" value={draft.researchInterestsEn} onChange={(value) => update("researchInterestsEn", value)} />
@@ -121,7 +120,6 @@ export function ProfileConsole({ mustChangePassword }: { mustChangePassword: boo
     </div> : null}
     {tab === "public" ? <PublicProfilePanel busy={busy} draft={draft} onSave={save} update={update} visible={visible} /> : null}
     {tab === "security" ? <PasswordForm busy={busy} error="" onSubmit={changePassword} /> : null}
-    <MediaPicker onClose={() => setMediaPickerOpen(false)} onSelect={(asset) => { update("avatarAssetId", asset.id); update("avatarUrl", asset.url); update("avatarPositionX", 50); update("avatarPositionY", 50); update("avatarZoom", 1); }} open={mediaPickerOpen}/>
   </section>;
 }
 
@@ -132,7 +130,7 @@ function Range({ label, value, min, max, step = 1, onChange }: { label: string; 
 function AvatarPreview({ alt, className, profile }: { alt: string; className: string; profile: Pick<Profile, "avatarUrl" | "avatarPositionX" | "avatarPositionY" | "avatarZoom"> }) { return <div className={`aspect-square overflow-hidden bg-slate-100 ${className}`}><img alt={alt} className="h-full w-full object-cover" src={profile.avatarUrl ?? ""} style={{ objectPosition: `${profile.avatarPositionX}% ${profile.avatarPositionY}%`, transform: `scale(${profile.avatarZoom})`, transformOrigin: `${profile.avatarPositionX}% ${profile.avatarPositionY}%` }} /></div>; }
 function PublicProfilePanel({ busy, draft, onSave, update, visible }: { busy: boolean; draft: Profile; onSave(): Promise<void>; update<K extends keyof Profile>(key: K, value: Profile[K]): void; visible: Set<string> }) {
   const alumni = draft.memberStatus === "alumni";
-  const stage = academicStageLabels[draft.academicStage];
+  const stage = draft.memberRole === "teacher" ? memberRoleLabels.teacher : draft.degrees.map((degree) => degreeLabels[degree]).join("、");
   const identity = alumni
     ? `${visible.has("graduation_year") && draft.graduationYear ? `${draft.graduationYear}届` : ""}${visible.has("academic_stage") ? stage : ""}`
     : visible.has("academic_stage") && visible.has("enrollment_year") && draft.enrollmentYear
@@ -145,7 +143,7 @@ function PublicProfilePanel({ busy, draft, onSave, update, visible }: { busy: bo
   return <div className="mt-7 grid gap-8 lg:grid-cols-[1fr_1.2fr]">
     <div>
       <p className={`p-3 text-sm ${draft.publicVisible ? "bg-emerald-50 text-emerald-800" : "bg-amber-50 text-amber-900"}`}>{draft.publicVisible ? "管理员已将你的账号列入官网成员页。" : "当前账号未被管理员列入官网成员页；你的展示设置会被保存，启用后生效。"}</p>
-      <p className="mt-3 text-xs leading-5 text-slate-500">“学术身份”只控制卡片或详情中的显式文字；成员所在分组仍由学术身份决定。</p>
+      <p className="mt-3 text-xs leading-5 text-slate-500">关闭此项会隐藏身份文字。官网团队页仍按在组身份和主学位分组。</p>
       <div className="mt-5 grid gap-5 sm:grid-cols-3">{publicProfileFieldGroups.map((group) => <section key={group.label}><h3 className="mb-2 text-xs font-bold text-blue-950">{group.label}</h3><div className="space-y-2">{group.fields.map(([key, label]) => <label className="flex items-center justify-between gap-3 border-b border-slate-200 py-2 text-sm" key={key}><span>{label}</span><input checked={visible.has(key)} type="checkbox" onChange={(event) => update("publicFields", event.target.checked ? [...draft.publicFields, key] : draft.publicFields.filter((value) => value !== key))} /></label>)}</div></section>)}</div>
       <button className="mt-5 bg-blue-950 px-5 py-2.5 text-sm font-semibold text-white" disabled={busy} onClick={() => void onSave()}>{busy ? "保存中…" : "保存公开设置"}</button>
     </div>

@@ -26,7 +26,8 @@ export async function consoleApi<T>(path: string, init?: RequestInit): Promise<T
     enrollmentYear: "入组年份",
     publicFields: "公开字段",
     publicVisible: "官网展示",
-    academicStage: "学术身份",
+    memberRole: "在组身份",
+    degrees: "学位身份",
     email: "邮箱",
   };
   const issueText = Array.isArray(errorPayload.issues)

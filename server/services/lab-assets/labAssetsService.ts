@@ -34,7 +34,13 @@ async function audit(client: PoolClient, input: AuditInput) {
 
 export function createLabAssetsService(pool: TransactionPool, dependencies: Dependencies = {}) {
   const notify=dependencies.notify??insertNotifications;
-  async function managers(client:Pick<PoolClient,"query">,exclude?:string){const result=await client.query<{id:string}>(`SELECT DISTINCT users.id FROM users LEFT JOIN user_permission_templates templates ON templates.user_id=users.id LEFT JOIN permission_template_permissions allowed ON allowed.template_key=templates.template_key AND allowed.permission_key='lab_assets.write' LEFT JOIN user_permission_overrides grants ON grants.user_id=users.id AND grants.permission_key='lab_assets.write' AND grants.decision='grant' LEFT JOIN user_permission_overrides revokes ON revokes.user_id=users.id AND revokes.permission_key='lab_assets.write' AND revokes.decision='revoke' WHERE users.status='active' AND ($1::uuid IS NULL OR users.id<>$1) AND revokes.user_id IS NULL AND (users.base_tier='super' OR allowed.permission_key IS NOT NULL OR grants.permission_key IS NOT NULL)`,[exclude??null]);return result.rows.map((row)=>row.id).filter(Boolean);}
+  async function managers(client: Pick<PoolClient, "query">, exclude?: string) {
+    const result = await client.query<{ id: string }>(
+      "SELECT id FROM users WHERE status='active' AND base_tier='super' AND ($1::uuid IS NULL OR id<>$1)",
+      [exclude ?? null],
+    );
+    return result.rows.map((row) => row.id);
+  }
   async function transaction<T>(invoke: (client: PoolClient) => Promise<T>) {
     const client = await pool.connect(); let primaryError: unknown;
     try { await client.query("BEGIN"); const result = await invoke(client); await client.query("COMMIT"); return result; }

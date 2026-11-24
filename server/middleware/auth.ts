@@ -2,12 +2,7 @@ import { createHash } from "node:crypto";
 import type { NextFunction, Request, RequestHandler, Response } from "express";
 import type { Pool } from "pg";
 import { parse } from "cookie";
-import {
-  getEffectivePermissions,
-  resolvePermissions,
-  restrictAlumniPermissions,
-  type BaseTier
-} from "../services/auth/permissions.js";
+import { getRolePermissions, type BaseTier } from "../services/auth/permissions.js";
 
 export const sessionCookieName = "rnav_session";
 
@@ -70,9 +65,6 @@ type UserRow = {
 
 type IdentityRow = Omit<UserRow, "password_hash"> & {
   member_status: "current" | "alumni";
-  template_permissions: string[] | null;
-  explicit_grants: string[] | null;
-  explicit_revokes: string[] | null;
 };
 
 export function hashSessionToken(token: string) {
@@ -82,13 +74,10 @@ export function hashSessionToken(token: string) {
 export function normalizeAuthenticatedUser(
   identity: SessionIdentity
 ): AuthenticatedUser {
-  const permissions = getEffectivePermissions(identity.permissions, identity.baseTier);
   return {
     ...identity,
     mustChangePassword: identity.mustChangePassword ?? false,
-    permissions: identity.memberStatus === "alumni"
-      ? restrictAlumniPermissions(permissions, identity.baseTier)
-      : permissions
+    permissions: getRolePermissions(identity.baseTier),
   };
 }
 
@@ -156,29 +145,7 @@ export function createPostgresAuthRepository(pool: Pool): AuthRepository {
            users.base_tier,
            users.status,
            users.must_change_password,
-           user_profiles.member_status,
-           COALESCE(
-             (SELECT array_agg(DISTINCT permission_template_permissions.permission_key)
-              FROM user_permission_templates
-              JOIN permission_template_permissions
-                ON permission_template_permissions.template_key = user_permission_templates.template_key
-              WHERE user_permission_templates.user_id = users.id),
-             ARRAY[]::text[]
-           ) AS template_permissions,
-           COALESCE(
-             (SELECT array_agg(user_permission_overrides.permission_key)
-              FROM user_permission_overrides
-              WHERE user_permission_overrides.user_id = users.id
-                AND user_permission_overrides.decision = 'grant'),
-             ARRAY[]::text[]
-           ) AS explicit_grants,
-           COALESCE(
-             (SELECT array_agg(user_permission_overrides.permission_key)
-              FROM user_permission_overrides
-              WHERE user_permission_overrides.user_id = users.id
-                AND user_permission_overrides.decision = 'revoke'),
-             ARRAY[]::text[]
-           ) AS explicit_revokes
+           user_profiles.member_status
          FROM session_tokens
          JOIN users ON users.id = session_tokens.user_id
          JOIN user_profiles ON user_profiles.user_id = users.id
@@ -188,16 +155,6 @@ export function createPostgresAuthRepository(pool: Pool): AuthRepository {
         [tokenHash, now]
       );
       const row = result.rows[0];
-      const resolution = row
-        ? resolvePermissions({
-            baseTier: row.base_tier,
-            templatePermissions: (row.template_permissions ?? []).map(
-              (permissionKey) => ({ permissionKey, templateKey: "assigned" })
-            ),
-            explicitGrants: row.explicit_grants ?? [],
-            explicitRevokes: row.explicit_revokes ?? []
-          })
-        : null;
       return row
         ? {
             id: row.id,
@@ -206,7 +163,7 @@ export function createPostgresAuthRepository(pool: Pool): AuthRepository {
             baseTier: row.base_tier,
             mustChangePassword: row.must_change_password,
             memberStatus: row.member_status,
-            permissions: resolution?.permissions ?? []
+            permissions: getRolePermissions(row.base_tier)
           }
         : null;
     },

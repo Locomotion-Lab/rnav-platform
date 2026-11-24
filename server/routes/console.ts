@@ -3,7 +3,6 @@ import { requireLogin } from "../middleware/auth.js";
 import { requirePasswordChanged } from "../middleware/requirePasswordChanged.js";
 import type { ConsoleDashboardService } from "../services/console-dashboard/consoleDashboardService.js";
 import {
-  deriveDisplayTier,
   getConsoleModules
 } from "../services/auth/permissions.js";
 
@@ -26,13 +25,13 @@ export function createConsoleRouter(options: ConsoleRouterOptions) {
           id: user.id,
           username: user.username,
           displayName: user.displayName,
-          tier: deriveDisplayTier(user.baseTier, user.permissions),
+          tier: user.baseTier,
           mustChangePassword: user.mustChangePassword ?? false
         },
         permissions: user.permissions,
         consoleModules: user.mustChangePassword
           ? [{ key: "profile", href: "/console/profile?section=security", label: "账号安全" }]
-          : getConsoleModules(user.permissions, user.baseTier)
+          : getConsoleModules(user.baseTier)
       });
     }
   );

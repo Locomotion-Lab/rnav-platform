@@ -28,7 +28,9 @@ export function MemberProfileDialog({ locale, member, onClose }: { locale: Local
   const close = () => dialog.current?.close();
   const profile = payload?.member ?? member;
   const publications = payload?.publications ?? [];
+  const degreeHistory = Array.isArray(profile?.degrees) ? profile.degrees.map(text).filter(Boolean) : [];
   const facts = [
+    [zh ? "学位身份" : "Degree history", { zh: degreeHistory.join("、"), en: degreeHistory.join(", ") }],
     [zh ? "专业" : "Major", profile?.major], [zh ? "毕业信息" : "Graduation", profile?.graduation],
     [zh ? "毕业论文" : "Thesis", profile?.thesis], [zh ? "毕业去向" : "Destination", profile?.destination],
   ].filter(([, value]) => text(value));

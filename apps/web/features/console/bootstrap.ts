@@ -6,7 +6,7 @@ import { cache } from "react";
 import type { ConsoleNavigationModule } from "@/features/console/navigation";
 import { getInternalApiUrl } from "@/lib/server/api";
 
-export type ConsoleTier = "normal" | "plus" | "super";
+export type ConsoleTier = "normal" | "super";
 
 export type ConsoleBootstrap = {
   consoleModules: ConsoleNavigationModule[];
@@ -38,7 +38,7 @@ function isConsoleBootstrap(value: unknown): value is ConsoleBootstrap {
       typeof candidate.user.username === "string" &&
       typeof candidate.user.displayName === "string" &&
       typeof candidate.user.mustChangePassword === "boolean" &&
-      ["normal", "plus", "super"].includes(candidate.user.tier ?? "") &&
+      ["normal", "super"].includes(candidate.user.tier ?? "") &&
       Array.isArray(candidate.permissions) &&
       Array.isArray(candidate.consoleModules),
   );

@@ -5,7 +5,7 @@ export type CompletenessProfile = {
   nameZh: string;
   nameEn: string;
   avatarAssetId: string | null;
-  academicStage: string;
+  hasGroupIdentity: boolean;
   enrollmentYear: string;
   graduationYear: string;
   majorZh: string;
@@ -20,7 +20,7 @@ export function profileCompleteness(profile: CompletenessProfile) {
   const missing: string[] = [];
   if (!profile.nameZh && !profile.nameEn) missing.push("name");
   if (!profile.avatarAssetId) missing.push("avatar");
-  if (!profile.academicStage) missing.push("academicStage");
+  if (!profile.hasGroupIdentity) missing.push("memberRole");
   if (!profile.majorZh && !profile.majorEn) missing.push("major");
   if (!profile.researchInterestsZh && !profile.researchInterestsEn) missing.push("research");
   if (profile.memberStatus === "current" && !profile.enrollmentYear) missing.push("enrollmentYear");

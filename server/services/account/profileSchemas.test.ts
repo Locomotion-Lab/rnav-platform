@@ -24,7 +24,7 @@ test("self profile accepts all granular public fields but rejects governance fie
 });
 
 test("admin profile accepts governance fields and enforces a public name", () => {
-  const admin = { ...valid, memberStatus: "current", academicStage: "phd", publicVisible: true };
+  const admin = { ...valid, memberStatus: "current", memberRole: "student", degrees: ["master", "phd"], publicVisible: true };
   assert.equal(adminProfileUpdateSchema.safeParse(admin).success, true);
   assert.equal(adminProfileUpdateSchema.safeParse({ ...admin, publicFields: ["phone"] }).success, false);
 });

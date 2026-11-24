@@ -6,8 +6,7 @@ export default async function MembersPage({searchParams}:{searchParams:Promise<{
   return result.status === "authenticated" ? (
     <MemberManagement
       actorId={result.data.user.id}
-      actorTier={result.data.user.tier}
-      permissions={result.data.permissions}
+      isAdmin={result.data.user.tier === "super"}
       initialProfileFilter={(await searchParams).profile}
     />
   ) : null;

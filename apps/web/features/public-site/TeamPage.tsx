@@ -53,6 +53,7 @@ export function TeamPage({ data }: { data: any }) {
       en: "UNDERGRADUATE STUDENTS",
       members: data.undergraduateStudents ?? [],
     },
+    { key: "students", zh: "学生", en: "STUDENTS", members: data.students ?? [] },
     { key: "alumni", en: "ALUMNI", members: data.alumni ?? [] },
   ];
   const openProfile = (member: any) => {
@@ -105,7 +106,7 @@ export function TeamPage({ data }: { data: any }) {
               <section key={group.key} className="v41-team-group">
                 <header>
                   <div>
-                    <h2>{text(data.sectionTitles?.[group.key]) || group.en}</h2>
+                    <h2>{text(data.sectionTitles?.[group.key]) || (zh && "zh" in group ? group.zh : group.en)}</h2>
                     <p className="v41-eyebrow">{group.en}</p>
                   </div>
                   <span>

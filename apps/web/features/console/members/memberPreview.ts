@@ -1,53 +1,38 @@
-import type { Member } from "./MemberManagement";
+import type { Degree, MemberProfile } from "./profileModel";
 
 /** Mirror the public DTO, never include account email or private phone. */
-export function memberPreview(member: Member) {
+export function memberPreview(member: MemberProfile) {
   const fields = new Set(member.publicFields),
     alumni = member.memberStatus === "alumni";
   const localized = (field: string, zh: string, en: string) =>
     fields.has(field) ? { zh, en } : { zh: "", en: "" };
-  const degree = (
-    {
-      faculty: ["教师", "Faculty"],
-      postdoc: ["博士后", "Postdoc"],
-      phd: ["博士", "PhD"],
-      master: ["硕士", "Master"],
-      undergrad: ["本科", "Undergraduate"],
-    } as Record<string, string[]>
-  )[member.academicStage] || ["", ""];
-  const graduateDegree =
-    member.academicStage === "postdoc"
-      ? "Postdoctoral"
-      : member.academicStage === "undergrad"
-        ? "Bachelor"
-        : degree[1];
-  const academicVisible = fields.has("academic_stage");
-  const enrollmentVisible = fields.has("enrollment_year");
-  const graduationVisible = fields.has("graduation_year");
-  const postdoc = member.academicStage === "postdoc";
+  const degrees: Record<Degree, [string, string]> = {
+    phd: ["博士", "PhD"], master: ["硕士", "Master"], undergrad: ["本科", "Bachelor"],
+  };
+  const highest = (Object.keys(degrees) as Degree[]).find((key) => member.degrees.includes(key));
+  const [degreeZh, degreeEn] = highest ? degrees[highest] : ["", ""];
+  const identityVisible = fields.has("academic_stage");
+  const enrollmentVisible = fields.has("enrollment_year") && member.enrollmentYear;
+  const graduationVisible = fields.has("graduation_year") && member.graduationYear;
+  const teacher = member.memberRole === "teacher";
   return {
     name: {
       zh: fields.has("name_zh") ? member.nameZh : "",
       en: fields.has("name_en") ? member.nameEn : "",
     },
-    role: !alumni && academicVisible && postdoc
-      ? { zh: "博士后", en: "Postdoctoral Researcher" }
+    role: identityVisible && teacher ? { zh: "老师", en: "Faculty" } : { zh: "", en: "" },
+    degree: !alumni && identityVisible && degreeZh
+      ? !teacher && enrollmentVisible
+        ? { zh: `${member.enrollmentYear}级${degreeZh}`, en: `${degreeEn}, Class of ${member.enrollmentYear}` }
+        : { zh: degreeZh, en: degreeEn }
       : { zh: "", en: "" },
-    degree: !alumni && academicVisible
-      ? enrollmentVisible && member.enrollmentYear
-        ? {
-            zh: `${member.enrollmentYear}级${postdoc ? "博士" : degree[0]}`,
-            en: `${postdoc ? "PhD" : degree[1]}, Class of ${member.enrollmentYear}`,
-          }
-        : postdoc ? { zh: "", en: "" } : { zh: degree[0], en: degree[1] }
-      : { zh: "", en: "" },
-    enrollmentYear: !alumni && !academicVisible && enrollmentVisible
+    enrollmentYear: !alumni && !(identityVisible && degreeZh && !teacher) && enrollmentVisible
       ? { zh: `${member.enrollmentYear}级`, en: `Class of ${member.enrollmentYear}` }
       : { zh: "", en: "" },
     graduation: alumni
       ? {
-          zh: `${graduationVisible && member.graduationYear ? `${member.graduationYear}届` : ""}${academicVisible ? degree[0] : ""}`,
-          en: [academicVisible ? graduateDegree : "", graduationVisible && member.graduationYear ? `Graduated ${member.graduationYear}` : ""].filter(Boolean).join(", "),
+          zh: `${graduationVisible ? `${member.graduationYear}届` : ""}${identityVisible ? degreeZh : ""}`,
+          en: [identityVisible ? degreeEn : "", graduationVisible ? `Graduated ${member.graduationYear}` : ""].filter(Boolean).join(", "),
         }
       : null,
     major: localized("major", member.majorZh, member.majorEn),

@@ -6,9 +6,7 @@ import { createRequireSameOrigin } from "../middleware/requireSameOrigin.js";
 import {
   createUserSchema,
   accountEmailSchema,
-  accountKindSchema,
   adminProfileUpdateSchema,
-  convertAlumniSchema,
   importUsersSchema,
   publicProfileAdminSchema,
   statusSchema,
@@ -55,15 +53,18 @@ export function createUsersRouter({
     else if (e instanceof ProfileIdentityConflictError) res.status(409).json({ code: "USERNAME_CONFLICT", error: e.message });
     else next(e);
   };
-  const canList: RequestHandler = (req, res, next) =>
-    req.authUser?.permissions.some(
-      (p) => p === "users.read" || p === "users.write" || p === "permissions.write" || p === "site.members.write",
-    )
-      ? next()
-      : res.status(403).json({ error: "Permission denied" });
+  router.get("/api/users/directory", requirePermission("console.access"), async (_request, res, next) => {
+    try {
+      if (!profileService) throw new Error("Profile service unavailable");
+      res.set("Cache-Control", "private, no-store").json({ members: await profileService.listDirectory() });
+    } catch (error) {
+      handle(error, res, next);
+    }
+  });
+  const canList = requirePermission("users.read");
   router.get("/api/users", canList, async (r, res, next) => {
     try {
-      res.json({
+      res.set("Cache-Control", "private, no-store").json({
         users: await service.listUsers(userListSchema.parse(r.query)),
       });
     } catch (e) {
@@ -121,14 +122,6 @@ export function createUsersRouter({
   );
   router.put("/api/users/:id/account-email", requirePermission("users.write"), same, async (r, res, next) => {
     try { await service.setAccountEmail(userIdSchema.parse(r.params.id), accountEmailSchema.parse(r.body).email, actor(r)); res.status(204).end(); }
-    catch (e) { handle(e, res, next); }
-  });
-  router.put("/api/users/:id/account-kind", requirePermission("users.write"), same, async (r, res, next) => {
-    try { await service.setAccountKind(userIdSchema.parse(r.params.id),accountKindSchema.parse(r.body).accountKind,actor(r));res.status(204).end(); }
-    catch(e){handle(e,res,next);}
-  });
-  router.post("/api/users/:id/convert-alumni", requirePermission("site.members.write"), same, async (r, res, next) => {
-    try { convertAlumniSchema.parse(r.body); res.json(await service.convertToAlumni(userIdSchema.parse(r.params.id), actor(r))); }
     catch (e) { handle(e, res, next); }
   });
   router.post("/api/users/import", requirePermission("users.write"), same, async (r, res, next) => {

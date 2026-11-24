@@ -244,7 +244,7 @@ test("GET /api/console/bootstrap returns normal member modules", async () => {
   assert.equal(body.user.tier, "normal");
   assert.deepEqual(
     body.consoleModules.map((module) => module.key),
-    ["profile", "lab-assets", "assistant"]
+    ["profile", "lab-assets", "members", "assistant"]
   );
 });
 
@@ -270,7 +270,6 @@ test("GET /api/console/bootstrap returns every module for a super user", async (
     "console.access",
     "lab_assets.read",
     "lab_assets.write",
-    "permissions.write",
     "profile.read_own",
     "profile.write_own",
     "site.content.write",
@@ -288,8 +287,7 @@ test("GET /api/console/bootstrap returns every module for a super user", async (
       "lab-assets",
       "site",
       "media",
-      "users",
-      "permissions",
+      "members",
       "assistant",
       "settings"
     ]
@@ -408,15 +406,14 @@ test("GET /api/auth/session returns safe authenticated identity", async () => {
       id: user.id,
       username: "alice",
       displayName: "Alice",
-      tier: "plus",
+      tier: "normal",
       mustChangePassword: false
     },
     permissions: [
       "console.access",
       "profile.read_own",
       "profile.write_own",
-      "lab_assets.read",
-      "site.content.write"
+      "lab_assets.read"
     ]
   });
 });

@@ -10,9 +10,8 @@ export default async function MemberPage({
   return result.status === "authenticated" ? (
     <MemberManagement
       actorId={result.data.user.id}
-      actorTier={result.data.user.tier}
+      isAdmin={result.data.user.tier === "super"}
       initialMemberId={id}
-      permissions={result.data.permissions}
     />
   ) : null;
 }

@@ -11,7 +11,6 @@ import {
   type AuthRepository,
   type SessionIdentity
 } from "../middleware/auth.js";
-import { deriveDisplayTier } from "../services/auth/permissions.js";
 import {
   CurrentPasswordError,
   PasswordValidationError,
@@ -81,7 +80,7 @@ function safeSessionPayload(identity: SessionIdentity) {
       id: identity.id,
       username: identity.username,
       displayName: identity.displayName,
-      tier: deriveDisplayTier(identity.baseTier, identity.permissions),
+      tier: identity.baseTier,
       mustChangePassword: identity.mustChangePassword ?? false
     },
     permissions: identity.permissions

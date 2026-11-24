@@ -3,8 +3,6 @@ import test from "node:test";
 import {
   accountLifecycleCopy,
   canConfirmPermanentDelete,
-  canShowPermanentDelete,
-  removeDeletedMember,
   type AccountDeletionCheck,
 } from "./accountDeletion.ts";
 
@@ -21,13 +19,6 @@ const check: AccountDeletionCheck = {
   },
   dependencies: [],
 };
-
-test("permanent deletion is only visible to a super with users.write", () => {
-  assert.equal(canShowPermanentDelete("super", true), true);
-  assert.equal(canShowPermanentDelete("super", false), false);
-  assert.equal(canShowPermanentDelete("plus", true), false);
-  assert.equal(canShowPermanentDelete("normal", true), false);
-});
 
 test("confirmation requires an exact username and a deletable precheck", () => {
   assert.equal(canConfirmPermanentDelete(check, "test.user"), true);
@@ -46,12 +37,5 @@ test("disabled and permanently deleted accounts have distinct guidance", () => {
   assert.notEqual(
     accountLifecycleCopy.disable,
     accountLifecycleCopy.permanentDelete,
-  );
-});
-
-test("a successful deletion removes the member from local list state", () => {
-  assert.deepEqual(
-    removeDeletedMember([{ id: "user-1" }, { id: "user-2" }], "user-2"),
-    [{ id: "user-1" }],
   );
 });

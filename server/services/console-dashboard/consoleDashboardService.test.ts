@@ -69,7 +69,7 @@ test("dashboard exposes only the task counters enabled by effective permissions"
     staleProfiles: 0,
   });
   assert.deepEqual(calls[0].values.slice(1), [true, false]);
-  assert.deepEqual(dashboard.user.roleLabels, ["资产管理员"]);
+  assert.deepEqual(dashboard.user.roleLabels, ["成员"]);
 });
 
 test("dashboard normalizes recent items and super role labels", async () => {
@@ -88,6 +88,6 @@ test("dashboard normalizes recent items and super role labels", async () => {
 
   const dashboard = await service.getDashboard(user([], "super"));
   assert.equal(dashboard.recentItems[0].updatedAt, "2026-09-12T12:30:00.000Z");
-  assert.deepEqual(dashboard.user.roleLabels, ["超级管理员"]);
-  assert.deepEqual(getDashboardRoleLabels(user()), ["普通成员"]);
+  assert.deepEqual(dashboard.user.roleLabels, ["管理员"]);
+  assert.deepEqual(getDashboardRoleLabels(user()), ["成员"]);
 });

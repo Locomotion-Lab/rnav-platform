@@ -12,7 +12,7 @@ const candidateSelect = `SELECT work.id,work.decision,work.source_type,work.open
 
 const hasFacultySource = `EXISTS (
   SELECT 1 FROM scholarly_work_members source
-  JOIN user_profiles teacher ON teacher.user_id=source.user_id AND teacher.degree_level='faculty'
+  JOIN user_profiles teacher ON teacher.user_id=source.user_id AND teacher.member_role='teacher'
   WHERE source.work_id=work.id AND source.author_position IS NOT NULL
 )`;
 
@@ -88,7 +88,7 @@ const profileSelect = `SELECT users.id user_id,users.display_name,user_profiles.
   LEFT JOIN member_scholarly_profiles scholarly ON scholarly.user_id=users.id`;
 
 async function readProfile(queryable: Queryable, userId: string) {
-  const result = await queryable.query<Record<string, unknown>>(`${profileSelect} WHERE users.id=$1 AND users.account_kind='person' AND user_profiles.degree_level='faculty'`, [userId]);
+  const result = await queryable.query<Record<string, unknown>>(`${profileSelect} WHERE users.id=$1 AND users.account_kind='person' AND user_profiles.member_role='teacher'`, [userId]);
   return result.rows[0] ? { ...profileRow(result.rows[0]), memberName: String(result.rows[0].name_zh || result.rows[0].name_en || result.rows[0].display_name), academicStage: String(result.rows[0].degree_level ?? ""), memberStatus: String(result.rows[0].member_status ?? "current") } : null;
 }
 
@@ -101,7 +101,7 @@ export function createScholarlySyncRepository(pool: Pick<Pool, "query" | "connec
     async listAuthorMembers() {
       const result = await pool.query<{ id: string; nameZh: string; nameEn: string; faculty: boolean }>(
         `SELECT users.id, COALESCE(NULLIF(p.name_zh,''), users.display_name) "nameZh",
-                COALESCE(p.name_en,'') "nameEn", p.degree_level='faculty' faculty
+                COALESCE(p.name_en,'') "nameEn", p.member_role='teacher' faculty
          FROM users JOIN user_profiles p ON p.user_id=users.id
          WHERE users.account_kind='person' ORDER BY p.name_zh, p.name_en, users.id`,
       );
@@ -147,7 +147,7 @@ export function createScholarlySyncRepository(pool: Pick<Pool, "query" | "connec
       } catch (error) { await client.query("ROLLBACK"); throw error; } finally { client.release(); }
     },
     async listSyncProfiles(userId?: string) {
-      const result = await pool.query<Record<string, unknown>>(`${profileSelect} WHERE users.account_kind='person' AND user_profiles.degree_level='faculty' AND scholarly.identity_status='verified' AND scholarly.sync_enabled=true${userId ? " AND users.id=$1" : ""} ORDER BY users.id`, userId ? [userId] : []);
+      const result = await pool.query<Record<string, unknown>>(`${profileSelect} WHERE users.account_kind='person' AND user_profiles.member_role='teacher' AND scholarly.identity_status='verified' AND scholarly.sync_enabled=true${userId ? " AND users.id=$1" : ""} ORDER BY users.id`, userId ? [userId] : []);
       return result.rows.map((row) => ({ ...profileRow(row), memberName: String(row.name_zh || row.name_en || row.display_name), academicStage: String(row.degree_level ?? "") }));
     },
     async findStoredWork(work: NormalizedScholarlyWork) {
@@ -221,7 +221,7 @@ export function createScholarlySyncRepository(pool: Pick<Pool, "query" | "connec
     },
     async status() {
       const [profiles, candidates, ignored, lastRun] = await Promise.all([
-        pool.query<{ verified: number; enabled: number; total: number }>("SELECT count(*)::int total,count(*) FILTER(WHERE identity_status='verified')::int verified,count(*) FILTER(WHERE sync_enabled)::int enabled FROM member_scholarly_profiles source JOIN user_profiles teacher ON teacher.user_id=source.user_id WHERE teacher.degree_level='faculty'"),
+        pool.query<{ verified: number; enabled: number; total: number }>("SELECT count(*)::int total,count(*) FILTER(WHERE identity_status='verified')::int verified,count(*) FILTER(WHERE sync_enabled)::int enabled FROM member_scholarly_profiles source JOIN user_profiles teacher ON teacher.user_id=source.user_id WHERE teacher.member_role='teacher'"),
         pool.query<{ count: number }>(`SELECT count(*)::int count FROM scholarly_works work WHERE decision='pending' AND ${hasFacultySource}`),
         pool.query<{ count: number }>(`SELECT count(*)::int count FROM scholarly_works work WHERE decision='ignored' AND ${hasFacultySource}`),
         pool.query<Record<string, unknown>>("SELECT * FROM scholarly_sync_runs ORDER BY started_at DESC LIMIT 1"),

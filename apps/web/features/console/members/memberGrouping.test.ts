@@ -1,5 +1,15 @@
-import assert from "node:assert/strict";import test from "node:test";import {groupMembers,memberGroup} from "./memberGrouping.ts";
-const person=(academicStage:string,extra:Record<string,unknown>={})=>({accountKind:"person" as const,memberStatus:"current",academicStage,templateKeys:["asset-admin"],baseTier:"super",...extra});
-test("academic identity determines person groups regardless of admin role",()=>{assert.equal(memberGroup(person("faculty")),"faculty");assert.equal(memberGroup(person("postdoc")),"postdoc");assert.equal(memberGroup(person("phd")),"phd");assert.equal(memberGroup(person("master")),"master");assert.equal(memberGroup(person("undergrad")),"undergrad")});
-test("alumni and explicit system accounts have priority",()=>{assert.equal(memberGroup(person("phd",{memberStatus:"alumni"})),"alumni");assert.equal(memberGroup({...person("faculty"),accountKind:"system"}),"system")});
-test("filtered members remain grouped and alumni and system default collapsed",()=>{const groups=groupMembers([person("phd"),person("master"),{...person("faculty"),accountKind:"system" as const}]);assert.equal(groups.find((group)=>group.key==="phd")?.members.length,1);assert.equal(groups.find((group)=>group.key==="system")?.collapsed,true);assert.equal(groups.find((group)=>group.key==="alumni")?.collapsed,true)});
+import assert from "node:assert/strict";
+import test from "node:test";
+import { memberGroup } from "./memberGrouping.ts";
+
+test("teachers remain teachers regardless of degree", () => {
+  assert.equal(memberGroup({ memberRole: "teacher", degrees: ["phd"] }), "teacher");
+});
+
+test("students are grouped by highest degree and unknown degrees stay unclassified", () => {
+  assert.equal(memberGroup({ memberRole: "student", degrees: ["master", "phd"] }), "phd");
+  assert.equal(memberGroup({ memberRole: "student", degrees: ["phd"] }), "phd");
+  assert.equal(memberGroup({ memberRole: "student", degrees: ["master", "undergrad"] }), "master");
+  assert.equal(memberGroup({ memberRole: "student", degrees: ["undergrad"] }), "undergrad");
+  assert.equal(memberGroup({ memberRole: "student", degrees: [] }), "student");
+});

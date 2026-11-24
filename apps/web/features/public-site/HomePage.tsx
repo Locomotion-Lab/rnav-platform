@@ -51,6 +51,7 @@ export function HomePage({ data }: { data: any }) {
     ...(data.team?.phdStudents ?? []),
     ...(data.team?.masterStudents ?? []),
     ...(data.team?.undergraduateStudents ?? []),
+    ...(data.team?.students ?? []),
   ].filter(Boolean);
   const selectedMembers = selectConfigured(
     home.featuredMemberSlugs?.length

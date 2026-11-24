@@ -1,9 +1,8 @@
 import type { ConsoleTier } from "@/features/console/bootstrap";
 
 const tierLabels: Record<ConsoleTier, string> = {
-  normal: "普通成员",
-  plus: "进阶成员",
-  super: "超级管理员",
+  normal: "成员",
+  super: "管理员",
 };
 
 export function TierBadge({ tier }: { tier: ConsoleTier }) {

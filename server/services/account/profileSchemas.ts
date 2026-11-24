@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { degreesSchema, memberRoleSchema } from "./memberIdentity.js";
 
 const text = (max: number) => z.string().trim().max(max);
 const webUrl = z.string().trim().url().max(500).refine((value) => /^https?:\/\//i.test(value), "Only HTTP(S) links are supported");
@@ -7,10 +8,6 @@ export const publicProfileFields = [
   "avatar", "name_zh", "name_en", "academic_stage", "enrollment_year",
   "graduation_year", "major", "research", "bio", "email", "phone",
   "links", "thesis", "destination",
-] as const;
-
-export const academicStages = [
-  "faculty", "postdoc", "phd", "master", "undergrad",
 ] as const;
 
 export const personalLinkSchema = z.object({
@@ -60,7 +57,8 @@ export const profileUpdateSchema = profileUpdateObject.superRefine(validateProfi
 
 export const adminProfileUpdateSchema = profileUpdateObject.extend({
   memberStatus: z.enum(["current", "alumni"]),
-  academicStage: z.enum(academicStages),
+  memberRole: memberRoleSchema,
+  degrees: degreesSchema,
   publicVisible: z.boolean(),
 }).strict().superRefine((value, context) => {
   validateProfile(value, context);

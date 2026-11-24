@@ -26,13 +26,6 @@ export const accountLifecycleCopy = {
     "永久删除只适用于从未产生正式业务记录的测试或误建账号，删除后无法恢复。",
 } as const;
 
-export function canShowPermanentDelete(
-  actorTier: string,
-  canWriteUsers: boolean,
-) {
-  return actorTier === "super" && canWriteUsers;
-}
-
 export function canConfirmPermanentDelete(
   check: AccountDeletionCheck | null,
   confirmation: string,
@@ -40,11 +33,4 @@ export function canConfirmPermanentDelete(
   return Boolean(
     check?.deletable && confirmation === check.target.username,
   );
-}
-
-export function removeDeletedMember<T extends { id: string }>(
-  members: T[],
-  deletedId: string,
-) {
-  return members.filter((member) => member.id !== deletedId);
 }

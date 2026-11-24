@@ -87,7 +87,7 @@ test("public members come from visible account profiles and honor field visibili
   assert.match(teamSql,/u\.account_kind='person'/);
 });
 
-test("postdocs keep their role title but show the cohort as a PhD class", async () => {
+test("former postdocs map to teachers with a doctorate", async () => {
   const queryable = { async query(sql: string) {
     if (!sql.includes("FROM user_profiles")) return { rows: [] };
     return { rows: [{
@@ -99,9 +99,9 @@ test("postdocs keep their role title but show the cohort as a PhD class", async 
     }] };
   } };
   const member = (await createPostgresPublicSiteRepository(queryable as never).getTeamMembers())[0];
-  assert.equal(member.group, "postdoc");
-  assert.deepEqual(member.role, { zh: "博士后", en: "Postdoctoral Researcher" });
-  assert.deepEqual(member.degree, { zh: "2024级博士", en: "PhD, Class of 2024" });
+  assert.equal(member.group, "advisor");
+  assert.deepEqual(member.role, { zh: "老师", en: "Faculty" });
+  assert.deepEqual(member.degree, { zh: "博士", en: "PhD" });
 });
 
 test("public member detail is privacy-gated and loads distinct accepted final publications in two queries", async () => {

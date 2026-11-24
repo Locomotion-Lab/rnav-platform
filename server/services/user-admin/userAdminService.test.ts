@@ -21,18 +21,16 @@ class Client {
 
 test("user creation creates a private self-managed profile and returns a one-time password", async () => {
   const client = new Client(); const service = createUserAdminService({ connect: async () => client } as never);
-  const result = await service.createUser({ username: "alice", nameZh: "张三", nameEn: "Alice", academicStage: "phd", email: "a@example.com", baseTier: "normal" }, { id: "admin", baseTier: "super" });
+  const result = await service.createUser({ username: "alice", nameZh: "张三", nameEn: "Alice", memberRole: "student", memberStatus: "current", degrees: ["phd"], email: "a@example.com", baseTier: "normal" }, { id: "admin", baseTier: "super" });
   const insert = client.calls.find((call) => call.sql.includes("INSERT INTO users"));
   assert.equal(await bcrypt.compare(result.temporaryPassword, String(insert?.values?.[2])), true);
   assert.ok(client.calls.some((call) => call.sql.includes("INSERT INTO user_profiles")));
   assert.equal(client.calls.some((call) => call.sql.includes("INSERT INTO team_members")), false);
   assert.ok(client.calls.some((call) => call.sql.includes("public_visible")));
-  assert.ok(client.calls.some((call) => call.sql.includes("normal-member")));
   assert.equal(JSON.stringify(client.calls).includes(result.temporaryPassword), false);
   assert.equal(client.calls.at(-1)?.sql, "COMMIT");
 });
 
-test("system account creation and conversion stay out of the public team",async()=>{const client=new Client();const service=createUserAdminService({connect:async()=>client} as never);await service.createUser({username:"robot",nameZh:"设备账号",nameEn:"Robot",email:"robot@example.com",baseTier:"normal",accountKind:"system"},{id:"admin",baseTier:"super"});const insert=client.calls.find((call)=>call.sql.includes("INSERT INTO users"));assert.equal(insert?.values?.[4],"system");await service.setAccountKind("user-2","system",{id:"admin",baseTier:"super"});assert.ok(client.calls.some((call)=>call.sql.includes("UPDATE user_profiles SET public_visible=false")));assert.ok(client.calls.some((call)=>call.sql.includes("'user.account_kind'")));});
 
 test("blank account email persists as NULL and new person public defaults stay granular", async () => {
   const client = new Client();
@@ -41,10 +39,9 @@ test("blank account email persists as NULL and new person public defaults stay g
     username: "no-email",
     nameZh: "无邮箱成员",
     nameEn: "",
-    academicStage: "master",
+    memberRole: "student", memberStatus: "current", degrees: ["master"],
     email: "",
     baseTier: "normal",
-    accountKind: "person",
   }, { id: "admin", baseTier: "super" });
   const userInsert = client.calls.find((call) => call.sql.includes("INSERT INTO users"));
   const profileInsert = client.calls.find((call) => call.sql.includes("INSERT INTO user_profiles"));
@@ -282,10 +279,9 @@ test("a deleted username and email can create a fresh account with a new UUID", 
       username: "test-user",
       nameZh: "测试账号",
       nameEn: "Test User",
-      academicStage: "undergrad",
+      memberRole: "student", memberStatus: "current", degrees: ["undergrad"],
       email: "test-user@example.com",
       baseTier: "normal",
-      accountKind: "person",
     },
     superActor,
   );

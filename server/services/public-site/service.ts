@@ -90,6 +90,7 @@ const itemFields: Allowlist = {
   role: localized,
   focus: localized,
   degree: localized,
+  degrees: [localized],
   enrollmentYear: true,
   major: localized,
   research: localized,
@@ -502,6 +503,7 @@ function normalizeItem(item: PublicRecord): PublicRecord {
   }
   for (const key of ["authors", "links", "contacts", "keywords", "specs"])
     if (key in item) normalized[key] = array(item[key]).map(normalizeItem);
+  if ("degrees" in item) normalized.degrees = array(item.degrees).map((degree) => text(degree));
   if (normalized.href !== undefined)
     normalized.href = sanitizeActionUrl(normalized.href);
   if (normalized.image) normalized.image = normalizeImage(normalized.image);
@@ -809,6 +811,7 @@ export function createPublicSiteService(repository: PublicSiteRepository) {
         phdStudents: group("phd"),
         masterStudents: group("master"),
         undergraduateStudents: group("undergrad"),
+        students: group("student"),
         alumni: group("alumni"),
         recruitment: config.recruitment,
       };

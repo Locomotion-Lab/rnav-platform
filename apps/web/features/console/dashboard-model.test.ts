@@ -3,7 +3,7 @@ import test from "node:test";
 import { normalizeConsoleDashboard } from "./dashboard-model.ts";
 
 const dashboard = {
-  user: { id: "user-1", displayName: "张三", tier: "plus", roleLabels: ["资产管理员"] },
+  user: { id: "user-1", displayName: "张三", tier: "super", roleLabels: ["管理员"] },
   tasks: { labUsageReviews: 2 },
   mine: { labUsageOpen: 1, assetsInUse: 2 },
   recentItems: [{

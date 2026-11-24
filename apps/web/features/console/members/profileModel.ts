@@ -1,16 +1,28 @@
-export type AcademicStage =
-  | "faculty"
-  | "postdoc"
-  | "phd"
-  | "master"
-  | "undergrad";
+export const memberRoleLabels = { teacher: "老师", student: "学生" } as const;
+export const degreeLabels = { phd: "博士", master: "硕士", undergrad: "本科" } as const;
+export const memberStatusLabels = { current: "在校", alumni: "校友" } as const;
 
-export const academicStageLabels: Record<AcademicStage, string> = {
-  faculty: "教师",
-  postdoc: "博士后",
-  phd: "博士生",
-  master: "硕士生",
-  undergrad: "本科生",
+export type MemberRole = keyof typeof memberRoleLabels;
+export type Degree = keyof typeof degreeLabels;
+export type MemberStatus = keyof typeof memberStatusLabels;
+
+export type DirectoryMember = {
+  userId: string; username: string; nameZh: string; nameEn: string;
+  memberStatus: MemberStatus; memberRole: MemberRole; degrees: Degree[];
+  bioZh: string; bioEn: string; publicEmail: string; phone: string;
+  researchInterestsZh: string; researchInterestsEn: string;
+  enrollmentYear: string; graduationYear: string; majorZh: string; majorEn: string;
+  thesisZh: string; thesisEn: string; destinationZh: string; destinationEn: string;
+  avatarAssetId: string | null; avatarUrl: string | null;
+  avatarPositionX: number; avatarPositionY: number; avatarZoom: number;
+  personalLinks: Array<{ labelZh: string; labelEn: string; url: string }>;
+};
+
+export type MemberProfile = DirectoryMember & {
+  accountKind: "person" | "system";
+  publicVisible: boolean; publicFields: string[]; version: number;
+  profileContentUpdatedAt: string | null;
+  completeness: { complete: boolean; publishable: boolean; missing: string[] };
 };
 
 export const publicProfileFieldGroups = [
@@ -20,7 +32,7 @@ export const publicProfileFieldGroups = [
       ["name_zh", "中文姓名"],
       ["name_en", "英文姓名"],
       ["avatar", "头像"],
-      ["academic_stage", "学术身份"],
+      ["academic_stage", "在组身份与学位"],
       ["enrollment_year", "入组年份"],
       ["graduation_year", "毕业年份"],
     ],

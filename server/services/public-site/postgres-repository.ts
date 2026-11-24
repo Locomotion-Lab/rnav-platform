@@ -1,4 +1,5 @@
 import type { Pool } from "pg";
+import { degreeOrder, type Degree } from "../account/memberIdentity.js";
 import type { PublicRecord, PublicSiteRepository } from "./service.js";
 
 export type Queryable = Pick<Pool, "query">;
@@ -20,31 +21,35 @@ export function mapPublicTeamMember(row: PublicRecord) {
   const alumni = row.member_status === "alumni";
   const publicNameZh = fields.has("name_zh") ? row.name_zh : "";
   const publicNameEn = fields.has("name_en") ? row.name_en : "";
-  const postdoc = row.degree_level === "postdoc";
-  const degreeZh = row.degree_level === "phd" ? "博士" : row.degree_level === "master" ? "硕士" : row.degree_level === "undergrad" ? "本科" : postdoc ? "博士后" : row.degree_level === "faculty" ? "教师" : "";
-  const degreeEn = row.degree_level === "phd" ? "PhD" : row.degree_level === "master" ? "Master" : row.degree_level === "undergrad" ? "Bachelor" : postdoc ? "Postdoctoral" : row.degree_level === "faculty" ? "Faculty" : "";
-  const academicVisible = fields.has("academic_stage");
+  const teacher = row.member_role ? row.member_role === "teacher" : ["faculty", "postdoc"].includes(row.degree_level);
+  const rawDegrees = row.degrees ?? [row.degree_level === "postdoc" ? "phd" : row.degree_level];
+  const degrees = degreeOrder.filter((degree) => rawDegrees.includes(degree));
+  const names: Record<Degree, { zh: string; en: string }> = {
+    phd: { zh: "博士", en: "PhD" }, master: { zh: "硕士", en: "Master" }, undergrad: { zh: "本科", en: "Bachelor" },
+  };
+  const identityVisible = fields.has("academic_stage");
   const yearVisible = fields.has(alumni ? "graduation_year" : "enrollment_year");
   const year = alumni ? row.graduation_year : row.enrollment_year;
-  const academicZh = academicVisible ? degreeZh : "";
-  const academicEn = academicVisible ? degreeEn : "";
-  const currentDegree = academicVisible && yearVisible && year
-    ? { zh: `${year}级${postdoc ? "博士" : degreeZh}`, en: `${postdoc ? "PhD" : degreeEn}, Class of ${year}` }
-    : postdoc ? { zh: "", en: "" } : { zh: academicZh, en: academicEn };
-  const role = academicVisible && postdoc ? { zh: "博士后", en: "Postdoctoral Researcher" } : { zh: "", en: "" };
-  const currentYear = !academicVisible && yearVisible && year ? { zh: `${year}级`, en: `Class of ${year}` } : { zh: "", en: "" };
+  const degree = identityVisible && degrees[0] ? names[degrees[0]] : { zh: "", en: "" };
+  const showCohort = !teacher && degree.zh && yearVisible && year;
+  const currentDegree = showCohort
+    ? { zh: `${year}级${degree.zh}`, en: `${degree.en}, Class of ${year}` }
+    : degree;
+  const role = identityVisible && teacher ? { zh: "老师", en: "Faculty" } : { zh: "", en: "" };
+  const currentYear = !showCohort && yearVisible && year ? { zh: `${year}级`, en: `Class of ${year}` } : { zh: "", en: "" };
   const alumniSummary = {
-    zh: [yearVisible && year ? `${year}届` : "", academicZh].filter(Boolean).join(""),
-    en: [academicEn, yearVisible && year ? `Graduated ${year}` : ""].filter(Boolean).join(", "),
+    zh: [yearVisible && year ? `${year}届` : "", degree.zh].filter(Boolean).join(""),
+    en: [degree.en, yearVisible && year ? `Graduated ${year}` : ""].filter(Boolean).join(", "),
   };
   return {
     slug: row.member_slug || row.username,
-    group: alumni ? "alumni" : row.degree_level === "faculty" ? "advisor" : row.degree_level,
+    group: alumni ? "alumni" : teacher ? "advisor" : degrees[0] ?? "student",
     sortOrder: 0,
     name: { zh: publicNameZh, en: publicNameEn },
     bio: fields.has("bio") ? locale(row, "bio") : { zh: "", en: "" },
     role,
     degree: !alumni ? currentDegree : { zh: "", en: "" },
+    ...(identityVisible && degrees.length > 1 ? { degrees: degrees.map((item) => names[item]) } : {}),
     enrollmentYear: !alumni ? currentYear : { zh: "", en: "" },
     graduation: alumni ? alumniSummary : { zh: "", en: "" },
     major: fields.has("major") ? locale(row, "major") : { zh: "", en: "" },
@@ -107,7 +112,7 @@ export function createPostgresPublicSiteRepository(pool: Queryable, {
         FROM user_profiles p JOIN users u ON u.id=p.user_id
         LEFT JOIN media_assets m ON m.id=p.avatar_asset_id AND m.status='active'
         WHERE p.public_visible=true AND u.account_kind='person'
-        ORDER BY p.member_status,p.degree_level,p.enrollment_year,p.name_en,u.username`);
+        ORDER BY p.member_status,p.member_role,p.degrees,p.enrollment_year,p.name_en,u.username`);
       return rows.map(mapPublicTeamMember);
     },
     async getTeamMemberProfile(slug) {

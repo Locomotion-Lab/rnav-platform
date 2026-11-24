@@ -4055,6 +4055,7 @@
             "description": "Success (status depends on operation); see validation source for domain DTO"
           }
         },
+        "x-request-schema": "mediaUploadSchema",
         "requestBody": {
           "required": true,
           "content": {
@@ -4068,6 +4069,19 @@
                   "file": {
                     "type": "string",
                     "format": "binary"
+                  },
+                  "category": {
+                    "type": "string",
+                    "enum": [
+                      "avatar",
+                      "site",
+                      "device",
+                      "other"
+                    ]
+                  },
+                  "avatarUserId": {
+                    "type": "string",
+                    "format": "uuid"
                   }
                 },
                 "additionalProperties": false
@@ -4315,254 +4329,6 @@
             "description": "Success (status depends on operation); see validation source for domain DTO"
           }
         }
-      }
-    },
-    "/api/v1/permissions/catalog": {
-      "get": {
-        "operationId": "get__api_v1_permissions_catalog",
-        "parameters": [],
-        "security": [
-          {
-            "sessionCookie": []
-          }
-        ],
-        "x-validation-source": "server/routes/permissions.ts",
-        "responses": {
-          "400": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "413": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Unavailable or business write freeze",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "2XX": {
-            "description": "Success (status depends on operation); see validation source for domain DTO"
-          }
-        }
-      }
-    },
-    "/api/v1/permissions/users/{id}": {
-      "get": {
-        "operationId": "get__api_v1_permissions_users__id_",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "security": [
-          {
-            "sessionCookie": []
-          }
-        ],
-        "x-validation-source": "server/routes/permissions.ts",
-        "responses": {
-          "400": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "413": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Unavailable or business write freeze",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "2XX": {
-            "description": "Success (status depends on operation); see validation source for domain DTO"
-          }
-        }
-      },
-      "put": {
-        "operationId": "put__api_v1_permissions_users__id_",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "security": [
-          {
-            "sessionCookie": []
-          }
-        ],
-        "x-validation-source": "server/routes/permissions.ts",
-        "responses": {
-          "400": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "413": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Unavailable or business write freeze",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "2XX": {
-            "description": "Success (status depends on operation); see validation source for domain DTO"
-          }
-        },
-        "x-request-schema": "permissionAssignmentSchema"
       }
     },
     "/api/v1/profile": {
@@ -7952,6 +7718,93 @@
         }
       }
     },
+    "/api/v1/users/directory": {
+      "get": {
+        "operationId": "get__api_v1_users_directory",
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-validation-source": "server/routes/users.ts",
+        "responses": {
+          "200": {
+            "description": "Validated core DTO",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DirectoryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "API error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "API error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "API error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "API error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "API error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Unavailable or business write freeze",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "2XX": {
+            "description": "Success (status depends on operation); see validation source for domain DTO"
+          }
+        }
+      }
+    },
     "/api/v1/users": {
       "get": {
         "operationId": "get__api_v1_users",
@@ -8317,6 +8170,16 @@
         ],
         "x-validation-source": "server/routes/users.ts",
         "responses": {
+          "200": {
+            "description": "Validated core DTO",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResponse"
+                }
+              }
+            }
+          },
           "400": {
             "description": "API error",
             "content": {
@@ -8401,6 +8264,16 @@
         ],
         "x-validation-source": "server/routes/users.ts",
         "responses": {
+          "200": {
+            "description": "Validated core DTO",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResponse"
+                }
+              }
+            }
+          },
           "400": {
             "description": "API error",
             "content": {
@@ -8569,200 +8442,6 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/accountEmailSchema"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/users/{id}/account-kind": {
-      "put": {
-        "operationId": "put__api_v1_users__id__account_kind",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "security": [
-          {
-            "sessionCookie": []
-          }
-        ],
-        "x-validation-source": "server/routes/users.ts",
-        "responses": {
-          "400": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "413": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Unavailable or business write freeze",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "2XX": {
-            "description": "Success (status depends on operation); see validation source for domain DTO"
-          }
-        },
-        "x-request-schema": "accountKindSchema",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/accountKindSchema"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/users/{id}/convert-alumni": {
-      "post": {
-        "operationId": "post__api_v1_users__id__convert_alumni",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "security": [
-          {
-            "sessionCookie": []
-          }
-        ],
-        "x-validation-source": "server/routes/users.ts",
-        "responses": {
-          "400": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "413": {
-            "description": "API error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Unavailable or business write freeze",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "2XX": {
-            "description": "Success (status depends on operation); see validation source for domain DTO"
-          }
-        },
-        "x-request-schema": "convertAlumniSchema",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/convertAlumniSchema"
               }
             }
           }
@@ -12951,23 +12630,6 @@
         ],
         "additionalProperties": false
       },
-      "accountKindSchema": {
-        "$schema": "http://json-schema.org/draft-07/schema#",
-        "type": "object",
-        "properties": {
-          "accountKind": {
-            "type": "string",
-            "enum": [
-              "person",
-              "system"
-            ]
-          }
-        },
-        "required": [
-          "accountKind"
-        ],
-        "additionalProperties": false
-      },
       "adminProfileUpdateSchema": {
         "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",
@@ -13152,15 +12814,24 @@
               "alumni"
             ]
           },
-          "academicStage": {
+          "memberRole": {
             "type": "string",
             "enum": [
-              "faculty",
-              "postdoc",
-              "phd",
-              "master",
-              "undergrad"
+              "teacher",
+              "student"
             ]
+          },
+          "degrees": {
+            "maxItems": 3,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "phd",
+                "master",
+                "undergrad"
+              ]
+            }
           },
           "publicVisible": {
             "type": "boolean"
@@ -13191,22 +12862,9 @@
           "personalLinks",
           "publicFields",
           "memberStatus",
-          "academicStage",
+          "memberRole",
+          "degrees",
           "publicVisible"
-        ],
-        "additionalProperties": false
-      },
-      "convertAlumniSchema": {
-        "$schema": "http://json-schema.org/draft-07/schema#",
-        "type": "object",
-        "properties": {
-          "confirm": {
-            "type": "boolean",
-            "const": true
-          }
-        },
-        "required": [
-          "confirm"
         ],
         "additionalProperties": false
       },
@@ -13228,24 +12886,32 @@
             "type": "string",
             "maxLength": 100
           },
-          "academicStage": {
-            "default": "",
-            "anyOf": [
-              {
-                "type": "string",
-                "const": ""
-              },
-              {
-                "type": "string",
-                "enum": [
-                  "faculty",
-                  "postdoc",
-                  "phd",
-                  "master",
-                  "undergrad"
-                ]
-              }
+          "memberRole": {
+            "type": "string",
+            "enum": [
+              "teacher",
+              "student"
             ]
+          },
+          "memberStatus": {
+            "default": "current",
+            "type": "string",
+            "enum": [
+              "current",
+              "alumni"
+            ]
+          },
+          "degrees": {
+            "maxItems": 3,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "phd",
+                "master",
+                "undergrad"
+              ]
+            }
           },
           "email": {
             "default": "",
@@ -13269,20 +12935,14 @@
               "normal",
               "super"
             ]
-          },
-          "accountKind": {
-            "default": "person",
-            "type": "string",
-            "enum": [
-              "person",
-              "system"
-            ]
           }
         },
         "required": [
           "username",
           "nameZh",
-          "nameEn"
+          "nameEn",
+          "memberRole",
+          "degrees"
         ],
         "additionalProperties": false
       },
@@ -13304,24 +12964,32 @@
             "type": "string",
             "maxLength": 100
           },
-          "academicStage": {
-            "default": "",
-            "anyOf": [
-              {
-                "type": "string",
-                "const": ""
-              },
-              {
-                "type": "string",
-                "enum": [
-                  "faculty",
-                  "postdoc",
-                  "phd",
-                  "master",
-                  "undergrad"
-                ]
-              }
+          "memberRole": {
+            "type": "string",
+            "enum": [
+              "teacher",
+              "student"
             ]
+          },
+          "memberStatus": {
+            "default": "current",
+            "type": "string",
+            "enum": [
+              "current",
+              "alumni"
+            ]
+          },
+          "degrees": {
+            "maxItems": 3,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "phd",
+                "master",
+                "undergrad"
+              ]
+            }
           },
           "email": {
             "default": "",
@@ -13365,7 +13033,9 @@
         "required": [
           "username",
           "nameZh",
-          "nameEn"
+          "nameEn",
+          "memberRole",
+          "degrees"
         ],
         "additionalProperties": false
       },
@@ -13394,24 +13064,32 @@
                   "type": "string",
                   "maxLength": 100
                 },
-                "academicStage": {
-                  "default": "",
-                  "anyOf": [
-                    {
-                      "type": "string",
-                      "const": ""
-                    },
-                    {
-                      "type": "string",
-                      "enum": [
-                        "faculty",
-                        "postdoc",
-                        "phd",
-                        "master",
-                        "undergrad"
-                      ]
-                    }
+                "memberRole": {
+                  "type": "string",
+                  "enum": [
+                    "teacher",
+                    "student"
                   ]
+                },
+                "memberStatus": {
+                  "default": "current",
+                  "type": "string",
+                  "enum": [
+                    "current",
+                    "alumni"
+                  ]
+                },
+                "degrees": {
+                  "maxItems": 3,
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "phd",
+                      "master",
+                      "undergrad"
+                    ]
+                  }
                 },
                 "email": {
                   "default": "",
@@ -13455,7 +13133,9 @@
               "required": [
                 "username",
                 "nameZh",
-                "nameEn"
+                "nameEn",
+                "memberRole",
+                "degrees"
               ],
               "additionalProperties": false
             }
@@ -13539,7 +13219,6 @@
             "type": "string",
             "enum": [
               "normal",
-              "plus",
               "super"
             ]
           },
@@ -13827,6 +13506,37 @@
               "active",
               "recycled"
             ]
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "avatar",
+              "site",
+              "device",
+              "other"
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "mediaUploadSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "category": {
+            "default": "other",
+            "type": "string",
+            "enum": [
+              "avatar",
+              "site",
+              "device",
+              "other"
+            ]
+          },
+          "avatarUserId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
           }
         },
         "additionalProperties": false
@@ -13950,7 +13660,6 @@
                 "type": "string",
                 "enum": [
                   "normal",
-                  "plus",
                   "super"
                 ]
               },
@@ -13980,15 +13689,242 @@
         ],
         "additionalProperties": false
       },
+      "DirectoryResponse": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "members": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "nameZh": {
+                  "type": "string",
+                  "maxLength": 100
+                },
+                "nameEn": {
+                  "type": "string",
+                  "maxLength": 100
+                },
+                "publicEmail": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "const": ""
+                    },
+                    {
+                      "type": "string",
+                      "maxLength": 320,
+                      "format": "email",
+                      "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                    }
+                  ]
+                },
+                "phone": {
+                  "type": "string",
+                  "maxLength": 50
+                },
+                "bioZh": {
+                  "type": "string",
+                  "maxLength": 4000
+                },
+                "bioEn": {
+                  "type": "string",
+                  "maxLength": 4000
+                },
+                "researchInterestsZh": {
+                  "type": "string",
+                  "maxLength": 2000
+                },
+                "researchInterestsEn": {
+                  "type": "string",
+                  "maxLength": 2000
+                },
+                "enrollmentYear": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "const": ""
+                    },
+                    {
+                      "type": "string",
+                      "pattern": "^20\\d{2}$"
+                    }
+                  ]
+                },
+                "graduationYear": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "const": ""
+                    },
+                    {
+                      "type": "string",
+                      "pattern": "^20\\d{2}$"
+                    }
+                  ]
+                },
+                "majorZh": {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                "majorEn": {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                "thesisZh": {
+                  "type": "string",
+                  "maxLength": 500
+                },
+                "thesisEn": {
+                  "type": "string",
+                  "maxLength": 500
+                },
+                "destinationZh": {
+                  "type": "string",
+                  "maxLength": 300
+                },
+                "destinationEn": {
+                  "type": "string",
+                  "maxLength": 300
+                },
+                "avatarAssetId": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "avatarPositionX": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100
+                },
+                "avatarPositionY": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100
+                },
+                "avatarZoom": {
+                  "type": "number",
+                  "minimum": 1,
+                  "maximum": 3
+                },
+                "personalLinks": {
+                  "maxItems": 12,
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "labelZh": {
+                        "type": "string",
+                        "maxLength": 80
+                      },
+                      "labelEn": {
+                        "type": "string",
+                        "maxLength": 80
+                      },
+                      "url": {
+                        "type": "string",
+                        "maxLength": 500,
+                        "format": "uri"
+                      }
+                    },
+                    "required": [
+                      "labelZh",
+                      "labelEn",
+                      "url"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "userId": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "username": {
+                  "type": "string"
+                },
+                "memberRole": {
+                  "type": "string",
+                  "enum": [
+                    "teacher",
+                    "student"
+                  ]
+                },
+                "memberStatus": {
+                  "type": "string",
+                  "enum": [
+                    "current",
+                    "alumni"
+                  ]
+                },
+                "degrees": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "phd",
+                      "master",
+                      "undergrad"
+                    ]
+                  }
+                },
+                "avatarUrl": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "nameZh",
+                "nameEn",
+                "publicEmail",
+                "phone",
+                "bioZh",
+                "bioEn",
+                "researchInterestsZh",
+                "researchInterestsEn",
+                "enrollmentYear",
+                "graduationYear",
+                "majorZh",
+                "majorEn",
+                "thesisZh",
+                "thesisEn",
+                "destinationZh",
+                "destinationEn",
+                "avatarAssetId",
+                "avatarPositionX",
+                "avatarPositionY",
+                "avatarZoom",
+                "personalLinks",
+                "userId",
+                "username",
+                "memberRole",
+                "memberStatus",
+                "degrees",
+                "avatarUrl"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "members"
+        ],
+        "additionalProperties": false
+      },
       "ProfileResponse": {
         "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",
         "properties": {
-          "version": {
-            "type": "integer",
-            "exclusiveMinimum": 0,
-            "maximum": 9007199254740991
-          },
           "nameZh": {
             "type": "string",
             "maxLength": 100
@@ -14134,8 +14070,51 @@
               "additionalProperties": false
             }
           },
+          "userId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "username": {
+            "type": "string"
+          },
+          "memberRole": {
+            "type": "string",
+            "enum": [
+              "teacher",
+              "student"
+            ]
+          },
+          "memberStatus": {
+            "type": "string",
+            "enum": [
+              "current",
+              "alumni"
+            ]
+          },
+          "degrees": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "phd",
+                "master",
+                "undergrad"
+              ]
+            }
+          },
+          "avatarUrl": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "version": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
           "publicFields": {
-            "maxItems": 14,
             "type": "array",
             "items": {
               "type": "string",
@@ -14157,26 +14136,11 @@
               ]
             }
           },
-          "userId": {
-            "type": "string",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-          },
-          "username": {
-            "type": "string"
-          },
           "memberSlug": {
-            "type": "string"
-          },
-          "memberStatus": {
-            "type": "string",
-            "enum": [
-              "current",
-              "alumni"
+            "type": [
+              "string",
+              "null"
             ]
-          },
-          "academicStage": {
-            "type": "string"
           },
           "publicVisible": {
             "type": "boolean"
@@ -14188,14 +14152,14 @@
               "system"
             ]
           },
-          "avatarUrl": {
+          "accountEmail": {
+            "type": "string"
+          },
+          "profileContentUpdatedAt": {
             "type": [
               "string",
               "null"
             ]
-          },
-          "accountEmail": {
-            "type": "string"
           },
           "completeness": {
             "type": "object",
@@ -14204,7 +14168,6 @@
           }
         },
         "required": [
-          "version",
           "nameZh",
           "nameEn",
           "publicEmail",
@@ -14226,16 +14189,19 @@
           "avatarPositionY",
           "avatarZoom",
           "personalLinks",
-          "publicFields",
           "userId",
           "username",
-          "memberSlug",
+          "memberRole",
           "memberStatus",
-          "academicStage",
+          "degrees",
+          "avatarUrl",
+          "version",
+          "publicFields",
+          "memberSlug",
           "publicVisible",
           "accountKind",
-          "avatarUrl",
           "accountEmail",
+          "profileContentUpdatedAt",
           "completeness"
         ],
         "additionalProperties": {}
@@ -14278,6 +14244,15 @@
           "status": {
             "type": "string"
           },
+          "category": {
+            "type": "string",
+            "enum": [
+              "avatar",
+              "site",
+              "device",
+              "other"
+            ]
+          },
           "recycledAt": {
             "type": [
               "string",
@@ -14300,6 +14275,7 @@
           "sizeBytes",
           "checksumSha256",
           "status",
+          "category",
           "recycledAt",
           "createdAt",
           "references"

@@ -5,8 +5,7 @@ import { memberPreview } from "./memberPreview";
 import { useEffect, useRef, useState } from "react";
 import { ConsoleApiError, consoleApi } from "@/lib/consoleApi";
 import { RNAV_BRAND_ASSETS } from "@/lib/brand";
-import type { Member } from "./MemberManagement";
-import { academicStageLabels, publicProfileFieldGroups, type AcademicStage } from "./profileModel";
+import { degreeLabels, memberRoleLabels, memberStatusLabels, publicProfileFieldGroups, type Degree, type MemberProfile } from "./profileModel";
 import { personIdentityFromChineseName } from "./memberIdentity";
 
 const field =
@@ -14,7 +13,7 @@ const field =
 const labels: Record<string, string> = {
   name: "姓名",
   avatar: "头像",
-  academicStage: "学术身份",
+  memberRole: "在组身份与学位",
   major: "专业",
   research: "研究方向",
   enrollmentYear: "入组年份",
@@ -27,32 +26,30 @@ export function MemberProfileEditor({
   canEdit,
   onSave,
   onReload,
-  onConvert,
 }: {
-  member: Member;
+  member: MemberProfile;
   busy: boolean;
   canEdit: boolean;
-  onSave: (body: Record<string, unknown>) => Promise<Partial<Member>>;
-  onReload: () => Promise<Partial<Member>>;
-  onConvert: () => Promise<void>;
+  onSave: (body: Record<string, unknown>) => Promise<Partial<MemberProfile>>;
+  onReload: () => Promise<Partial<MemberProfile>>;
 }) {
   const [draft, setDraft] = useState(member);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error" | "conflict">("idle");
   const [saveError, setSaveError] = useState("");
-  const memberIdRef = useRef(member.id);
+  const memberIdRef = useRef(member.userId);
   useEffect(() => {
-    const selectedMemberChanged = memberIdRef.current !== member.id;
+    const selectedMemberChanged = memberIdRef.current !== member.userId;
     setDraft((current) => selectedMemberChanged || member.version > current.version ? member : current);
     if (selectedMemberChanged) {
-      memberIdRef.current = member.id;
+      memberIdRef.current = member.userId;
       setUploadError("");
       setSaveState("idle");
       setSaveError("");
     }
   }, [member]);
-  const update = (key: keyof Member, value: unknown) =>
+  const update = (key: keyof MemberProfile, value: unknown) =>
     setDraft((current) => ({ ...current, [key]: value }));
   const updateIdentity = (nameZh: string) => setDraft((current) => {
     if (current.accountKind !== "person") return { ...current, nameZh };
@@ -66,7 +63,8 @@ export function MemberProfileEditor({
       const saved = await onSave({
       version: draft.version,
       memberStatus: draft.memberStatus,
-      academicStage: draft.academicStage,
+      memberRole: draft.memberRole,
+      degrees: draft.degrees,
       nameZh: draft.nameZh,
       nameEn: draft.nameEn,
       publicEmail: draft.publicEmail,
@@ -117,6 +115,8 @@ export function MemberProfileEditor({
     try {
       const data = new FormData();
       data.append("file", file);
+      data.append("category", "avatar");
+      data.append("avatarUserId", member.userId);
       const asset = await consoleApi<{ id: string; url: string }>(
         "/api/media/upload",
         { method: "POST", body: data },
@@ -124,7 +124,7 @@ export function MemberProfileEditor({
       setDraft((current) => ({
         ...current,
         avatarAssetId: asset.id,
-        avatarUrl: asset.url,
+        avatarUrl: `/api/v1/media/files/${asset.id}`,
         avatarPositionX: 50,
         avatarPositionY: 50,
         avatarZoom: 1,
@@ -153,10 +153,10 @@ export function MemberProfileEditor({
               .join("、")}
           </span>
         ) : null}
-        <span className="ml-2">
+        {draft.profileContentUpdatedAt ? <span className="ml-2">
           · 上次内容更新{" "}
           {new Date(draft.profileContentUpdatedAt).toLocaleDateString("zh-CN")}
-        </span>
+        </span> : null}
       </div>
       {draft.publicVisible && !draft.completeness.complete ? (
         <p className="mb-5 border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
@@ -288,30 +288,34 @@ export function MemberProfileEditor({
             </label>
           ))}
           <label className="text-sm">
-            成员状态
+            在校状态
             <select
               className={`${field} mt-1`}
               disabled={!canEdit || busy}
               value={draft.memberStatus}
               onChange={(event) => update("memberStatus", event.target.value)}
             >
-              <option value="current">在组</option>
-              <option value="alumni">校友</option>
+              {Object.entries(memberStatusLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
             </select>
           </label>
           <label className="text-sm">
-            学术身份
-            <select
-              className={`${field} mt-1`}
-              disabled={!canEdit || busy}
-              value={draft.academicStage}
-              onChange={(event) => update("academicStage", event.target.value as AcademicStage)}
-            >
-              {Object.entries(academicStageLabels).map(([value, label]) => (
-                <option key={value} value={value}>{label}</option>
-              ))}
+            在组身份
+            <select className={`${field} mt-1`} disabled={!canEdit || busy} value={draft.memberRole}
+              onChange={(event) => update("memberRole", event.target.value)}>
+              {Object.entries(memberRoleLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
             </select>
           </label>
+          <fieldset className="border border-slate-200 p-4 sm:col-span-2" disabled={!canEdit || busy}>
+            <legend className="px-1 text-sm">学位身份</legend>
+            <div className="flex flex-wrap gap-5">
+              {(Object.keys(degreeLabels) as Degree[]).map((degree) => <label className="inline-flex items-center gap-2 text-sm" key={degree}>
+                <input type="checkbox" checked={draft.degrees.includes(degree)}
+                  onChange={(event) => update("degrees", event.target.checked ? [...draft.degrees, degree] : draft.degrees.filter((value) => value !== degree))} />
+                {degreeLabels[degree]}
+              </label>)}
+            </div>
+            <p className="mt-2 text-xs text-slate-500">可多选。硕转博且未取得硕士学位时，只勾选博士。</p>
+          </fieldset>
           <label className="flex items-center gap-3 border border-slate-200 p-4 text-sm font-semibold sm:col-span-2">
             <input
               checked={draft.publicVisible}
@@ -325,7 +329,7 @@ export function MemberProfileEditor({
           </label>
           <fieldset className="border border-slate-200 p-4 sm:col-span-2">
             <legend className="px-1 text-xs font-semibold text-slate-500">官网公开内容</legend>
-            <p className="mb-4 text-xs leading-5 text-slate-500">“学术身份”只控制卡片或详情中的显式文字；成员所在分组仍由学术身份决定。</p>
+            <p className="mb-4 text-xs leading-5 text-slate-500">关闭此项会隐藏身份文字。官网团队页仍按在组身份和主学位分组。</p>
             <div className="grid gap-5 md:grid-cols-3">
               {publicProfileFieldGroups.map((group) => (
                 <section key={group.label}>
@@ -541,23 +545,6 @@ export function MemberProfileEditor({
           {saveState === "saved" ? <span className="text-sm font-semibold text-emerald-700">✓ 已保存</span> : null}
           {saveState === "error" ? <span className="text-sm font-semibold text-red-700">保存失败：{saveError}</span> : null}
           {saveState === "conflict" ? <span className="text-sm font-semibold text-amber-800">{saveError} <button className="underline" onClick={() => void reload()} type="button">加载最新资料</button></span> : null}
-          {draft.memberStatus === "current" && draft.baseTier !== "super" ? (
-            <button
-              className="border border-amber-400 px-4 py-2 text-sm font-bold text-amber-900"
-              disabled={busy || uploading}
-              onClick={() => {
-                if (
-                  window.confirm(
-                    "确认转换为校友？系统将检查占用设备，清理岗位权限并撤销旧会话。",
-                  )
-                )
-                  void onConvert();
-              }}
-              type="button"
-            >
-              转换为校友
-            </button>
-          ) : null}
         </div>
       ) : null}
     </div>
@@ -599,7 +586,7 @@ function AvatarPreview({
   member,
 }: {
   member: Pick<
-    Member,
+    MemberProfile,
     "avatarUrl" | "avatarPositionX" | "avatarPositionY" | "avatarZoom"
   >;
 }) {

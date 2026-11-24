@@ -1,5 +1,5 @@
 export type BaseTier = "normal" | "super";
-export type DisplayTier = "normal" | "plus" | "super";
+export type DisplayTier = BaseTier;
 
 export type ConsoleModule = {
   key: string;
@@ -20,7 +20,6 @@ export const knownPermissionKeys = [
   "lab_assets.write",
   "users.read",
   "users.write",
-  "permissions.write",
   "system.settings.write"
 ] as const;
 
@@ -31,63 +30,8 @@ export const basePermissionKeys = [
   "lab_assets.read",
 ] as const;
 
-const basePermissions = new Set<string>(basePermissionKeys);
-
-export type PermissionSource =
-  | { type: "base" }
-  | { type: "super" }
-  | { type: "template"; templateKey: string }
-  | { type: "grant" }
-  | { type: "revoke" };
-
-export type PermissionResolutionInput = {
-  baseTier?: BaseTier;
-  templatePermissions?: Array<{ permissionKey: string; templateKey: string }>;
-  explicitGrants?: string[];
-  explicitRevokes?: string[];
-};
-
-export function resolvePermissions({
-  baseTier = "normal",
-  templatePermissions = [],
-  explicitGrants = [],
-  explicitRevokes = []
-}: PermissionResolutionInput) {
-  const sources: Record<string, PermissionSource[]> = {};
-  if (baseTier === "super") {
-    for (const key of knownPermissionKeys) sources[key] = [{ type: "super" }];
-    return { permissions: [...knownPermissionKeys], sources };
-  }
-
-  const effective = new Set<string>();
-  for (const key of basePermissionKeys) {
-    effective.add(key);
-    sources[key] = [{ type: "base" }];
-  }
-  for (const item of templatePermissions) {
-    if (!knownPermissionKeys.includes(item.permissionKey as never)) continue;
-    effective.add(item.permissionKey);
-    sources[item.permissionKey] ??= [];
-    sources[item.permissionKey].push({ type: "template", templateKey: item.templateKey });
-  }
-  for (const key of explicitGrants) {
-    if (!knownPermissionKeys.includes(key as never)) continue;
-    effective.add(key);
-    sources[key] ??= [];
-    sources[key].push({ type: "grant" });
-  }
-  for (const key of explicitRevokes) {
-    if (!knownPermissionKeys.includes(key as never) || basePermissions.has(key)) continue;
-    effective.delete(key);
-    sources[key] = [{ type: "revoke" }];
-  }
-  return { permissions: [...effective], sources };
-}
-
-export function restrictAlumniPermissions(permissions: string[], baseTier: BaseTier) {
-  if (baseTier === "super") return permissions;
-  const internalMemberPermissions = new Set(["lab_assets.read"]);
-  return permissions.filter((permission) => !internalMemberPermissions.has(permission));
+export function getRolePermissions(baseTier: BaseTier): string[] {
+  return baseTier === "super" ? [...knownPermissionKeys] : [...basePermissionKeys];
 }
 
 const moduleDefinitions: ConsoleModule[] = [
@@ -116,16 +60,10 @@ const moduleDefinitions: ConsoleModule[] = [
     requiredAny: ["site.media.write"]
   },
   {
-    key: "users",
-    href: "/console/users",
-    label: "用户管理",
-    requiredAny: ["users.read", "users.write"]
-  },
-  {
-    key: "permissions",
-    href: "/console/permissions",
-    label: "权限管理",
-    requiredAny: ["permissions.write"]
+    key: "members",
+    href: "/console/members",
+    label: "成员与账号管理",
+    requiredAny: ["console.access"]
   },
   {
     key: "assistant",
@@ -141,31 +79,8 @@ const moduleDefinitions: ConsoleModule[] = [
   }
 ];
 
-export function deriveDisplayTier(
-  baseTier: BaseTier,
-  permissions: string[]
-): DisplayTier {
-  if (baseTier === "super") {
-    return "super";
-  }
-
-  return permissions.some((permission) => knownPermissionKeys.includes(permission as never) && !basePermissions.has(permission))
-    ? "plus"
-    : "normal";
-}
-
-export function getEffectivePermissions(
-  permissions: string[],
-  baseTier: BaseTier = "normal"
-) {
-  return resolvePermissions({ baseTier, explicitGrants: permissions }).permissions;
-}
-
-export function getConsoleModules(
-  permissions: string[],
-  baseTier: BaseTier = "normal"
-) {
-  const permissionSet = new Set(getEffectivePermissions(permissions, baseTier));
+export function getConsoleModules(baseTier: BaseTier) {
+  const permissionSet = new Set(getRolePermissions(baseTier));
   return moduleDefinitions
     .filter((module) =>
       module.requiredAny.some((permission) => permissionSet.has(permission))

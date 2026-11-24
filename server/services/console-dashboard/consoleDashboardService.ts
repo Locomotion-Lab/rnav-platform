@@ -1,6 +1,6 @@
 import type { Pool } from "pg";
 import type { AuthenticatedUser } from "../../middleware/auth.js";
-import { deriveDisplayTier, type DisplayTier } from "../auth/permissions.js";
+import type { DisplayTier } from "../auth/permissions.js";
 
 export type ConsoleDashboardRecentItem = {
   href: string;
@@ -49,20 +49,8 @@ type RecentRow = {
   updated_at: Date | string;
 };
 
-const roleDefinitions: Array<{ label: string; permissions: string[] }> = [
-  { label: "资产管理员", permissions: ["lab_assets.write"] },
-  { label: "官网编辑", permissions: ["site.content.write", "site.members.write", "site.media.write"] },
-  { label: "成员管理员", permissions: ["users.write", "permissions.write"] },
-  { label: "系统管理员", permissions: ["system.settings.write"] },
-];
-
 export function getDashboardRoleLabels(user: AuthenticatedUser) {
-  if (user.baseTier === "super") return ["超级管理员"];
-  const permissions = new Set(user.permissions);
-  const labels = roleDefinitions
-    .filter((role) => role.permissions.some((permission) => permissions.has(permission)))
-    .map((role) => role.label);
-  return labels.length ? labels : ["普通成员"];
+  return [user.baseTier === "super" ? "管理员" : "成员"];
 }
 
 function numeric(value: string | number | undefined) {
@@ -87,8 +75,8 @@ export function createConsoleDashboardService(pool: DashboardPool) {
              CASE WHEN $2::boolean THEN
                (SELECT count(*) FROM lab_asset_usage_requests WHERE status='pending')
              ELSE 0 END lab_usage_reviews,
-             CASE WHEN $3::boolean THEN (SELECT count(*) FROM user_profiles WHERE COALESCE(NULLIF(name_zh,''),NULLIF(name_en,'')) IS NULL OR avatar_asset_id IS NULL OR degree_level='' OR COALESCE(NULLIF(major_zh,''),NULLIF(major_en,'')) IS NULL OR COALESCE(NULLIF(research_interests_zh,''),NULLIF(research_interests_en,'')) IS NULL) ELSE 0 END incomplete_profiles,
-             CASE WHEN $3::boolean THEN (SELECT count(*) FROM user_profiles WHERE profile_content_updated_at < now()-interval '1 year') ELSE 0 END stale_profiles`,
+             CASE WHEN $3::boolean THEN (SELECT count(*) FROM user_profiles p JOIN users u ON u.id=p.user_id WHERE u.account_kind='person' AND (COALESCE(NULLIF(name_zh,''),NULLIF(name_en,'')) IS NULL OR avatar_asset_id IS NULL OR (member_role='student' AND cardinality(degrees)=0) OR COALESCE(NULLIF(major_zh,''),NULLIF(major_en,'')) IS NULL OR COALESCE(NULLIF(research_interests_zh,''),NULLIF(research_interests_en,'')) IS NULL)) ELSE 0 END incomplete_profiles,
+             CASE WHEN $3::boolean THEN (SELECT count(*) FROM user_profiles p JOIN users u ON u.id=p.user_id WHERE u.account_kind='person' AND profile_content_updated_at < now()-interval '1 year') ELSE 0 END stale_profiles`,
           [user.id, canReviewLabUsage,canManageMembers],
         ),
         pool.query<RecentRow>(
@@ -116,7 +104,7 @@ export function createConsoleDashboardService(pool: DashboardPool) {
         user: {
           id: user.id,
           displayName: user.displayName || user.username,
-          tier: deriveDisplayTier(user.baseTier, user.permissions),
+          tier: user.baseTier,
           roleLabels: getDashboardRoleLabels(user),
         },
         tasks: {

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createProfileService, ProfileConflictError, ProfileIdentityConflictError, ProfileIdentityError, ProfilePublicNameError } from "./profileService.js";
 
-const row = { user_id: "user-1", username: "zhangsan", account_kind: "person", member_category: "phd", member_slug: "alice", member_status: "current", degree_level: "phd", public_visible: true, name_zh: "张三", name_en: "San-Zhang", email: "alice@example.com", phone: "123", bio_zh: "简介", bio_en: "Bio", research_interests_zh: "导航", research_interests_en: "Navigation", enrollment_year: "2024", graduation_year: "", major_zh: "自动化", major_en: "Automation", thesis_zh: "", thesis_en: "", destination_zh: "", destination_en: "", avatar_asset_id: "new-avatar", avatar_url: "https://cdn/new.png", avatar_position_x: 42, avatar_position_y: 61, avatar_zoom: "1.25", personal_links: [{ labelZh: "代码", labelEn: "Code", url: "https://github.com/a" }], public_fields: ["name_zh"], version: "2" };
+const row = { user_id: "user-1", username: "zhangsan", account_kind: "person", member_category: "phd", member_slug: "alice", member_status: "current", member_role: "student", degrees: ["phd"], public_visible: true, name_zh: "张三", name_en: "San-Zhang", email: "alice@example.com", phone: "123", bio_zh: "简介", bio_en: "Bio", research_interests_zh: "导航", research_interests_en: "Navigation", enrollment_year: "2024", graduation_year: "", major_zh: "自动化", major_en: "Automation", thesis_zh: "", thesis_en: "", destination_zh: "", destination_en: "", avatar_asset_id: "new-avatar", avatar_url: "https://cdn/new.png", avatar_position_x: 42, avatar_position_y: 61, avatar_zoom: "1.25", personal_links: [{ labelZh: "代码", labelEn: "Code", url: "https://github.com/a" }], public_fields: ["name_zh"], version: "2" };
 const body = { version: 1, nameZh: "张三", nameEn: "San-Zhang", publicEmail: "alice@example.com", phone: "secret-phone", bioZh: "简介", bioEn: "Bio", researchInterestsZh: "导航", researchInterestsEn: "Navigation", enrollmentYear: "2024", graduationYear: "", majorZh: "自动化", majorEn: "Automation", thesisZh: "", thesisEn: "", destinationZh: "", destinationEn: "", avatarAssetId: "new-avatar", avatarPositionX: 42, avatarPositionY: 61, avatarZoom: 1.25, personalLinks: [{ labelZh: "代码", labelEn: "Code", url: "https://github.com/a" }], publicFields: ["name_zh", "bio", "links"] as Array<"name_zh" | "bio" | "links"> };
 
 class Client {
@@ -20,15 +20,15 @@ class Client {
   release() { this.released = true; }
 }
 
-test("profile update uses account data directly and recycles an unreferenced old avatar", async () => {
+test("profile update preserves group identity and uses account data directly", async () => {
   const client = new Client();
   const result = await createProfileService({ connect: async () => client } as never).updateProfile("user-1", body as never);
   assert.equal(client.calls.some((call) => call.sql.includes("UPDATE team_members")), false);
-  assert.ok(client.calls.some((call) => call.sql.includes("status='recycled'")));
+
   assert.equal(JSON.stringify(client.calls.find((call) => call.values?.includes("profile.update"))?.values).includes("secret-phone"), false);
   assert.equal(result.avatarUrl, "https://cdn/new.png");
   assert.equal("memberCategory" in result, false);
-  assert.equal(result.academicStage, "phd");
+  assert.deepEqual(result.degrees, ["phd"]);
   assert.equal(result.avatarZoom, 1.25);
   assert.equal(client.calls.at(-1)?.sql, "COMMIT");
   assert.equal(client.released, true);
@@ -46,7 +46,7 @@ test("admin profile updates governance fields without writing member_category", 
   await createProfileService({ connect: async () => client } as never).updateProfileAsAdmin(
     "user-1",
     "admin-1",
-    { ...body, memberStatus: "alumni", academicStage: "master", publicVisible: false } as never,
+    { ...body, memberStatus: "alumni", memberRole: "student", degrees: ["master"], publicVisible: false } as never,
   );
   const update = client.calls.find((call) => call.sql.includes("UPDATE user_profiles SET"));
   assert.ok(update);
@@ -54,6 +54,7 @@ test("admin profile updates governance fields without writing member_category", 
   assert.equal(update.values?.[2], "alumni");
   assert.equal(update.values?.[3], "master");
   assert.equal(update.values?.[26], false);
+  assert.deepEqual(update.values?.slice(27), ["student", ["master"]]);
 });
 
 test("a visible profile cannot remove every populated public name", async () => {

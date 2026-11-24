@@ -19,7 +19,7 @@ function deletionError(value: unknown) {
       return "该账号仍有关联数据，无法永久删除。请停用账号或先解除相关业务关系。";
     if (value.code === "SELF_DELETE") return "不能永久删除当前登录账号。";
     if (value.code === "LAST_SUPER")
-      return "不能删除最后一个启用的超级管理员。";
+      return "不能删除最后一个启用的管理员。";
     if (value.code === "NOT_FOUND") return "该账号已不存在，请刷新成员列表。";
   }
   return value instanceof Error ? value.message : "永久删除检查失败。";

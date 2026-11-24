@@ -1,11 +1,8 @@
 import { randomBytes } from "node:crypto";
 import bcrypt from "bcryptjs";
 import type { Pool } from "pg";
-import {
-  deriveDisplayTier,
-  resolvePermissions,
-  type BaseTier,
-} from "../auth/permissions.js";
+import type { BaseTier } from "../auth/permissions.js";
+import { legacyDegreeLevel } from "../account/memberIdentity.js";
 import type { z } from "zod";
 import type { createUserSchema } from "./userSchemas.js";
 import type { importUsersSchema } from "./userSchemas.js";
@@ -154,6 +151,9 @@ async function buildDeletionCheck(
     }))
     .filter((dependency: AccountDeletionDependency) => dependency.count > 0);
 
+  if (target.account_kind === "system") {
+    dependencies.unshift({ type: "system_account", label: "保留系统账号及其历史记录", count: 1, blocking: true });
+  }
   if (userId === actor.id) {
     dependencies.unshift({
       type: "self_protection",
@@ -169,7 +169,7 @@ async function buildDeletionCheck(
     if (Number(activeSuperResult.rows[0]?.count ?? 0) <= 1) {
       dependencies.unshift({
         type: "last_active_super",
-        label: "最后一个启用的超级管理员",
+        label: "最后一个启用的管理员",
         count: 1,
         blocking: true,
       });
@@ -211,30 +211,20 @@ export function createUserAdminService(pool: Pick<Pool, "query" | "connect">) {
       const result = await pool.query<any>(
         `SELECT users.id,users.username,users.email,users.display_name,users.base_tier,users.account_kind,users.status,
         users.must_change_password,users.last_login_at,users.created_at,
-        user_profiles.public_visible,user_profiles.member_status,user_profiles.degree_level,
+        user_profiles.public_visible,user_profiles.member_status,user_profiles.member_role,user_profiles.degrees,
         user_profiles.name_zh,user_profiles.name_en,user_profiles.email public_email,user_profiles.phone,user_profiles.bio_zh,user_profiles.bio_en,
         user_profiles.research_interests_zh,user_profiles.research_interests_en,user_profiles.enrollment_year,user_profiles.graduation_year,
         user_profiles.major_zh,user_profiles.major_en,user_profiles.thesis_zh,user_profiles.thesis_en,user_profiles.destination_zh,user_profiles.destination_en,
         user_profiles.avatar_asset_id,media_assets.url avatar_url,user_profiles.avatar_position_x,user_profiles.avatar_position_y,user_profiles.avatar_zoom,
-        user_profiles.personal_links,user_profiles.public_fields,user_profiles.version,user_profiles.profile_content_updated_at,
-        COALESCE(array_agg(DISTINCT permission_template_permissions.permission_key) FILTER(WHERE permission_template_permissions.permission_key IS NOT NULL),ARRAY[]::text[]) template_permissions,
-        COALESCE(array_agg(DISTINCT user_permission_templates.template_key) FILTER(WHERE user_permission_templates.template_key IS NOT NULL),ARRAY[]::text[]) template_keys,
-        COALESCE(array_agg(DISTINCT user_permission_overrides.permission_key) FILTER(WHERE user_permission_overrides.decision='grant'),ARRAY[]::text[]) grants,
-        COALESCE(array_agg(DISTINCT user_permission_overrides.permission_key) FILTER(WHERE user_permission_overrides.decision='revoke'),ARRAY[]::text[]) revokes
-        FROM users JOIN user_profiles ON user_profiles.user_id=users.id LEFT JOIN media_assets ON media_assets.id=user_profiles.avatar_asset_id LEFT JOIN user_permission_templates ON user_permission_templates.user_id=users.id
-        LEFT JOIN permission_template_permissions ON permission_template_permissions.template_key=user_permission_templates.template_key
-        LEFT JOIN user_permission_overrides ON user_permission_overrides.user_id=users.id
+        user_profiles.personal_links,user_profiles.public_fields,user_profiles.version,user_profiles.profile_content_updated_at
+        FROM users JOIN user_profiles ON user_profiles.user_id=users.id
+        LEFT JOIN media_assets ON media_assets.id=user_profiles.avatar_asset_id
         WHERE ($1='' OR users.username ILIKE '%'||$1||'%' OR users.display_name ILIKE '%'||$1||'%' OR COALESCE(users.email,'') ILIKE '%'||$1||'%')
-          AND ($2='' OR users.status=$2) GROUP BY users.id,user_profiles.user_id,media_assets.id ORDER BY users.status,users.username`,
+          AND ($2='' OR users.status=$2) AND (users.account_kind='person' OR users.username='admin') ORDER BY users.status,users.username`,
         [query.search ?? "", query.status ?? ""],
       );
       return result.rows
         .map((row: any) => {
-          const permissions = resolvePermissions({
-            baseTier: row.base_tier,
-            explicitGrants: [...row.template_permissions, ...row.grants],
-            explicitRevokes: row.revokes,
-          }).permissions;
           return {
             id: row.id,
             username: row.username,
@@ -242,18 +232,17 @@ export function createUserAdminService(pool: Pick<Pool, "query" | "connect">) {
             displayName: row.display_name,
             baseTier: row.base_tier,
             accountKind: row.account_kind,
-            tier: deriveDisplayTier(row.base_tier, permissions),
+            tier: row.base_tier,
             status: row.status,
             mustChangePassword: row.must_change_password,
             lastLoginAt: row.last_login_at,
             createdAt: row.created_at,
             publicVisible: row.public_visible,
             memberStatus: row.member_status,
-            academicStage: row.degree_level,
+            memberRole: row.member_role, degrees: row.degrees,
             nameZh: row.name_zh,
             nameEn: row.name_en,
             researchInterestsZh: row.research_interests_zh,
-            templateKeys: row.template_keys,
             publicEmail: row.public_email, phone: row.phone, bioZh: row.bio_zh, bioEn: row.bio_en,
             researchInterestsEn: row.research_interests_en, enrollmentYear: row.enrollment_year, graduationYear: row.graduation_year,
             majorZh: row.major_zh, majorEn: row.major_en, thesisZh: row.thesis_zh, thesisEn: row.thesis_en,
@@ -262,7 +251,7 @@ export function createUserAdminService(pool: Pick<Pool, "query" | "connect">) {
             personalLinks: row.personal_links, publicFields: row.public_fields, version: Number(row.version),
             profileContentUpdatedAt: row.profile_content_updated_at,
             completeness: profileCompleteness({ memberStatus: row.member_status, publicVisible: row.public_visible, publicFields: row.public_fields, nameZh: row.name_zh,
-              nameEn: row.name_en, avatarAssetId: row.avatar_asset_id, academicStage: row.degree_level, enrollmentYear: row.enrollment_year,
+              nameEn: row.name_en, avatarAssetId: row.avatar_asset_id, hasGroupIdentity: row.member_role === "teacher" || Boolean(row.degrees?.length), enrollmentYear: row.enrollment_year,
               graduationYear: row.graduation_year, majorZh: row.major_zh, majorEn: row.major_en,
               researchInterestsZh: row.research_interests_zh, researchInterestsEn: row.research_interests_en,
               destinationZh: row.destination_zh, destinationEn: row.destination_en }),
@@ -327,7 +316,7 @@ export function createUserAdminService(pool: Pick<Pool, "query" | "connect">) {
           )
         )
           throw new UserAdminError(
-            "At least one active super is required",
+            "至少保留一个启用的管理员账号",
             "LAST_SUPER",
             409,
           );
@@ -371,7 +360,7 @@ export function createUserAdminService(pool: Pick<Pool, "query" | "connect">) {
         client.release();
       }
     },
-    async createUser(body: z.input<typeof createUserSchema>, actor: Actor) {
+    async createUser(body: z.output<typeof createUserSchema>, actor: Actor) {
       if (body.baseTier === "super" && actor.baseTier !== "super")
         throw new UserAdminError(
           "Only super can create super users",
@@ -380,7 +369,7 @@ export function createUserAdminService(pool: Pick<Pool, "query" | "connect">) {
         );
       const password = temporaryPassword();
       const hash = await bcrypt.hash(password, 12);
-      const accountKind = body.accountKind ?? "person";
+      const accountKind = "person";
       const rawEmail = body.email ?? "";
       const accountEmail = rawEmail.trim()
         ? rawEmail.trim().toLowerCase()
@@ -402,25 +391,19 @@ export function createUserAdminService(pool: Pick<Pool, "query" | "connect">) {
           ],
         );
         const id = user.rows[0].id;
-        const publicFields = accountKind === "person"
-          ? ["avatar", "name_zh", "name_en", "academic_stage", "research"]
-          : [];
+        const publicFields = ["avatar", "name_zh", "name_en", "academic_stage", "research"];
         await client.query(
-          `INSERT INTO user_profiles(user_id,member_slug,member_status,degree_level,name_zh,name_en,email,public_fields,public_visible)
-          VALUES($1,$2,'current',$3,$4,$5,$6,$7,false)`,
+          `INSERT INTO user_profiles(user_id,member_slug,member_status,degree_level,name_zh,name_en,email,public_fields,public_visible,member_role,degrees)
+          VALUES($1,$2,$8,$3,$4,$5,$6,$7,false,$9,$10)`,
           [
             id,
             slug(body.username),
-            accountKind === "person" ? body.academicStage : "",
+            legacyDegreeLevel(body.memberRole, body.degrees),
             body.nameZh,
             body.nameEn,
-            accountEmail ?? "",
-            publicFields,
+            "",
+            publicFields, body.memberStatus, body.memberRole, body.degrees,
           ],
-        );
-        await client.query(
-          "INSERT INTO user_permission_templates(user_id,template_key,assigned_by) VALUES($1,'normal-member',$2) ON CONFLICT DO NOTHING",
-          [id, actor.id],
         );
         await client.query(
           "INSERT INTO audit_logs(actor_id,action,target_type,target_id,detail) VALUES($1,'user.create','user',$2,$3::jsonb)",
@@ -485,7 +468,7 @@ export function createUserAdminService(pool: Pick<Pool, "query" | "connect">) {
           );
           if (Number(count.rows[0].count) <= 1)
             throw new UserAdminError(
-              "At least one active super is required",
+              "至少保留一个启用的管理员账号",
               "LAST_SUPER",
               409,
             );
@@ -539,7 +522,7 @@ export function createUserAdminService(pool: Pick<Pool, "query" | "connect">) {
           );
           if (Number(count.rows[0].count) <= 1)
             throw new UserAdminError(
-              "At least one active super is required",
+              "至少保留一个启用的管理员账号",
               "LAST_SUPER",
               409,
             );
@@ -562,19 +545,6 @@ export function createUserAdminService(pool: Pick<Pool, "query" | "connect">) {
       } finally {
         client.release();
       }
-    },
-    async setAccountKind(userId: string, accountKind: "person" | "system", actor: Actor) {
-      const client = await pool.connect();
-      try {
-        await client.query("BEGIN");
-        const target = await client.query<{base_tier:BaseTier}>("SELECT base_tier FROM users WHERE id=$1 FOR UPDATE",[userId]);
-        if(!target.rowCount) throw new UserAdminError("User not found","NOT_FOUND",404);
-        if(target.rows[0].base_tier==="super"&&actor.baseTier!=="super") throw new UserAdminError("Only super can modify super users","SUPER_REQUIRED",403);
-        await client.query("UPDATE users SET account_kind=$2,updated_at=now() WHERE id=$1",[userId,accountKind]);
-        if(accountKind==="system") await client.query("UPDATE user_profiles SET public_visible=false,updated_at=now() WHERE user_id=$1",[userId]);
-        await client.query("INSERT INTO audit_logs(actor_id,action,target_type,target_id,detail) VALUES($1,'user.account_kind','user',$2,$3::jsonb)",[actor.id,userId,JSON.stringify({accountKind})]);
-        await client.query("COMMIT");
-      } catch(error) { await client.query("ROLLBACK"); throw error; } finally { client.release(); }
     },
     async setPublicProfile(
       userId: string,
@@ -693,30 +663,12 @@ export function createUserAdminService(pool: Pick<Pool, "query" | "connect">) {
         throw error;
       }
     },
-    async convertToAlumni(userId: string, actor: Actor) {
-      const client = await pool.connect();
-      try {
-        await client.query("BEGIN");
-        const target = await client.query<{ base_tier: BaseTier; member_status: string }>(`SELECT users.base_tier,user_profiles.member_status FROM users JOIN user_profiles ON user_profiles.user_id=users.id WHERE users.id=$1 FOR UPDATE`, [userId]);
-        if (!target.rows[0]) throw new UserAdminError("User not found", "NOT_FOUND", 404);
-        if (target.rows[0].base_tier === "super") throw new UserAdminError("Super accounts cannot be converted to alumni", "SUPER_ACCOUNT_ALUMNI", 409);
-        const assets = await client.query<{ code: string }>("SELECT code FROM lab_assets WHERE assigned_user_id=$1 AND status='in_use' FOR UPDATE", [userId]);
-        if (assets.rowCount) throw new UserAdminError(`Member still has ${assets.rowCount} in-use asset(s)`, "ALUMNI_ASSETS_IN_USE", 409);
-        await client.query("UPDATE user_profiles SET member_status='alumni',profile_content_updated_at=now(),updated_at=now(),version=version+1 WHERE user_id=$1", [userId]);
-        await client.query("DELETE FROM user_permission_templates WHERE user_id=$1", [userId]);
-        await client.query("DELETE FROM user_permission_overrides WHERE user_id=$1", [userId]);
-        await client.query("DELETE FROM session_tokens WHERE user_id=$1", [userId]);
-        await client.query("INSERT INTO audit_logs(actor_id,action,target_type,target_id,detail) VALUES($1,'user.convert_alumni','user',$2,$3::jsonb)", [actor.id, userId, JSON.stringify({})]);
-        await client.query("COMMIT");
-        return { ok: true };
-      } catch (error) { await client.query("ROLLBACK"); throw error; } finally { client.release(); }
-    },
     async validateImportUsers(body: z.output<typeof importUsersSchema>, actor: Actor) {
       const normalized=body.rows.map((row)=>({...row,username:row.username.toLowerCase(),email:row.email.trim().toLowerCase()}));
       const accountEmails=normalized.map((row)=>row.email).filter(Boolean);
       const existing=await pool.query<{username:string;email:string}>("SELECT username,COALESCE(email,'') email FROM users WHERE username=ANY($1::text[]) OR LOWER(email)=ANY($2::text[])",[normalized.map((row)=>row.username),accountEmails]);
       const usernames=new Set(existing.rows.map((row)=>row.username));const emails=new Set(existing.rows.map((row)=>row.email.toLowerCase()));
-      const rows=normalized.map((row,index)=>{const issues:string[]=[];if(normalized.findIndex((candidate)=>candidate.username===row.username)!==index)issues.push("文件内用户名重复");if(row.email&&normalized.findIndex((candidate)=>candidate.email===row.email)!==index)issues.push("文件内账号邮箱重复");if(usernames.has(row.username))issues.push("用户名已存在");if(row.email&&emails.has(row.email))issues.push("账号邮箱已存在");if(row.baseTier==="super"&&actor.baseTier!=="super")issues.push("无权导入超级管理员");return{index:index+1,username:row.username,issues};});
+      const rows=normalized.map((row,index)=>{const issues:string[]=[];if(normalized.findIndex((candidate)=>candidate.username===row.username)!==index)issues.push("文件内用户名重复");if(row.email&&normalized.findIndex((candidate)=>candidate.email===row.email)!==index)issues.push("文件内账号邮箱重复");if(usernames.has(row.username))issues.push("用户名已存在");if(row.email&&emails.has(row.email))issues.push("账号邮箱已存在");if(row.baseTier==="super"&&actor.baseTier!=="super")issues.push("无权导入管理员");return{index:index+1,username:row.username,issues};});
       return{valid:rows.every((row)=>!row.issues.length),summary:{total:rows.length,errors:rows.filter((row)=>row.issues.length).length},rows};
     },
     async importUsers(body: z.output<typeof importUsersSchema>, actor: Actor) {
@@ -730,8 +682,7 @@ export function createUserAdminService(pool: Pick<Pool, "query" | "connect">) {
         for (const row of normalized) {
           const password = temporaryPassword(); const hash = await bcrypt.hash(password, 12);
           const user = await client.query<{ id: string }>(`INSERT INTO users(username,email,password_hash,base_tier,account_kind,display_name,status,must_change_password,created_source) VALUES($1,$2,$3,$4,'person',$5,'active',true,'import') RETURNING id`, [row.username, row.email || null, hash, row.baseTier, row.nameZh || row.nameEn]);
-          await client.query(`INSERT INTO user_profiles(user_id,member_slug,member_status,degree_level,name_zh,name_en,email,public_fields,public_visible) VALUES($1,$2,'current',$3,$4,$5,$6,$7,false)`, [user.rows[0].id, slug(row.username), row.academicStage, row.nameZh, row.nameEn, row.publicEmail, ["avatar", "name_zh", "name_en", "academic_stage", "research"]]);
-          await client.query("INSERT INTO user_permission_templates(user_id,template_key,assigned_by) VALUES($1,'normal-member',$2) ON CONFLICT DO NOTHING", [user.rows[0].id, actor.id]);
+          await client.query(`INSERT INTO user_profiles(user_id,member_slug,member_status,degree_level,name_zh,name_en,email,public_fields,public_visible,member_role,degrees) VALUES($1,$2,$8,$3,$4,$5,$6,$7,false,$9,$10)`, [user.rows[0].id, slug(row.username), legacyDegreeLevel(row.memberRole, row.degrees), row.nameZh, row.nameEn, row.publicEmail, ["avatar", "name_zh", "name_en", "academic_stage", "research"], row.memberStatus, row.memberRole, row.degrees]);
           credentials.push({ username: row.username, temporaryPassword: password });
         }
         await client.query("INSERT INTO audit_logs(actor_id,action,target_type,target_id,detail) VALUES($1,'user.import','user_import',$1,$2::jsonb)", [actor.id, JSON.stringify({ count: normalized.length })]);

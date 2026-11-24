@@ -24,8 +24,6 @@ import { createProfileService } from "./services/account/profileService.js";
 import { createProfileRouter } from "./routes/profile.js";
 import { createUsersRouter } from "./routes/users.js";
 import { createUserAdminService } from "./services/user-admin/userAdminService.js";
-import { createPermissionsRouter } from "./routes/permissions.js";
-import { createPermissionAdminService } from "./services/permission-admin/permissionAdminService.js";
 import { createStorage } from "./services/storage/provider.js";
 import { createMediaService } from "./services/media/mediaService.js";
 import { createMediaRouter } from "./routes/media.js";
@@ -80,7 +78,6 @@ const app = createApp({
     createAuthRouter({ repository: authRepository, authMiddleware, cookieSecure: env.cookieSecure, accountService: createAccountService(pool), trustProxy: true }),
     createProfileRouter({ authMiddleware, service: profileService, trustProxy: true }),
     createUsersRouter({ authMiddleware, service: createUserAdminService(pool), profileService, trustProxy: true }),
-    createPermissionsRouter({ authMiddleware, service: createPermissionAdminService(pool), trustProxy: true }),
     createMediaRouter({ authMiddleware, service: createMediaService(pool, createStorage(env)), trustProxy: true, maxBytes: env.mediaMaxUploadBytes, publicBaseUrl: env.cosPublicBaseUrl ?? `${env.publicBaseUrl}/media`, pathPrefix: env.cosPathPrefix }),
     createSettingsRouter({ authMiddleware, service: createSettingsService(pool), scholarlySettings: scholarlySyncSettingsService, scholarlySync: scholarlySyncService, trustProxy: true }),
     createNotificationsRouter({ authMiddleware, service: createNotificationService(pool), trustProxy: true }),

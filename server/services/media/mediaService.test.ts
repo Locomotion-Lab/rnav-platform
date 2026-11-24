@@ -8,7 +8,7 @@ class Client {
   referenceCount = "0";
   async query<T = Record<string, unknown>>(sql: string, values?: unknown[]) {
     this.calls.push({ sql, values });
-    if (sql.includes("SELECT (")) return { rowCount: 1, rows: [{ count: this.referenceCount }] } as any;
+    if (sql.includes("SELECT rnav_media_reference_count")) return { rowCount: 1, rows: [{ count: this.referenceCount }] } as any;
     if (sql.includes("FROM media_assets") && sql.includes("FOR UPDATE")) return { rowCount: 1, rows: [{ id: "asset-1", object_key: "rnav/a.png", filename: "a.png", status: "recycled", recycled_at: "2020-01-01", size_bytes: "3", mime_type: "image/png", checksum_sha256: "x", url: "https://x/a.png", created_at: "2020-01-01" }] } as any;
     if (sql.includes("INSERT INTO media_assets")) return { rowCount: 1, rows: [{ id: "asset-1", object_key: "rnav/a.png", filename: "a.png", status: "active", size_bytes: "3", mime_type: "image/png", checksum_sha256: "x", url: "https://x/a.png", created_at: "2020-01-01", recycled_at: null }] } as any;
     return { rowCount: 1, rows: [] } as any;
@@ -28,13 +28,13 @@ test("upload validates input, stores one object, and writes an auditable asset",
   const client = new Client(); const cos = new Cos();
   const service = createMediaService({ connect: async () => client } as never, cos);
   const result = await service.upload({ filename: "a.png", mimeType: "image/png", body: Buffer.from([137,80,78,71,13,10,26,10]), maxBytes: 20, publicBaseUrl: "https://cdn.example", pathPrefix: "rnav" }, "user-1");
-  assert.equal(result.mimeType, "image/png"); assert.equal(cos.puts.length, 1); assert.ok(client.calls.some(call => call.sql.includes("media.upload"))); assert.equal(client.calls.at(-1)?.sql, "COMMIT");
+  assert.equal(result.mimeType, "image/png"); assert.equal(cos.puts.length, 1); assert.ok(client.calls.some(call => call.values?.includes("media.upload"))); assert.equal(client.calls.at(-1)?.sql, "COMMIT");
 });
 
-test("media reference counts include procurement catalog images", async () => {
+test("media uses the shared database reference count", async () => {
   const client = new Client(); const service = createMediaService({ query: async (sql: string, values?: unknown[]) => client.query(sql, values) } as never, new Cos());
   await service.getReferences("asset-1");
-  assert.ok(client.calls.some((call) => call.sql.includes("procurement_catalog_items WHERE image_asset_id=$1")));
+  assert.ok(client.calls.some((call) => call.sql.includes("rnav_media_reference_count($1)")));
 });
 
 test("recycle refuses referenced assets and permanent deletion requires the retention period", async () => {
@@ -50,5 +50,5 @@ test("permanent deletion preserves a recycled row when COS deletion fails", asyn
   const client = new Client(); const cos = new Cos(); cos.failDelete = true;
   const service = createMediaService({ connect: async () => client, query: async (sql: string, values?: unknown[]) => { client.calls.push({ sql, values }); return { rows: [] }; } } as never, cos);
   await assert.rejects(service.permanentDelete("asset-1", "user-1"), (error: unknown) => error instanceof MediaError && error.code === "MEDIA_DELETE_FAILED");
-  assert.ok(client.calls.some(call => call.sql.includes("delete_error")));
+  assert.equal(client.calls.at(-1)?.sql, "ROLLBACK");
 });

@@ -21,24 +21,11 @@ const navigationGroups: Array<
 export function groupConsoleModules(
   modules: ConsoleNavigationModule[],
 ): ConsoleNavigationGroup[] {
-  const normalized = modules.filter(
-    (module) => module.key !== "users" && module.key !== "permissions",
-  );
-  if (
-    modules.some(
-      (module) => module.key === "users" || module.key === "permissions",
-    )
-  )
-    normalized.push({
-      key: "members",
-      href: "/console/members",
-      label: "成员与账号管理",
-    });
   return navigationGroups
     .map(({ moduleKeys, ...group }) => ({
       ...group,
       modules: moduleKeys.flatMap((key) =>
-        normalized.filter((module) => module.key === key),
+        modules.filter((module) => module.key === key),
       ),
     }))
     .filter((group) => group.modules.length > 0);

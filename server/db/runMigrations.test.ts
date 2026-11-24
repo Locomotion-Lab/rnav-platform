@@ -126,6 +126,8 @@ test("getMigrationFiles returns SQL migrations in lexical order", async () => {
       "044_publication_and_storage_journal.sql",
       "045_safe_profile_field_default.sql",
       "046_faculty_publications.sql",
+      "047_member_identities.sql",
+      "048_media_lifecycle.sql",
     ],
   );
 });

@@ -48,7 +48,7 @@ export function normalizeConsoleDashboard(value: unknown): ConsoleDashboard {
   if (
     typeof user.id !== "string" ||
     typeof user.displayName !== "string" ||
-    !["normal", "plus", "super"].includes(String(user.tier)) ||
+    !["normal", "super"].includes(String(user.tier)) ||
     !Array.isArray(user.roleLabels) ||
     !user.roleLabels.every((label) => typeof label === "string") ||
     !Array.isArray(dashboard.recentItems)

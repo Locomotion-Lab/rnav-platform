@@ -31,7 +31,11 @@ export function createLocalStorage(root: string): StorageProvider {
       try { await handle.writeFile(body); } finally { await handle.close(); }
     },
     async getObject(key) { validKey(key); return readFile(await safeFile(root,key)); },
-    async deleteObject(key) { validKey(key); await unlink(await safeFile(root,key)); },
+    async deleteObject(key) {
+      validKey(key);
+      try { await unlink(await safeFile(root, key)); }
+      catch (error) { if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error; }
+    },
   };
 }
 export function createStorage(options: {

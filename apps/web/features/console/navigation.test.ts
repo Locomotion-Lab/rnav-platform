@@ -34,8 +34,7 @@ test("groups only available modules into task-oriented navigation sections", () 
     { key: "profile", href: "/console/profile", label: "个人资料" },
     { key: "procurements", href: "/console/procurements", label: "采购事务" },
     { key: "site", href: "/console/site", label: "官网内容" },
-    { key: "users", href: "/console/users", label: "用户管理" },
-    { key: "permissions", href: "/console/permissions", label: "权限管理" },
+    { key: "members", href: "/console/members", label: "成员与账号管理" },
   ]);
   assert.deepEqual(
     groups.map((group) => ({
