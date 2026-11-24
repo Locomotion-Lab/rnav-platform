@@ -385,12 +385,12 @@ export const defaults = {
       },
     },
     sectionTitles: {
-      faculty: { zh: "导师", en: "Faculty" },
-      postdocs: { zh: "博士后", en: "Postdoctoral Researchers" },
+      faculty: { zh: "老师", en: "Faculty" },
       phd: { zh: "博士生", en: "PhD Students" },
       master: { zh: "硕士生", en: "Master Students" },
       undergrad: { zh: "本科生", en: "Undergraduate Students" },
-      alumni: { zh: "毕业生", en: "Graduates" },
+      students: { zh: "学生", en: "Students" },
+      alumni: { zh: "校友", en: "Alumni" },
     },
     recruitment: {
       title: { zh: "欢迎联系我们", en: "Join Our Team" },

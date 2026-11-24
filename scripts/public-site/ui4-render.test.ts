@@ -99,13 +99,21 @@ test("team renders each identity in order with every member and a single landsca
     data: {
       facultyLead: lead,
       advisors: [lead],
+      postdocs: [{ slug: "former-postdoc", name: bilingual("Former fellow") }],
+      students: [{ slug: "other-student", name: bilingual("Another student") }],
       masterStudents: members,
-      alumni: [{ slug: "alumni", name: bilingual("Graduate") }],
+      alumni: [{ slug: "alumni", name: bilingual("Graduate"), graduation: { zh: "2025届硕士", en: "Master, graduated 2025" } }],
     },
   });
-  assert.equal((html.match(/class="rnav-member-card"/g) || []).length, 21);
+  assert.equal((html.match(/class="rnav-member-card"/g) || []).length, 23);
   assert.equal((html.match(/id="lead"/g) || []).length, 1);
-  assert.ok(html.indexOf('id="lead"') < html.indexOf('id="master-0"'));
+  assert.ok(html.indexOf('id="lead"') < html.indexOf('id="former-postdoc"'));
+  assert.ok(html.indexOf('id="former-postdoc"') < html.indexOf('id="master-0"'));
+  assert.ok(html.indexOf('id="other-student"') < html.indexOf('id="alumni"'));
+  assert.match(html, /<h2>老师<\/h2>/);
+  assert.match(html, /<h2>校友<\/h2>/);
+  assert.match(html, /2025届硕士/);
+  assert.doesNotMatch(html, /POSTDOCTORAL FELLOWS/);
   assert.ok(html.indexOf('id="master-18"') < html.indexOf('id="alumni"'));
   assert.doesNotMatch(html, /v41-team-mosaic|v41-group-more|v41-lead/);
   assert.match(html, /202501233.png/);

@@ -36,25 +36,16 @@ export function TeamPage({ data }: { data: any }) {
     return () => window.removeEventListener("hashchange", reveal);
   }, []);
   const groups = [
-    { key: "faculty", en: "FACULTY", members: data.advisors ?? [] },
     {
-      key: "postdocs",
-      en: "POSTDOCTORAL FELLOWS",
-      members: data.postdocs ?? [],
+      key: "faculty", zh: "老师", en: "Faculty",
+      // Retained snapshots may still store faculty in two groups.
+      members: [...(data.advisors ?? []), ...(data.postdocs ?? [])],
     },
-    { key: "phd", en: "PHD STUDENTS", members: data.phdStudents ?? [] },
-    {
-      key: "master",
-      en: "MASTER STUDENTS",
-      members: data.masterStudents ?? [],
-    },
-    {
-      key: "undergrad",
-      en: "UNDERGRADUATE STUDENTS",
-      members: data.undergraduateStudents ?? [],
-    },
-    { key: "students", zh: "学生", en: "STUDENTS", members: data.students ?? [] },
-    { key: "alumni", en: "ALUMNI", members: data.alumni ?? [] },
+    { key: "phd", zh: "博士生", en: "PhD students", members: data.phdStudents ?? [] },
+    { key: "master", zh: "硕士生", en: "Master’s students", members: data.masterStudents ?? [] },
+    { key: "undergrad", zh: "本科生", en: "Undergraduate students", members: data.undergraduateStudents ?? [] },
+    { key: "students", zh: "学生", en: "Students", members: data.students ?? [] },
+    { key: "alumni", zh: "校友", en: "Alumni", members: data.alumni ?? [] },
   ];
   const openProfile = (member: any) => {
     profileTrigger.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
@@ -106,8 +97,8 @@ export function TeamPage({ data }: { data: any }) {
               <section key={group.key} className="v41-team-group">
                 <header>
                   <div>
-                    <h2>{text(data.sectionTitles?.[group.key]) || (zh && "zh" in group ? group.zh : group.en)}</h2>
-                    <p className="v41-eyebrow">{group.en}</p>
+                    <h2>{zh ? group.zh : group.en}</h2>
+                    {zh ? <p className="v41-eyebrow">{group.en}</p> : null}
                   </div>
                   <span>
                     {group.members.length} {zh ? "位成员" : "members"}

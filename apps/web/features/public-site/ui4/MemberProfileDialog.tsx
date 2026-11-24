@@ -28,6 +28,8 @@ export function MemberProfileDialog({ locale, member, onClose }: { locale: Local
   const close = () => dialog.current?.close();
   const profile = payload?.member ?? member;
   const publications = payload?.publications ?? [];
+  const identity = [text(profile?.role), text(profile?.degree), text(profile?.enrollmentYear)].filter(Boolean).join(" · ");
+  const alumni = profile?.group === "alumni";
   const degreeHistory = Array.isArray(profile?.degrees) ? profile.degrees.map(text).filter(Boolean) : [];
   const facts = [
     [zh ? "学位身份" : "Degree history", { zh: degreeHistory.join("、"), en: degreeHistory.join(", ") }],
@@ -39,7 +41,7 @@ export function MemberProfileDialog({ locale, member, onClose }: { locale: Local
       <button aria-label={zh ? "关闭成员资料" : "Close member profile"} className="rnav-member-dialog-close" onClick={close} type="button">×</button>
       <header className="rnav-member-dialog-header">
         <div className="rnav-member-dialog-photo">{profile?.image?.src ? <Media image={profile.image} alt={text(profile.name)} sizes="144px" /> : <Media alt={text(profile?.name) || (zh ? "成员照片" : "Member portrait")} />}</div>
-        <div><p className="rnav-member-dialog-kicker">{zh ? "团队成员" : "TEAM MEMBER"}</p><h2 id="member-profile-title">{text(profile?.name)}</h2>{zh && profile?.name?.en ? <p className="rnav-member-dialog-en">{profile.name.en}</p> : null}<p className="rnav-member-dialog-identity">{[text(profile?.role), text(profile?.degree), text(profile?.enrollmentYear)].filter(Boolean).join(" · ")}</p>{text(profile?.research) ? <p className="rnav-member-dialog-research">{text(profile.research)}</p> : null}</div>
+        <div><p className="rnav-member-dialog-kicker">{alumni ? zh ? "校友" : "ALUMNI" : zh ? "团队成员" : "TEAM MEMBER"}</p><h2 id="member-profile-title">{text(profile?.name)}</h2>{zh && profile?.name?.en ? <p className="rnav-member-dialog-en">{profile.name.en}</p> : null}{identity ? <p className="rnav-member-dialog-identity">{identity}</p> : null}{text(profile?.research) ? <p className="rnav-member-dialog-research">{text(profile.research)}</p> : null}</div>
       </header>
       <nav aria-label={zh ? "成员资料分区" : "Member profile sections"} className="rnav-member-dialog-tabs" role="tablist">
         <button aria-selected={tab === "overview"} onClick={() => setTab("overview")} role="tab" type="button">{zh ? "概览" : "Overview"}</button>
