@@ -55,32 +55,45 @@ export async function preparePublication(pool: Pool, storage: StorageProvider, d
   // Exclusive destination, never overwrite an already reviewed package.
   await mkdir(destination);
   await mkdir(join(destination,"media"));
-  const copied = new Map<string,string>();
+  const copied = new Map<string, Promise<string>>();
+  const mediaWrites = new Map<string, Promise<void>>();
+  async function copyMedia(value: string) {
+    const object = objects.get(value);
+    let bytes: Buffer;
+    if (object?.storage_provider === "local") {
+      const provider = storage.forProvider?.("local") ?? storage;
+      if (!provider.getObject) throw new Error("Local object reader unavailable");
+      bytes = await provider.getObject(object.object_key);
+    } else if (object && storage.forProvider?.("cos").getObject) {
+      bytes = await storage.forProvider("cos").getObject!(object.object_key);
+    } else bytes = await download(value);
+    if (!bytes.length || bytes.length > 20971520) throw new Error("Public media size invalid");
+    if (object && (sha256(bytes) !== object.checksum_sha256 || bytes.length !== Number(object.size_bytes))) {
+      throw new Error("Source media integrity mismatch");
+    }
+    const [contentType, extension] = mediaType(bytes);
+    const hash = sha256(bytes), path = `media/${hash}.${extension}`;
+    let write = mediaWrites.get(path);
+    if (!write) {
+      write = writeFile(join(destination, path), bytes, { flag: "wx", mode: 0o600 }).then(() => {
+        publication.media.push({ path, sha256: hash, contentType, size: bytes.length });
+      });
+      mediaWrites.set(path, write);
+    }
+    await write;
+    return `/published-media/${publication.publicationId}/${hash}.${extension}`;
+  }
   const transform = async (value: unknown, field = ""): Promise<unknown> => {
     if (typeof value === "string" && shouldCopyMedia(value,field,objects.has(value))) {
       if (!value) return value;
       // Repo-native immutable brand/placeholder assets ship with the independent web image.
       if (/^\/(?:brand\/|og-default\.svg$)/.test(value)) return value;
-      if (copied.has(value)) return copied.get(value);
-      const object = objects.get(value);
-      let bytes: Buffer;
-      if (object?.storage_provider === "local") {
-        const provider = storage.forProvider?.("local") ?? storage;
-        if (!provider.getObject) throw new Error("Local object reader unavailable");
-        bytes = await provider.getObject(object.object_key);
-      } else if (object && storage.forProvider?.("cos").getObject) {
-        bytes = await storage.forProvider("cos").getObject!(object.object_key);
-      } else bytes = await download(value);
-      if (!bytes.length || bytes.length > 20971520) throw new Error("Public media size invalid");
-      if(object&&(sha256(bytes)!==object.checksum_sha256||bytes.length!==Number(object.size_bytes)))throw new Error("Source media integrity mismatch");
-      const [contentType,extension] = mediaType(bytes);
-      const hash = sha256(bytes), path = `media/${hash}.${extension}`;
-      if (!publication.media.some(item=>item.path===path)) {
-        await writeFile(join(destination,path),bytes,{flag:"wx",mode:0o600});
-        publication.media.push({path,sha256:hash,contentType,size:bytes.length});
+      let copy = copied.get(value);
+      if (!copy) {
+        copy = copyMedia(value);
+        copied.set(value, copy);
       }
-      const url = `/published-media/${publication.publicationId}/${hash}.${extension}`;
-      copied.set(value,url); return url;
+      return copy;
     }
     if (Array.isArray(value)) return Promise.all(value.map(item=>transform(item)));
     if (value && typeof value === "object") {
@@ -92,6 +105,7 @@ export async function preparePublication(pool: Pool, storage: StorageProvider, d
   };
   publication.pages = await transform(publication.pages) as Record<string,unknown>;
   publication.members = await transform(publication.members) as Record<string,unknown>;
+  publication.media.sort((a, b) => a.path.localeCompare(b.path));
   const bytes = JSON.stringify(publication,null,2)+"\n";
   await writeFile(join(destination,"snapshot.json"),bytes,{flag:"wx",mode:0o600});
   await validateBundle(destination);
